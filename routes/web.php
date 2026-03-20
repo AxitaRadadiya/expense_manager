@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\ExpenseController;
 use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
@@ -41,6 +42,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Projects
     Route::get('projects-list', [ProjectController::class, 'list'])->name('projects.list');
     Route::resource('projects', ProjectController::class);
+    // Expenses
+    Route::get('expense-list', [ExpenseController::class, 'list'])->name('expense.list');
+    Route::resource('expense', ExpenseController::class);
 });
 
 require __DIR__.'/auth.php';
