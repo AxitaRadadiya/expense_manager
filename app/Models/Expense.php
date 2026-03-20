@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Expense extends Model
+{
+   
+    protected $table = 'expense';
+
+    protected $fillable = [
+        'projects_id',
+        'users_id',
+        'expense_date',
+        'category',
+        'sub_category',
+        'amount',
+        'description',
+        'bill_path',
+        'bill_original_name',
+        'payment_mode',
+        'reference_number',
+        'status',
+    ];
+
+    // ── Relationships ─────────────────────────────────────────────────────────
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'projects_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'users_id');
+    }
+}

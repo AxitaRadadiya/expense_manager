@@ -35,6 +35,13 @@
           </li>
 
           <li class="nav-item">
+            <a href="{{ route('expense.index') }}" class="nav-link {{ Request::routeIs('expense.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-folder-open"></i>
+              <p>Expenses</p>
+            </a>
+          </li>
+
+          <li class="nav-item">
             <a href="{{ route('users.index') }}" class="nav-link {{ Request::routeIs('users.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-users"></i>
               <p>Users</p>

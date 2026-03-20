@@ -295,7 +295,33 @@ $(document).ready( function () {
                  }
               ]  
             });
-        }      
+        }  
+        
+        load_expense();
+        function load_expense(){
+
+            $('#ExpenseTable').DataTable({
+                processing:  true,
+                serverSide:  true,
+                responsive:  true,
+                autoWidth:   false,
+                order:       [[0, 'desc']],
+                ajax: {
+                    url:  "{{ route('expense.list') }}",
+                    type: 'GET',
+                    data: { _token: '{{ csrf_token() }}' }
+                },
+                columns: [
+                    { data: 'id',           name: 'id' },
+                    { data: 'project',      name: 'project',      orderable: false },
+                    { data: 'expense_date', name: 'expense_date' },
+                    { data: 'amount',       name: 'amount' },
+                    { data: 'payment_mode', name: 'payment_mode', orderable: false },
+                    { data: 'status',       name: 'status' },
+                    { data: 'action',       name: 'action',       orderable: false, searchable: false }
+                ]
+            });
+        }
 });
 </script>
 
