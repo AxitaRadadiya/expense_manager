@@ -26,7 +26,7 @@
 
           {{-- ── Setting (treeview) ── --}}
           <li class="nav-header">System</li>
-
+          @if(auth()->user() && auth()->user()->hasRole('super-admin'))
           <li class="nav-item">
             <a href="{{ route('projects.index') }}" class="nav-link {{ Request::routeIs('projects.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-folder-open"></i>
@@ -47,6 +47,7 @@
               <p>Roles</p>
             </a>
           </li>
+          @endif
 
           <li class="nav-item">
             <a href="#" class="nav-link">

@@ -240,16 +240,14 @@ $(document).ready( function () {
                  "data":{ _token: "{{csrf_token()}}",route:'users.list'}
               },
               "columns": [
-                 { "data": "id" },
-                 { "data": "name" },
-                 { "data": "email" },
-                 { "data": "work_phone"},
-                 { "data": "company_name" },
-                //  { "data": "receivables" },
-                //  { "data": "payables" },
-               //   { "data": "status" },
-                 { "data": "action" }
-              ],
+                { "data": "id" },
+                { "data": "name" },
+                { "data": "email" },
+                { "data": "mobile" },
+                { "data": "role" },
+                { "data": "status" },
+                { "data": "action", "orderable": false, "searchable": false }
+                ],
               aoColumnDefs: [
                  {
                     bSortable: false,

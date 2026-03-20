@@ -32,7 +32,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('roles-list', [RoleController::class, 'index'])->name('roles.list');
+    Route::get('roles-list', [RoleController::class, 'roleList'])->name('roles.list');
     Route::resource('roles', RoleController::class);
     Route::get('permissions-list', [PermissionController::class, 'permissionsList'])->name('permissions.list');
     Route::resource('permissions', PermissionController::class);
