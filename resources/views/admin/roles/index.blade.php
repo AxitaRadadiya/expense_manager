@@ -42,9 +42,9 @@
         </h3>
         <div class="card-tools">
          
-            <a href="{{ route('roles.create') }}" class="btn btn-primary btn-sm">
+            <!-- <a href="{{ route('roles.create') }}" class="btn btn-primary btn-sm">
               <i class="fas fa-plus mr-1"></i> New Role
-            </a>
+            </a> -->
          
         </div>
       </div>
@@ -55,7 +55,7 @@
             <tr>
               <th width="5%">#</th>
               <th width="20%">Role Name</th>
-              <th width="10%">Actions</th>
+              <!-- <th width="10%">Actions</th> -->
             </tr>
           </thead>
           <tbody></tbody>

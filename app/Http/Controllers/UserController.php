@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth;
 use App\Models\Role;
+use App\Models\Project;
 use Illuminate\View\View;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -36,6 +37,7 @@ class UserController extends Controller
     {
         return view('admin.users.create', [
             'roles' => Role::orderBy('name')->get(),
+            'projects' => Project::orderBy('name')->get(),
         ]);
     }
 
@@ -52,6 +54,8 @@ class UserController extends Controller
             'status'   => ['required', 'in:0,1'],
             'note'     => ['nullable', 'string', 'max:1000'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'amount'     => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $user = User::create([
@@ -61,6 +65,8 @@ class UserController extends Controller
             'role_id'  => $request->role_id,
             'status'   => $request->status,
             'note'     => $request->note,
+            'project_id' => $request->project_id,
+            'amount'     => $request->amount,
             'password' => Hash::make($request->password),
         ]);
 
@@ -79,9 +85,6 @@ class UserController extends Controller
             ->withSuccess('New user added successfully.');
     }
 
-    /* ─────────────────────────────────────────
-     | SHOW
-     ───────────────────────────────────────── */
     public function show(User $user): View
     {
         return view('admin.users.show', [
@@ -89,9 +92,6 @@ class UserController extends Controller
         ]);
     }
 
-    /* ─────────────────────────────────────────
-     | EDIT
-     ───────────────────────────────────────── */
     public function edit($id): View
     {
         $user = User::with('role')->findOrFail($id);
@@ -99,12 +99,10 @@ class UserController extends Controller
         return view('admin.users.edit', [
             'user'  => $user,
             'roles' => Role::orderBy('name')->get(),
+            'projects' => Project::orderBy('name')->get(),
         ]);
     }
 
-    /* ─────────────────────────────────────────
-     | UPDATE
-     ───────────────────────────────────────── */
     public function update(Request $request, $id): RedirectResponse
     {
         $user = User::findOrFail($id);
@@ -117,6 +115,8 @@ class UserController extends Controller
             'status'   => ['required', 'in:0,1'],
             'note'     => ['nullable', 'string', 'max:1000'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'amount'     => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $data = [
@@ -126,6 +126,8 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'status'  => $request->status,
             'note'    => $request->note,
+            'project_id' => $request->project_id,
+            'amount'     => $request->amount,
         ];
 
         if ($request->filled('password')) {
@@ -160,9 +162,6 @@ class UserController extends Controller
             ->withSuccess('User updated successfully.');
     }
 
-    /* ─────────────────────────────────────────
-     | DESTROY
-     ───────────────────────────────────────── */
     public function destroy(User $user): RedirectResponse
     {
         $loginUser = Auth::user();
@@ -181,12 +180,9 @@ class UserController extends Controller
             ->withSuccess('User deleted successfully.');
     }
 
-    /* ─────────────────────────────────────────
-     | DATATABLE AJAX
-     ───────────────────────────────────────── */
     public function userList(Request $request)
     {
-        $columns = [0 => 'id', 1 => 'name', 2 => 'email', 3 => 'mobile', 4 => 'status', 5 => 'action'];
+        $columns = [0 => 'id', 1 => 'name', 2 => 'email', 3 => 'mobile', 4 => 'project', 5 => 'amount', 6 => 'status', 7 => 'action'];
 
         $totalData     = User::count();
         $totalFiltered = $totalData;
@@ -239,8 +235,12 @@ class UserController extends Controller
                 'id'     => $start + $i + 1,
                 'name'   => '<span style="font-weight:600;color:#0D1A30;">' . e($u->name) . '</span>',
                 'email'  => '<span style="color:#64748b;">' . e($u->email) . '</span>',
-                'mobile' => '<span style="color:#64748b;">' . e($u->mobile ?? '—') . '</span>',
-                'role'   => $u->role
+                'mobile'  => '<span style="color:#64748b;">' . e($u->mobile ?? '—') . '</span>',
+                'project' => '<span style="color:#64748b;">' . e($u->project ?? '—') . '</span>',
+                'amount'  => $u->amount !== null
+                    ? '<span style="color:#0D1A30;font-weight:600;">' . $u->amount . '</span>'
+                    : '<span style="color:#ccc;">—</span>',
+                'role'    => $u->role
                     ? '<span class="role-chip">' . e($u->role->name) . '</span>'
                     : '<span style="color:#ccc;">—</span>',
                 'status' => $statusBadge,

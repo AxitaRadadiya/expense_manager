@@ -88,6 +88,8 @@ class User extends Authenticatable
         'status',
         'mobile',
         'note',
+        'project_id',
+        'amount',
     ];
 
     /**
@@ -112,11 +114,27 @@ class User extends Authenticatable
             'password' => 'hashed',
             'status' => 'integer',
             'mobile' => 'string',
+            'amount' => 'decimal:2',
         ];
     }
 
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    public function balanceHistories()
+    {
+        return $this->hasMany(UserBalanceHistory::class);
+    }
+
+    public function transfers()
+    {
+        return $this->hasMany(\App\Models\Transfer::class);
     }
 }

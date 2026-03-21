@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Job;          
 use App\Models\JobCard;     
 use Illuminate\Support\Facades\DB;
+use App\Models\Transfer;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
@@ -70,6 +71,33 @@ use Illuminate\Http\RedirectResponse;
 
             $currentYear = date('Y');
 
+            // Per-user transfer totals and counts
+            $authUser = $user; // from above
+            $isSuper = false;
+            if ($authUser) {
+                $isSuper = method_exists($authUser, 'hasRole')
+                    ? $authUser->hasRole('superadmin')
+                    : (optional($authUser->role)->name === 'superadmin');
+            }
+
+            if ($isSuper) {
+                // Superadmin: show all users
+                $usersWithTransfers = User::query()
+                    ->select('id', 'name', 'email', 'amount')
+                    ->withSum('transfers', 'amount')
+                    ->withCount('transfers')
+                    ->orderBy('name')
+                    ->get();
+            } else {
+                // Regular user: only show their own summary
+                $usersWithTransfers = User::query()
+                    ->select('id', 'name', 'email', 'amount')
+                    ->withSum('transfers', 'amount')
+                    ->withCount('transfers')
+                    ->where('id', $authUser ? $authUser->id : 0)
+                    ->get();
+            }
+
             return view('admin.dashboard', compact(
                 'totalJobCards',
                 'totalJobs',
@@ -78,7 +106,8 @@ use Illuminate\Http\RedirectResponse;
                 'monthlyChartData',
                 'currentYear',
                 'jobCardsByStatus',
-                'statusCounts'
+                'statusCounts',
+                'usersWithTransfers'
             ));
         }
         

@@ -35,13 +35,6 @@
           </li>
 
           <li class="nav-item">
-            <a href="{{ route('expense.index') }}" class="nav-link {{ Request::routeIs('expense.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-folder-open"></i>
-              <p>Expenses</p>
-            </a>
-          </li>
-
-          <li class="nav-item">
             <a href="{{ route('users.index') }}" class="nav-link {{ Request::routeIs('users.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-users"></i>
               <p>Users</p>
@@ -54,7 +47,25 @@
               <p>Roles</p>
             </a>
           </li>
+          <li class="nav-item">
+            <a href="{{ route('category.index') }}" class="nav-link {{ Request::routeIs('category.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-tags"></i>
+              <p>Categories</p>
+            </a>
+          </li>
+
           @endif
+           <li class="nav-item">
+            <a href="{{ route('expense.index') }}" class="nav-link {{ Request::routeIs('expense.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-user-shield"></i>
+              <p>Expenses</p>
+            </a>
+          </li>
+            <li class="nav-item">
+              <a href="{{ route('transfer.index') }}" class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-exchange-alt"></i>
+                <p>Transfers</p>
+              </a>
 
           <li class="nav-item">
             <a href="#" class="nav-link">

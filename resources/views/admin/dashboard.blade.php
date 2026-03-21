@@ -104,57 +104,39 @@
 <div class="dash-stats">
   <div class="row">
 
-    <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#9A6E00,#F5BE2E);"></div>
-        <div class="scard-icon" style="background:#fdf8e8;"><i class="fas fa-layer-group" style="color:#C9960C;"></i></div>
-        <div style="flex:1;">
-          <div class="scard-label">Total Job Cards</div>
-          <div class="scard-num">{{ $totalJobCards }}</div>
-          <div class="scard-sub" style="color:#C9960C;"><i class="fas fa-history mr-1"></i>All time</div>
+      {{-- USER TRANSFERS PANEL --}}
+      <div class="container-fluid mt-3">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><i class="fas fa-exchange-alt"></i> User Transfers</div>
+            <div class="panel-actions">&nbsp;</div>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive">
+              <table class="table table-sm table-striped">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th class="text-right">Total Transfers</th>
+                    <th class="text-right">Transfers Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($usersWithTransfers as $u)
+                    <tr>
+                      <td>{{ $u->name }}</td>
+                      <td>{{ $u->email }}</td>
+                      <td class="text-right">₹ {{ number_format((float) ($u->transfers_sum_amount ?? 0), 2) }}</td>
+                      <td class="text-right">{{ $u->transfers_count }}</td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="scard-watermark"><i class="fas fa-layer-group"></i></div>
       </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#1d4ed8,#60a5fa);"></div>
-        <div class="scard-icon" style="background:#eff6ff;"><i class="fas fa-print" style="color:#2563eb;"></i></div>
-        <div style="flex:1;">
-          <div class="scard-label">Total Jobs</div>
-          <div class="scard-num">{{ $totalJobs }}</div>
-          <div class="scard-sub" style="color:#2563eb;"><i class="fas fa-briefcase mr-1"></i>All products</div>
-        </div>
-        <div class="scard-watermark"><i class="fas fa-print"></i></div>
-      </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#15803d,#4ade80);"></div>
-        <div class="scard-icon" style="background:#f0fdf4;"><i class="fas fa-address-book" style="color:#16a34a;"></i></div>
-        <div style="flex:1;">
-          <div class="scard-label">Total Contacts</div>
-          <div class="scard-num">{{ $totalContacts }}</div>
-          <div class="scard-sub" style="color:#16a34a;"><i class="fas fa-users mr-1"></i>Registered parties</div>
-        </div>
-        <div class="scard-watermark"><i class="fas fa-address-book"></i></div>
-      </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 col-sm-6 col-12 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#7e22ce,#a855f7);"></div>
-        <div class="scard-icon" style="background:#faf5ff;"><i class="fas fa-calendar-day" style="color:#9333ea;"></i></div>
-        <div style="flex:1;">
-          <div class="scard-label">Today's Cards</div>
-          <div class="scard-num">{{ $todayJobCards }}</div>
-          <div class="scard-sub" style="color:#9333ea;"><i class="far fa-clock mr-1"></i>{{ date('d M Y') }}</div>
-        </div>
-        <div class="scard-watermark"><i class="fas fa-calendar-day"></i></div>
-      </div>
-    </div>
 
   </div>
 </div>

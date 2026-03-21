@@ -212,6 +212,30 @@
             </div>
           </div>
 
+            {{-- Project & Amount --}}
+          <div class="frow">
+            {{-- Project --}}
+            <div class="fgroup">
+              <label class="flabel" for="project_id">Project</label>
+              <select id="project_id" name="project_id" class="fselect @error('project_id') is-invalid @enderror">
+                <option value="">— Select Project —</option>
+                @foreach($projects as $project)
+                  <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
+                @endforeach
+              </select>
+              @error('project_id') <span class="ferr">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Amount --}}
+            <div class="fgroup">
+              <label class="flabel" for="amount">Amount</label>
+              <input id="amount" name="amount" type="number" min="0" step="0.01"
+                     class="finput @error('amount') is-invalid @enderror"
+                     value="{{ old('amount') }}" placeholder="e.g. 5000">
+              @error('amount') <span class="ferr">{{ $message }}</span> @enderror
+            </div>
+          </div>
+
           {{-- ── Password ── --}}
           <div class="fsection"><span class="fsi"><i class="fas fa-lock"></i></span> Password</div>
 
