@@ -42,7 +42,7 @@
           <i class="nav-icon fas fa-sliders-h"></i>
           <p>
             Settings
-            <i class="fas fa-angle-left right"></i>
+            <i class="fas fa-angle-left right mr-4"></i>
           </p>
         </a>
         <ul class="nav nav-treeview">

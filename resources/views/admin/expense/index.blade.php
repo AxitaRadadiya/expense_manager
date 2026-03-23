@@ -42,7 +42,6 @@
               <th>Expense Date</th>
               <th>Amount (₹)</th>
               <th>Payment Mode</th>
-              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
