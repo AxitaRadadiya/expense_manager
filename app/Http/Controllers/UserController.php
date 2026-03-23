@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\Project;
 use Illuminate\View\View;
 use App\Models\User;
+use App\Models\Expense;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -87,8 +88,16 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
+        $user->load('role');
+
+        $expenses = Expense::with('project')
+            ->where('users_id', $user->id)
+            ->latest()
+            ->paginate(15);
+
         return view('admin.users.show', [
-            'user' => $user->load('role'),
+            'user' => $user,
+            'expenses' => $expenses,
         ]);
     }
 
