@@ -38,14 +38,6 @@
             </thead>
             <tbody>
             </tbody>
-            <tfoot>
-            <tr>
-              <th></th>
-              <th>Sr No.</th>
-              <th>Name</th>
-              <th>Actions</th>
-            </tr>
-            </tfoot>
         </table>
       </div>
     </div>

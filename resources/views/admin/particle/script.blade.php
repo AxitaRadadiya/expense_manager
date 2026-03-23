@@ -174,66 +174,85 @@ $(document).ready(function () {
     load_expense();
 
     // Category table
-    function load_category() {
-        var table = $('#CategoryTable').DataTable({
-            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
-            autoWidth: false, responsive: true, processing: true, serverSide: true, order: [0, 'asc'],
-            rowReorder: { dataSrc: 'position', selector: '.drag-handle' },
-            ajax: { url: '{{ route('category.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'category.list' } },
-            columns: [
-                { data: null, orderable: false, className: 'drag-handle', defaultContent: "<i class='fa fa-bars'></i>" },
-                { data: 'id' }, { data: 'name' }, { data: 'action', orderable: false }
-            ],
-            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+   function load_category() {
+            var table = $('#CategoryTable').DataTable({
+                paging: true, 
+                lengthChange: true, 
+                searching: true, 
+                ordering: true, 
+                info: true,
+                autoWidth: false, 
+                responsive: true, 
+                processing: true, 
+                serverSide: true, 
+                order: [[2, 'asc']],
+                rowReorder: { dataSrc: 'position', selector: '.drag-handle' },
+                ajax: { 
+                    url: '{{ route("category.list") }}', 
+                    dataType: 'json', 
+                    type: 'GET', 
+                    data: { _token: '{{ csrf_token() }}' },
+                    error: function(xhr) {
+                        console.log('DataTable Ajax Error - Status: ' + xhr.status);
+                        console.log('Response: ' + xhr.responseText);
+                    }
+                },
+                columns: [
+                    { data: 'position', orderable: false, className: 'drag-handle'},
+                    { data: 'id', orderable: false },
+                    { data: 'name' },
+                    { data: 'action', orderable: false, searchable: false }
+                ],
+                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>" } },
             drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
-        });
+            });
 
-        table.on('row-reorder', function (e, diff) {
-            var order = [];
+            table.on('row-reorder', function (e, diff) {
+                var order = [];
             diff.forEach(function (item) { var rowData = table.row(item.node).data(); order.push({ id: rowData.id, position: item.newPosition + 1 }); });
+            });
+        }
+        load_category();
+
+        // Modal handlers
+        $(document).on('click', '.category-date-modal', function () {
+            $('#categoryForm')[0].reset();
+            $('#categoryForm').attr('action', '{{ route("category.store") }}');
+            $('#categoryForm').find('input[name="_method"]').remove();
+            $('#category_id').val('');
+            $('.error').text('');
+            $('input').removeClass('is-invalid');
+            $('#CategoryModal').modal('show');
         });
-    }
-    load_category();
 
-    // Modal handlers
-    $(document).on('click', '.category-date-modal', function () {
-        $('#categoryForm')[0].reset();
-        $('#categoryForm').attr('action', '{{ route("category.store") }}');
-        $('#categoryForm').find('input[name="_method"]').remove();
-        $('#category_id').val('');
-        $('.error').text('');
-        $('input').removeClass('is-invalid');
-        $('#CategoryModal').modal('show');
-    });
-
-    $(document).on('click', '.edit-category-date-modal', function () {
-        let categoryId = $(this).data('id');
-        let categoryName = $(this).data('name');
-        $('#categoryForm')[0].reset();
-        $('#category_id').val(categoryId);
-        $('#category_name').val(categoryName);
-        $('.error').text('');
-        $('input').removeClass('is-invalid');
-        let updateUrl = '{{ route("category.update", ":id") }}'.replace(':id', categoryId);
-        $('#categoryForm').attr('action', updateUrl);
-        $('#categoryForm').find('input[name="_method"]').remove();
-        $('#categoryForm').append('<input type="hidden" name="_method" value="PUT">');
-        $('#CategoryModal').modal('show');
-    });
+        $(document).on('click', '.edit-category-date-modal', function () {
+            let categoryId = $(this).data('id');
+            let categoryName = $(this).data('name');
+            $('#categoryForm')[0].reset();
+            $('#category_id').val(categoryId);
+            $('#category_name').val(categoryName);
+            $('.error').text('');
+            $('input').removeClass('is-invalid');
+            let updateUrl = '{{ route("category.update", ":id") }}'.replace(':id', categoryId);
+            $('#categoryForm').attr('action', updateUrl);
+            $('#categoryForm').find('input[name="_method"]').remove();
+            $('#categoryForm').append('<input type="hidden" name="_method" value="PUT">');
+            $('#CategoryModal').modal('show');
+        });
 
     $('#CategoryModal').on('hidden.bs.modal', function () { $('#categoryForm')[0].reset(); $('#categoryForm').find('input[name="_method"]').remove(); $('#category_id').val(''); $('.error').text(''); $('input').removeClass('is-invalid'); });
 
-    // Save the Category (client validation)
-    $(document).on('click', '#saveCategory', function (e) {
-        e.preventDefault();
-        let categoryName = $('#category_name').val();
+        // Save the Category (client validation)
+        $(document).on('click', '#saveCategory', function (e) {
+            e.preventDefault();
+            let categoryName = $('#category_name').val();
         $('.error').text(''); $('input').removeClass('is-invalid');
-        let errors = {};
-        if (!categoryName) errors.categoryName = 'Category Name is required.';
+            let errors = {};
+            if (!categoryName) errors.categoryName = 'Category Name is required.';
         if (Object.keys(errors).length > 0) { if (errors.categoryName) { $('#category_name').addClass('is-invalid'); $('.category-name-error').text(errors.categoryName); } return; }
-        $('#categoryForm').submit();
-    });
+            $('#categoryForm').submit();
+        });
 
 });
 </script>
