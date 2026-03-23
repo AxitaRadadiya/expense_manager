@@ -19,6 +19,8 @@ class RolesSeeder extends Seeder
         $roles = [
             ['name' => 'super-admin'],
             ['name' => 'user'],
+            ['name' => 'owner'],
+            ['name' => 'superviour'],
         ];
 
         // Populate table

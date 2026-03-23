@@ -14,11 +14,10 @@ class TransferController extends Controller
         $this->middleware('auth');
     }
 
-     public function index()
+    public function index()
     {
         $auth = auth()->user();
 
-        // Only allow super-admin and owner roles to view transfers index
         if (! $auth || ! (method_exists($auth, 'hasRole') && $auth->hasRole(['super-admin', 'owner']))) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized to view transfers.');
         }
@@ -26,6 +25,7 @@ class TransferController extends Controller
         $transfers = Transfer::with(['user', 'creator'])->latest()->get();
         return view('admin.transfer.index', compact('transfers'));
     }
+
     public function create()
     {
         $users = User::orderBy('name')->get();
@@ -35,14 +35,14 @@ class TransferController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
+            'user_id'    => 'nullable|exists:users,id',
             'start_date' => 'nullable|date',
-            'amount' => 'required|numeric',
+            'amount'     => 'required|numeric',
         ]);
 
         $data['created_by'] = auth()->id();
 
-        $transfer = Transfer::create($data);
+        Transfer::create($data);
 
         return redirect()->route('transfer.index')->with('success', 'Transfer saved successfully.');
     }
@@ -51,50 +51,78 @@ class TransferController extends Controller
     {
         $auth = auth()->user();
 
-        // Only super-admin sees all transfers; owners see only their own
         if (! $auth || ! (method_exists($auth, 'hasRole') && $auth->hasRole(['super-admin', 'owner']))) {
             return response()->json([
-                'draw' => intval($request->input('draw', 1)),
-                'recordsTotal' => 0,
+                'draw'            => intval($request->input('draw', 1)),
+                'recordsTotal'    => 0,
                 'recordsFiltered' => 0,
-                'data' => [],
+                'data'            => [],
             ]);
         }
 
-        $query = Transfer::with('user', 'creator')->latest();
+        $query = Transfer::with('user', 'creator');
 
+        // Owner sees only their own transfers
         if ($auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            $query->where('user_id', $auth->id());
+            $query->where('user_id', $auth->id);
         }
 
-        // Search
+        // FIX: Wrap orWhere in a grouped closure to avoid breaking other conditions
         if (!empty($request->input('search.value'))) {
             $search = $request->input('search.value');
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            })->orWhere('amount', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($q2) use ($search) {
+                    $q2->where('name', 'like', "%{$search}%");
+                })->orWhere('amount', 'like', "%{$search}%");
+            });
         }
 
-        $totalFiltered = $query->count();
+        // Ordering
+        $orderColumnIndex = $request->input('order.0.column', 0);
+        $orderDir         = $request->input('order.0.dir', 'desc') === 'asc' ? 'asc' : 'desc';
+        $columns          = ['id', 'user', 'start_date', 'amount'];
+        $orderColumn      = $columns[$orderColumnIndex] ?? 'id';
+
+        // Only order by real DB columns (skip 'user' relation column)
+        if (in_array($orderColumn, ['id', 'start_date', 'amount'])) {
+            $query->orderBy($orderColumn, $orderDir);
+        } else {
+            $query->latest();
+        }
+
         $totalData     = Transfer::count();
+        $totalFiltered = $query->count();
 
         $transfers = $query
-            ->offset($request->input('start', 0))
-            ->limit($request->input('length', 10))
+            ->offset((int) $request->input('start', 0))
+            ->limit((int) $request->input('length', 10))
             ->get();
 
-        $data = $transfers->map(function ($transfer, $i) use ($request) {
+        $start = (int) $request->input('start', 0);
 
+        $data = $transfers->map(function ($transfer, $i) use ($start) {
+
+            // FIX: Safely format start_date — handle both string and Carbon instances
+            if ($transfer->start_date) {
+                try {
+                    $date = $transfer->start_date instanceof \Carbon\Carbon
+                        ? $transfer->start_date
+                        : \Carbon\Carbon::parse($transfer->start_date);
+                    $formattedDate = $date->format('d M Y');
+                } catch (\Exception $e) {
+                    $formattedDate = '—';
+                }
+            } else {
+                $formattedDate = '—';
+            }
 
             return [
-                'id'         => $request->input('start', 0) + $i + 1,
-                'user'       => '<strong>'.e($transfer->user->name ?? '—').'</strong>'
-                            . '<br><small class="text-muted">by '.e($transfer->creator->name ?? '—').'</small>',
-                'start_date' => $transfer->start_date
-                                ? $transfer->start_date->format('d M Y')
-                                : '—',
+                'id'         => $start + $i + 1,
+                'user'       => '<strong>' . e($transfer->user->name ?? '—') . '</strong>'
+                              . '<br><small class="text-muted">by ' . e($transfer->creator->name ?? '—') . '</small>',
+                'start_date' => $formattedDate,
                 'amount'     => '<span class="text-success font-weight-bold">₹'
-                                . number_format($transfer->amount, 2) . '</span>',
+                              . number_format((float) $transfer->amount, 2) . '</span>',
             ];
         });
 
