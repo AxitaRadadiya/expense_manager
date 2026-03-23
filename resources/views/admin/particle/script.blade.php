@@ -253,6 +253,28 @@ $(document).ready(function () {
         if (Object.keys(errors).length > 0) { if (errors.categoryName) { $('#category_name').addClass('is-invalid'); $('.category-name-error').text(errors.categoryName); } return; }
             $('#categoryForm').submit();
         });
+        
+        function load_transfer() {
+        $('#TransferTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            autoWidth: false,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("transfer.list") }}',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
+            columns: [
+                { data: 'id',         name: 'id' },
+                { data: 'user',       name: 'user',       orderable: false },
+                { data: 'start_date', name: 'start_date' },
+                { data: 'amount',     name: 'amount' },
+            ]
+        });
+    }
+    load_transfer();
 
 });
 </script>
