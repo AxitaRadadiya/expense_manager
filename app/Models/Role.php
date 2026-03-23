@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;                    // ✅ added
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;               // ✅ LogsActivity added
 
     protected $fillable = ['name'];
+
+    // ── Relationships ─────────────────────────────
 
     public function users()
     {

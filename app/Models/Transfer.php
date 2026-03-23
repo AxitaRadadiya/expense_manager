@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;                    // ✅ added
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Transfer extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;               // ✅ LogsActivity added
 
     protected $fillable = [
         'user_id',
@@ -18,8 +19,10 @@ class Transfer extends Model
 
     protected $casts = [
         'start_date' => 'date',
-        'amount' => 'decimal:2',
+        'amount'     => 'decimal:2',
     ];
+
+    // ── Relationships ─────────────────────────────
 
     public function user()
     {

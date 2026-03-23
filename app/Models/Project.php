@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;                    // ✅ added
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;               // ✅ LogsActivity added
 
     protected $fillable = [
         'name',
@@ -20,7 +21,19 @@ class Project extends Model
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date' => 'date',
-        'amount' => 'decimal:2',
+        'end_date'   => 'date',
+        'amount'     => 'decimal:2',
     ];
+
+    // ── Relationships ─────────────────────────────
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'project_id');
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class, 'projects_id');
+    }
 }

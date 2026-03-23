@@ -11,7 +11,7 @@
     <ul class="navbar-nav ml-auto align-items-center">
 
       <!-- Settings -->
-      <li class="nav-item dropdown">
+      <!-- <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#" title="Settings"
            style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;">
           <i class="fas fa-cog"></i>
@@ -39,7 +39,7 @@
           </a>
           @endcanany
         </div>
-      </li>
+      </li> -->
 
       <!-- User -->
       <li class="nav-item dropdown ml-1">

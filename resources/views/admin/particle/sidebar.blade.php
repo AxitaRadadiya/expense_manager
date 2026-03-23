@@ -28,32 +28,48 @@
           <li class="nav-header">System</li>
           @if(auth()->user() && auth()->user()->hasRole('super-admin'))
           <li class="nav-item">
-            <a href="{{ route('projects.index') }}" class="nav-link {{ Request::routeIs('projects.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-folder-open"></i>
-              <p>Projects</p>
-            </a>
-          </li>
-
-          <li class="nav-item">
             <a href="{{ route('users.index') }}" class="nav-link {{ Request::routeIs('users.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-users"></i>
               <p>Users</p>
             </a>
           </li>
-
+         
           <li class="nav-item">
-            <a href="{{ route('roles.index') }}" class="nav-link {{ Request::routeIs('roles.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-user-shield"></i>
-              <p>Roles</p>
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-sliders-h"></i>
+              <p>
+                Setting
+                <i class="fas fa-angle-left right mr-5"></i>
+              </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{ route('roles.index') }}" class="nav-link {{ Request::routeIs('roles.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-user-shield"></i>
+                  <p>Roles</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ route('category.index') }}" class="nav-link {{ Request::routeIs('category.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-tags"></i>
+                  <p>Categories</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ route('projects.index') }}" class="nav-link {{ Request::routeIs('projects.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-folder-open"></i>
+                  <p>Projects</p>
+                </a>
+              </li>
+
+            </ul>
           </li>
           <li class="nav-item">
-            <a href="{{ route('category.index') }}" class="nav-link {{ Request::routeIs('category.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-tags"></i>
-              <p>Categories</p>
-            </a>
-          </li>
-
+              <a href="{{ route('activity-logs.index') }}" class="nav-link {{ Request::routeIs('activity-logs.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-history"></i>
+                <p>Activity Logs</p>
+              </a>
+            </li>
           @endif
            <li class="nav-item">
             <a href="{{ route('expense.index') }}" class="nav-link {{ Request::routeIs('expense.*') ? 'active' : '' }}">
@@ -61,24 +77,15 @@
               <p>Expenses</p>
             </a>
           </li>
+            @if(auth()->user() && auth()->user()->hasRole(['super-admin', 'owner']))
             <li class="nav-item">
               <a href="{{ route('transfer.index') }}" class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-exchange-alt"></i>
                 <p>Transfers</p>
               </a>
-
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-sliders-h"></i>
-              <p>
-                Setting
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              {{-- add sub-items here --}}
-            </ul>
-          </li>
+            </li>
+            @endif
+            
 
         </ul>
       </nav>
