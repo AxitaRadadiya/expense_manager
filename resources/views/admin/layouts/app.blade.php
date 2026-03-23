@@ -371,13 +371,45 @@
         transition: margin-left .3s ease;
       }
     }
-    @media (max-width: 991.98px) {
-      body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-header,
-      body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .content-wrapper,
-      body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-footer {
-        margin-left: 0;
+        body.sidebar-collapse .main-sidebar {
+          width: var(--sb-mini) !important;
+        }
+        body.sidebar-collapse .main-sidebar .brand-link .brand-text,
+        body.sidebar-collapse .main-sidebar .sidebar .nav-link p,
+        body.sidebar-collapse .main-sidebar .sidebar .nav-header {
+          opacity: 0;
+          transition: opacity .2s ease;
+          pointer-events: none;
+        }
+        body.sidebar-collapse .main-sidebar:hover .brand-link .brand-text,
+        body.sidebar-collapse .main-sidebar:hover .sidebar .nav-link p,
+        body.sidebar-collapse .main-sidebar:hover .sidebar .nav-header {
+          opacity: 1;
+          pointer-events: auto;
+        }
       }
-    }
+      @media (min-width: 768px) {
+        body:not(.sidebar-collapse):not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-header,
+        body:not(.sidebar-collapse):not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .content-wrapper,
+        body:not(.sidebar-collapse):not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-footer {
+          margin-left: var(--sb-w);
+          transition: margin-left .3s ease;
+        }
+
+        body.sidebar-collapse:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-header,
+        body.sidebar-collapse:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .content-wrapper,
+        body.sidebar-collapse:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-footer {
+          margin-left: 0;
+          transition: margin-left .3s ease;
+        }
+      }
+      @media (max-width: 991.98px) {
+        body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-header,
+        body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .content-wrapper,
+        body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-footer {
+          margin-left: 0;
+        }
+      }
 
     /* ════════════════ STAT CARDS (small-box) ═══ */
     .small-box {
