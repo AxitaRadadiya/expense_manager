@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\UserBalanceHistory;
 use App\Models\Transfer;
+use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,9 +18,16 @@ class ExpenseController extends Controller
 {
     public function index(): View
     {
-        $expense = Expense::with(['project', 'user'])
-            ->latest()
-            ->get();
+        $auth = auth()->user();
+
+        if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('super-admin')) {
+            $expense = Expense::with(['project', 'user'])->latest()->get();
+        } else {
+            $expense = Expense::with(['project', 'user'])
+                ->where('users_id', $auth?->id ?? 0)
+                ->latest()
+                ->get();
+        }
 
         return view('admin.expense.index', compact('expense'));
     }
@@ -29,7 +37,7 @@ class ExpenseController extends Controller
         $auth = auth()->user();
 
         // Superadmin can see all projects, others see only their assigned project (if any)
-        if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('superadmin')) {
+        if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('super-admin')) {
             $projects = Project::orderBy('name')->get();
         } else {
             if ($auth && $auth->project_id) {
@@ -40,8 +48,8 @@ class ExpenseController extends Controller
         }
 
         $users = User::orderBy('name')->get();
-
-        return view('admin.expense.create', compact('projects', 'users'));
+        $categories = Category::orderBy('name')->get();
+        return view('admin.expense.create', compact('projects', 'users', 'categories'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -52,6 +60,7 @@ class ExpenseController extends Controller
                 'expense_date' => 'required|date',
                 'amount'       => 'required|numeric|min:0',
                 'bill'         => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                'category'     => 'nullable|string|max:255',
 
                 'payment_mode'     => 'nullable',
                 'reference_number' => 'nullable',
@@ -78,7 +87,7 @@ class ExpenseController extends Controller
 
         $validated['users_id'] = auth()->id();
 
-        $validated['category'] = 'Other';
+        $validated['category'] = $validated['category'] ?? 'Other';
 
         if ($request->hasFile('bill')) {
             $billFile = $request->file('bill');
@@ -190,8 +199,9 @@ class ExpenseController extends Controller
         $expense  = Expense::findOrFail($id);
         $projects = Project::orderBy('name')->get();
         $users    = User::orderBy('name')->get();
+        $categories = Category::orderBy('name')->get();
 
-        return view('admin.expense.edit', compact('expense', 'projects', 'users'));
+        return view('admin.expense.edit', compact('expense', 'projects', 'users', 'categories'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -204,6 +214,7 @@ class ExpenseController extends Controller
                 'expense_date' => 'required|date',
                 'amount'       => 'required|numeric|min:0',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                'category'     => 'nullable|string|max:255',
 
                 'payment_mode'     => 'nullable',
                 'reference_number' => 'nullable',
@@ -283,7 +294,15 @@ class ExpenseController extends Controller
             5 => 'created_at',
         ];
 
-        $totalData     = Expense::count();
+        $auth = auth()->user();
+
+        // Base query respects permissions: super-admin sees all, others only their own
+        $baseQuery = Expense::query();
+        if (! ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('super-admin'))) {
+            $baseQuery->where('users_id', $auth?->id ?? 0);
+        }
+
+        $totalData     = $baseQuery->count();
         $totalFiltered = $totalData;
         $limit         = $request->input('length', 10);
         $start         = $request->input('start', 0);
@@ -292,7 +311,7 @@ class ExpenseController extends Controller
         $dir           = $request->input('order.0.dir', 'desc');
         $search        = $request->input('search.value');
 
-        $query = Expense::with(['project', 'user']);
+        $query = $baseQuery->with(['project', 'user']);
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {

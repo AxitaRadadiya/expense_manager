@@ -65,14 +65,14 @@
             </div>
 
             {{-- Expense Category --}}
-            <!-- <div class="col-md-6 mb-3">
-              <label for="category">Expense Category <span class="text-danger">*</span></label>
+            <div class="col-md-6 mb-3">
+              <label for="category">Expense Category</label>
               <select class="form-control @error('category') is-invalid @enderror"
-                      name="category" id="category" required>
+                      name="category" id="category">
                 <option value="">-- Select Category --</option>
-                @foreach(['Travel', 'Food', 'Accommodation', 'Office Supplies', 'Utilities', 'Other'] as $cat)
-                  <option value="{{ $cat }}" {{ old('category') == $cat ? 'selected' : '' }}>
-                    {{ $cat }}
+                @foreach($categories as $cat)
+                  <option value="{{ $cat->name }}" {{ old('category') == $cat->name ? 'selected' : '' }}>
+                    {{ $cat->name }}
                   </option>
                 @endforeach
               </select>
@@ -80,20 +80,6 @@
                 <span class="invalid-feedback">{{ $message }}</span>
               @enderror
             </div>
-
-            {{-- Sub-Category --}}
-            <div class="col-md-6 mb-3">
-              <label for="sub_category">Sub-Category</label>
-              <select class="form-control @error('sub_category') is-invalid @enderror"
-                      name="sub_category" id="sub_category">
-                <option value="">-- Select Sub-Category --</option>
-                {{-- Populated by JS; restore old value via hidden input --}}
-              </select>
-              <input type="hidden" id="old_sub_category" value="{{ old('sub_category') }}">
-              @error('sub_category')
-                <span class="invalid-feedback">{{ $message }}</span>
-              @enderror
-            </div> -->
 
             {{-- Amount --}}
             <div class="col-md-6 mb-3">

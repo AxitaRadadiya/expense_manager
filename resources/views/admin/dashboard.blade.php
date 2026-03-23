@@ -104,7 +104,7 @@
 <div class="dash-stats">
   <div class="row">
 
-      {{-- USER TRANSFERS PANEL --}}
+      {{-- USER TRANSFERS (compact user-wise amounts) --}}
       <div class="container-fluid mt-3">
         <div class="panel">
           <div class="panel-head">
@@ -112,28 +112,87 @@
             <div class="panel-actions">&nbsp;</div>
           </div>
           <div class="panel-body">
-            <div class="table-responsive">
-              <table class="table table-sm table-striped">
-                <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th class="text-right">Total Transfers</th>
-                    <th class="text-right">Transfers Count</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach($usersWithTransfers as $u)
-                    <tr>
-                      <td>{{ $u->name }}</td>
-                      <td>{{ $u->email }}</td>
-                      <td class="text-right">₹ {{ number_format((float) ($u->transfers_sum_amount ?? 0), 2) }}</td>
-                      <td class="text-right">{{ $u->transfers_count }}</td>
-                    </tr>
-                  @endforeach
-                </tbody>
-              </table>
+            <div class="list-group">
+              @foreach($usersWithTransfers as $u)
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="font-weight-bold">{{ $u->name }}</div>
+                    <div class="text-muted small">{{ $u->email ?? '—' }}</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-weight-bold">₹ {{ number_format((float) ($u->transfers_sum_amount ?? 0), 2) }}</div>
+                  </div>
+                </div>
+              @endforeach
             </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- DEBITS: recent or per-user/project summaries --}}
+      <div class="container-fluid mt-4">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><i class="fas fa-money-bill-wave"></i> Debited (Expenses)</div>
+            <div class="panel-actions">&nbsp;</div>
+          </div>
+          <div class="panel-body">
+            @if(auth()->user() && auth()->user()->hasRole('super-admin'))
+              <h5 class="sh">User-wise Debited Totals</h5>
+              <div class="table-responsive mb-3">
+                <table class="table table-sm table-striped">
+                  <thead>
+                    <tr><th>User</th><th class="text-right">Total Debited</th><th class="text-right">Count</th></tr>
+                  </thead>
+                  <tbody>
+                    @foreach($userDebitedTotals as $u)
+                      <tr>
+                        <td>{{ $u->user->name ?? '—' }}</td>
+                        <td class="text-right">₹ {{ number_format((float) ($u->total_debited ?? 0), 2) }}</td>
+                        <td class="text-right">{{ $u->expenses_count }}</td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
+
+              <h5 class="sh">Project-wise Debited Totals</h5>
+              <div class="table-responsive mb-3">
+                <table class="table table-sm table-striped">
+                  <thead>
+                    <tr><th>Project</th><th class="text-right">Total Debited</th><th class="text-right">Count</th></tr>
+                  </thead>
+                  <tbody>
+                    @foreach($projectDebitedTotals as $p)
+                      <tr>
+                        <td>{{ $p->project->name ?? '—' }}</td>
+                        <td class="text-right">₹ {{ number_format((float) ($p->total_debited ?? 0), 2) }}</td>
+                        <td class="text-right">{{ $p->expenses_count }}</td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
+            @else
+              <h5 class="sh">Your Recent Debits</h5>
+              <div class="table-responsive">
+                <table class="table table-sm table-striped">
+                  <thead>
+                    <tr><th>Date</th><th>Project</th><th class="text-right">Amount</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    @foreach($debitedList as $d)
+                      <tr>
+                        <td>{{ $d->expense_date ? \Carbon\Carbon::parse($d->expense_date)->format('d M Y') : '—' }}</td>
+                        <td>{{ $d->project->name ?? '—' }}</td>
+                        <td class="text-right">₹ {{ number_format((float) $d->amount, 2) }}</td>
+                        <td>{{ \Illuminate\Support\Str::limit($d->description ?? '-', 80) }}</td>
+                      </tr>
+                    @endforeach
+                  </tbody>
+                </table>
+              </div>
+            @endif
           </div>
         </div>
       </div>

@@ -10,8 +10,9 @@ use Illuminate\View\View;
 use App\Models\User;
 use App\Models\Job;          
 use App\Models\JobCard;     
-use Illuminate\Support\Facades\DB;
 use App\Models\Transfer;
+use App\Models\Expense;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
@@ -24,60 +25,15 @@ use Illuminate\Http\RedirectResponse;
 
             $roleName = $user && $user->role ? $user->role->name : null;
 
-            // Static expense-manager dashboard data (shown to any authenticated user)
-            $totalJobCards = 12450;
-            $totalJobs     = 25600;
-            $totalContacts = 48;
-            $todayJobCards = 320;
-
-            $monthlyChartData = [1200, 900, 1100, 950, 1300, 1250, 1400, 1500, 1350, 1600, 1700, 1850];
-
-            $jobCardsByStatus = [
-                (object)[
-                    'id' => 1001,
-                    'job' => (object)[ 'name' => 'Office Supplies', 'contact' => (object)['name' => 'Acme Stationers'] ],
-                    'job_name' => null,
-                    'contact' => (object)['name' => 'Acme Stationers'],
-                    'status' => 'paid',
-                    'amount' => 249.75,
-                    'created_at' => now()->subDays(1),
-                ],
-                (object)[
-                    'id' => 1002,
-                    'job' => (object)[ 'name' => 'Printer Ink', 'contact' => (object)['name' => 'PrintCo'] ],
-                    'job_name' => null,
-                    'contact' => (object)['name' => 'PrintCo'],
-                    'status' => 'pending',
-                    'amount' => 89.50,
-                    'created_at' => now()->subDays(2),
-                ],
-                (object)[
-                    'id' => 1003,
-                    'job' => (object)[ 'name' => 'Maintenance', 'contact' => (object)['name' => 'FixIt Ltd'] ],
-                    'job_name' => null,
-                    'contact' => (object)['name' => 'FixIt Ltd'],
-                    'status' => 'processing',
-                    'amount' => 420.00,
-                    'created_at' => now()->subDays(3),
-                ],
-            ];
-
-            $statusCounts = [
-                'paid' => 42,
-                'pending' => 7,
-                'processing' => 3,
-                'cancelled' => 1,
-            ];
-
-            $currentYear = date('Y');
+            // (Removed static demo dashboard stats)
 
             // Per-user transfer totals and counts
             $authUser = $user; // from above
             $isSuper = false;
             if ($authUser) {
                 $isSuper = method_exists($authUser, 'hasRole')
-                    ? $authUser->hasRole('superadmin')
-                    : (optional($authUser->role)->name === 'superadmin');
+                    ? $authUser->hasRole('super-admin')
+                    : (optional($authUser->role)->name === 'super-admin');
             }
 
             if ($isSuper) {
@@ -88,6 +44,21 @@ use Illuminate\Http\RedirectResponse;
                     ->withCount('transfers')
                     ->orderBy('name')
                     ->get();
+                // Superadmin: user-wise debited totals (expenses)
+                $userDebitedTotals = Expense::select('users_id', DB::raw('SUM(amount) as total_debited'), DB::raw('COUNT(*) as expenses_count'))
+                    ->groupBy('users_id')
+                    ->with('user')
+                    ->orderByDesc('total_debited')
+                    ->get();
+
+                // Superadmin: project-wise debited totals
+                $projectDebitedTotals = Expense::select('projects_id', DB::raw('SUM(amount) as total_debited'), DB::raw('COUNT(*) as expenses_count'))
+                    ->groupBy('projects_id')
+                    ->with('project')
+                    ->orderByDesc('total_debited')
+                    ->get();
+                // Recent debits
+                $debitedList = Expense::with('user','project')->latest()->limit(20)->get();
             } else {
                 // Regular user: only show their own summary
                 $usersWithTransfers = User::query()
@@ -96,18 +67,17 @@ use Illuminate\Http\RedirectResponse;
                     ->withCount('transfers')
                     ->where('id', $authUser ? $authUser->id : 0)
                     ->get();
+                // Regular user: show their own recent debits
+                $debitedList = Expense::with('project')->where('users_id', $authUser ? $authUser->id : 0)->latest()->limit(20)->get();
+                $userDebitedTotals = collect();
+                $projectDebitedTotals = collect();
             }
 
             return view('admin.dashboard', compact(
-                'totalJobCards',
-                'totalJobs',
-                'totalContacts',
-                'todayJobCards',
-                'monthlyChartData',
-                'currentYear',
-                'jobCardsByStatus',
-                'statusCounts',
-                'usersWithTransfers'
+                'usersWithTransfers',
+                'debitedList',
+                'userDebitedTotals',
+                'projectDebitedTotals'
             ));
         }
         

@@ -32,35 +32,11 @@
                   <i class="fa fa-edit mr-1"></i> Edit
                 </a>
               @endif
-
-              {{-- Download Bill --}}
-              @if($expense->bill_path)
-                <a href="{{ asset('storage/' . $expense->bill_path) }}"
-                   download
-                   class="btn btn-success btn-sm waves-effect waves-light">
-                  <i class="fa fa-download mr-1"></i> Download Bill
-                </a>
-              @endif
-
-              {{-- Delete --}}
-              <form action="{{ route('expense.destroy', $expense->id) }}"
-                    method="POST"
-                    data-delete-type="expense"
-                    class="d-inline">
-                @csrf
-                @method('DELETE')
-                <button type="button"
-                        class="btn btn-danger btn-sm waves-effect waves-light deleteButton">
-                  <i class="fa fa-trash mr-1"></i> Delete
-                </button>
-              </form>
-
             </div>
           </div>
         </div>
       </div>
     </div>
-    {{-- ─── End Page Header ──────────────────────────────────────────────── --}}
 
     <div class="row">
 

@@ -13,7 +13,6 @@
       </div>
       <div class="card-body">
 
-        {{-- Validation Errors --}}
         @if($errors->any())
           <div class="alert alert-danger">
             <ul class="mb-0">
@@ -31,7 +30,6 @@
           @method('PUT')
 
           <div class="row">
-
             {{-- Project --}}
             <div class="col-md-6 mb-3">
               <label for="projects_id">Project <span class="text-danger">*</span></label>
@@ -50,7 +48,6 @@
               @enderror
             </div>
 
-            {{-- Expense Date --}}
             <div class="col-md-6 mb-3">
               <label for="expense_date">Expense Date <span class="text-danger">*</span></label>
               <input type="date"
@@ -63,7 +60,6 @@
               @enderror
             </div>
 
-            {{-- Amount --}}
             <div class="col-md-6 mb-3">
               <label for="amount">Amount (₹) <span class="text-danger">*</span></label>
               <div class="input-group">
@@ -82,8 +78,21 @@
               </div>
             </div>
 
-            {{-- ↓ FIXED: values are lowercase to match DB enum ──────────────── --}}
-            {{-- Payment Mode --}}
+              <div class="col-md-6 mb-3">
+                <label for="category">Expense Category</label>
+                <select class="form-control @error('category') is-invalid @enderror"
+                        name="category" id="category">
+                  <option value="">-- Select Category --</option>
+                  @foreach($categories as $cat)
+                    <option value="{{ $cat->name }}" {{ old('category', $expense->category) == $cat->name ? 'selected' : '' }}>
+                      {{ $cat->name }}
+                    </option>
+                  @endforeach
+                </select>
+                @error('category')
+                  <span class="invalid-feedback">{{ $message }}</span>
+                @enderror
+              </div>
             <div class="col-md-6 mb-3">
               <label for="payment_mode">Payment Mode</label>
               <select class="form-control @error('payment_mode') is-invalid @enderror"
@@ -114,12 +123,9 @@
               @enderror
             </div>
 
-            {{-- ↓ FIXED: $expense->bill_path instead of $expense->bill ──────── --}}
-            {{-- Bill Upload --}}
             <div class="col-md-6 mb-3">
               <label for="bill">Bill Upload</label>
 
-              {{-- Existing Bill Preview --}}
               @if($expense->bill_path)
                 @php $ext = strtolower(pathinfo($expense->bill_path, PATHINFO_EXTENSION)); @endphp
                 <div class="mb-2 p-2 border rounded d-flex align-items-center justify-content-between"
@@ -127,13 +133,11 @@
                   <div class="d-flex align-items-center" style="gap:10px;">
 
                     @if(in_array($ext, ['jpg', 'jpeg', 'png']))
-                      {{-- Image preview thumbnail --}}
                       <img src="{{ asset('storage/' . $expense->bill_path) }}"
                            alt="Current Bill"
                            style="height:48px; width:64px; object-fit:cover;
                                   border-radius:4px; border:1px solid #dee2e6;">
                     @else
-                      {{-- PDF icon --}}
                       <div style="height:48px; width:48px; background:#fff3cd;
                                   border-radius:4px; border:1px solid #ffc107;
                                   display:flex; align-items:center; justify-content:center;">
@@ -145,7 +149,6 @@
                       <p class="mb-0 font-weight-bold text-dark" style="font-size:13px;">
                         Current Bill
                       </p>
-                      {{-- Show original filename if available --}}
                       <small class="text-muted">
                         {{ $expense->bill_original_name ?? strtoupper($ext) . ' file' }}
                       </small>
@@ -160,7 +163,6 @@
                 </div>
               @endif
 
-              {{-- New File Input --}}
               <div class="custom-file">
                 <input type="file"
                        class="custom-file-input @error('bill') is-invalid @enderror"
@@ -182,7 +184,6 @@
               @enderror
             </div>
 
-            {{-- Description --}}
             <div class="col-md-12 mb-3">
               <label for="description">Description</label>
               <textarea class="form-control @error('description') is-invalid @enderror"
@@ -193,7 +194,7 @@
                 <span class="invalid-feedback">{{ $message }}</span>
               @enderror
             </div>
-          </div>{{-- end row --}}
+          </div>
 
           <div class="mt-2">
             <button type="submit" class="btn btn-primary waves-effect waves-light">
@@ -204,7 +205,6 @@
               <i class="fa fa-times mr-1"></i> Cancel
             </a>
           </div>
-
         </form>
       </div>
     </div>

@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;                    // ✅ added
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UserBalanceHistory extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;               // ✅ LogsActivity added
 
     protected $fillable = [
         'user_id',
@@ -22,10 +23,12 @@ class UserBalanceHistory extends Model
     ];
 
     protected $casts = [
-        'change_amount' => 'decimal:2',
+        'change_amount'  => 'decimal:2',
         'balance_before' => 'decimal:2',
-        'balance_after' => 'decimal:2',
+        'balance_after'  => 'decimal:2',
     ];
+
+    // ── Relationships ─────────────────────────────
 
     public function user()
     {

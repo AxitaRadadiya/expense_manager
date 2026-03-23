@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;                    // ✅ added
 use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
-   
+    use LogsActivity;                           // ✅ LogsActivity added
+
     protected $table = 'expense';
 
     protected $fillable = [
@@ -24,7 +26,8 @@ class Expense extends Model
         'status',
     ];
 
-    // ── Relationships ─────────────────────────────────────────────────────────
+    // ── Relationships ─────────────────────────────
+
     public function project()
     {
         return $this->belongsTo(Project::class, 'projects_id');

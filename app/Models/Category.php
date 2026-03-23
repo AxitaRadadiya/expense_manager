@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;                    // ✅ added
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-   protected $fillable = ['name'];
+    use LogsActivity;                           // ✅ LogsActivity added
+
+    protected $fillable = ['name'];
 }

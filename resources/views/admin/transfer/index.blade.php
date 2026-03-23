@@ -35,14 +35,13 @@
                         </div>
 
                     <div class="card-body">
-                        <table id="transfersTable" class="table table-bordered table-striped table-hover table-sm">
+                        <table id="TransferTable" class="table table-bordered table-striped table-hover table-sm">
                             <thead class="thead-dark">
                                 <tr>
-                                    <th width="40">#</th>
+                                    <th width="40">Sr No.</th>
                                     <th>User</th>
                                     <th>Start Date</th>
                                     <th>Amount</th>
-                                    <th width="120" class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>

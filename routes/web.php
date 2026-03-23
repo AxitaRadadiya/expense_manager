@@ -10,7 +10,9 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TransferController;
+use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Artisan;
+
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -50,7 +52,11 @@ Route::group(['middleware' => ['auth']], function () {
    
     Route::get('category-list', [CategoryController::class, 'list'])->name('category.list');
     Route::resource('category', CategoryController::class);
+
+    Route::get('transfer-list', [TransferController::class, 'list'])->name('transfer.list');
     Route::resource('transfer', TransferController::class);
+    Route::get('activity-logs',       [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
 });
 
 require __DIR__.'/auth.php';
