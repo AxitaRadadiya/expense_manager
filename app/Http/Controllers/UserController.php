@@ -13,6 +13,8 @@ use App\Models\Expense;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use App\Models\UserBalanceHistory;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -75,6 +77,21 @@ class UserController extends Controller
 
         // Persist single project via `project_id` column (no pivot sync required)
         // `project_id` was already stored in the create above.
+
+        // If an opening amount was provided, record opening balance history
+        if (! empty($request->amount) && (float)$request->amount != 0) {
+            UserBalanceHistory::create([
+                'user_id' => $user->id,
+                'change_type' => 'opening',
+                'change_amount' => $request->amount,
+                'balance_before' => 0,
+                'balance_after' => $request->amount,
+                'reference_type' => 'user',
+                'reference_id' => $user->id,
+                'created_by' => Auth::id(),
+                'note' => 'Opening balance set',
+            ]);
+        }
 
         $loginUser = Auth::user();
         Log::info('user.created', [
@@ -187,6 +204,24 @@ class UserController extends Controller
         // project change detection
         if ((string)$originalProject !== (string)$user->project_id) {
             $changes['project'] = ['old' => $originalProject, 'new' => $user->project_id];
+        }
+
+        // amount change: store balance history
+        $oldAmount = isset($original['amount']) ? (float)$original['amount'] : 0.0;
+        $newAmount = (float)$user->amount;
+        if ($oldAmount !== $newAmount) {
+            $diff = $newAmount - $oldAmount;
+            UserBalanceHistory::create([
+                'user_id' => $user->id,
+                'change_type' => 'adjustment',
+                'change_amount' => $diff,
+                'balance_before' => $oldAmount,
+                'balance_after' => $newAmount,
+                'reference_type' => 'user',
+                'reference_id' => $user->id,
+                'created_by' => Auth::id(),
+                'note' => 'Admin updated balance',
+            ]);
         }
 
         $loginUser = Auth::user();

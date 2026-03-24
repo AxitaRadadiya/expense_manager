@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Transfer;
 use App\Models\User;
+use App\Models\UserBalanceHistory;
+use Illuminate\Support\Facades\DB;
 
 class TransferController extends Controller
 {
@@ -28,7 +30,15 @@ class TransferController extends Controller
 
     public function create()
     {
-        $users = User::orderBy('name')->get();
+        $auth = auth()->user();
+        $usersQuery = User::orderBy('name');
+
+        // If the current user is an owner (not super-admin), only show users in the same project
+        if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
+            $usersQuery->where('project_id', $auth->project_id);
+        }
+
+        $users = $usersQuery->get();
         return view('admin.transfer.create', compact('users'));
     }
 
@@ -42,7 +52,41 @@ class TransferController extends Controller
 
         $data['created_by'] = auth()->id();
 
-        Transfer::create($data);
+        // If the creator is an owner (not super-admin), enforce that the target user belongs to the same project
+        $auth = auth()->user();
+        if ($data['user_id'] && $auth && method_exists($auth, 'hasRole') && $auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
+            $target = User::find($data['user_id']);
+            if (! $target || (string)$target->project_id !== (string)$auth->project_id) {
+                return redirect()->back()->withInput()->with('error', 'You can only create transfers for users in your project.');
+            }
+        }
+
+        // Wrap in transaction: create transfer, update user balance and add history
+        DB::transaction(function () use ($data) {
+            $transfer = Transfer::create($data);
+
+            if (! empty($data['user_id'])) {
+                $user = User::find($data['user_id']);
+                if ($user) {
+                    $before = (float) $user->amount;
+                    $after = $before + (float) $data['amount'];
+                    $user->amount = $after;
+                    $user->save();
+
+                    UserBalanceHistory::create([
+                        'user_id' => $user->id,
+                        'change_type' => 'transfer',
+                        'change_amount' => $data['amount'],
+                        'balance_before' => $before,
+                        'balance_after' => $after,
+                        'reference_type' => 'transfer',
+                        'reference_id' => $transfer->id,
+                        'created_by' => auth()->id(),
+                        'note' => 'Transfer created',
+                    ]);
+                }
+            }
+        });
 
         return redirect()->route('transfer.index')->with('success', 'Transfer saved successfully.');
     }
@@ -64,7 +108,10 @@ class TransferController extends Controller
 
         // Owner sees only their own transfers
         if ($auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            $query->where('user_id', $auth->id);
+            // owners should see transfers for users in their same project
+            $query->whereHas('user', function ($q) use ($auth) {
+                $q->where('project_id', $auth->project_id);
+            });
         }
 
         // FIX: Wrap orWhere in a grouped closure to avoid breaking other conditions
