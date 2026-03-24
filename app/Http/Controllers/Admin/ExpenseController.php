@@ -62,7 +62,7 @@ class ExpenseController extends Controller
                 'bill'         => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'nullable|string|max:255',
 
-                'payment_mode'     => 'nullable',
+                'payment_mode' => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
                 'status'           => 'nullable',
@@ -113,74 +113,33 @@ class ExpenseController extends Controller
 
         $amount = (float) $validated['amount'];
 
-        // Calculate available funds: user.amount + sum of positive transfers
-        $transferTotal = (float) Transfer::where('user_id', $user->id)->where('amount', '>', 0)->sum('amount');
-        $available = (float) ($user->amount ?? 0) + $transferTotal;
+        // Available balance = opening balance + received transfers - sent transfers - expenses.
+        $transferInTotal = (float) Transfer::where('user_id', $user->id)->sum('amount');
+        $transferOutTotal = (float) Transfer::where('created_by', $user->id)->sum('amount');
+        $spentTotal = (float) Expense::where('users_id', $user->id)->sum('amount');
+        $available = (float) ($user->amount ?? 0) + $transferInTotal - $transferOutTotal - $spentTotal;
 
         if ($available < $amount) {
-            return redirect()->back()->withErrors(['amount' => 'Insufficient funds (opening balance + transfers)'])->withInput();
+            return redirect()->back()->withErrors(['amount' => 'Insufficient funds.'])->withInput();
         }
 
         // Create expense only after availability check
         $expense = Expense::create($validated);
 
-        // Consume transfers FIFO (oldest first) until expense amount covered
         try {
-            $remaining = $amount;
-
-            $transfers = Transfer::where('user_id', $user->id)
-                ->where('amount', '>', 0)
-                ->orderBy('start_date', 'asc')
-                ->orderBy('id', 'asc')
-                ->get();
-
-            foreach ($transfers as $transfer) {
-                if ($remaining <= 0) break;
-
-                $tBefore = (float) $transfer->amount;
-                $deduct = min($tBefore, $remaining);
-                $tAfter = $tBefore - $deduct;
-
-                $transfer->amount = $tAfter;
-                $transfer->save();
-
-                UserBalanceHistory::create([
-                    'user_id' => $user->id,
-                    'change_type' => 'transfer_debit',
-                    'change_amount' => -abs($deduct),
-                    'balance_before' => $tBefore,
-                    'balance_after' => $tAfter,
-                    'reference_type' => 'transfer',
-                    'reference_id' => $transfer->id,
-                    'created_by' => auth()->id(),
-                    'note' => 'Debited by expense #' . $expense->id,
-                ]);
-
-                $remaining -= $deduct;
-            }
-
-            // If any remaining amount, deduct from user's opening balance
-            if ($remaining > 0) {
-                $before = (float) ($user->amount ?? 0);
-                $after = $before - $remaining;
-                $user->amount = $after;
-                $user->save();
-
-                UserBalanceHistory::create([
-                    'user_id' => $user->id,
-                    'change_type' => 'expense',
-                    'change_amount' => -abs($remaining),
-                    'balance_before' => $before,
-                    'balance_after' => $after,
-                    'reference_type' => 'expense',
-                    'reference_id' => $expense->id,
-                    'created_by' => auth()->id(),
-                    'note' => 'Expense recorded via web',
-                ]);
-            }
-
+            UserBalanceHistory::create([
+                'user_id' => $user->id,
+                'change_type' => 'expense',
+                'change_amount' => -abs($amount),
+                'balance_before' => $available,
+                'balance_after' => $available - $amount,
+                'reference_type' => 'expense',
+                'reference_id' => $expense->id,
+                'created_by' => auth()->id(),
+                'note' => 'Expense recorded via web',
+            ]);
         } catch (\Exception $e) {
-            \Log::error('Balance/transfer consumption failed: ' . $e->getMessage());
+            \Log::error('Balance history write failed: ' . $e->getMessage());
         }
 
         return redirect()->route('expense.index')

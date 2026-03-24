@@ -118,6 +118,7 @@ class UserController extends Controller
         // Transfers (paginated) and totals
         $transfersQuery = \App\Models\Transfer::where('user_id', $user->id);
         $totalTransfers = (float) $transfersQuery->sum('amount');
+        $totalTransfersSent = (float) \App\Models\Transfer::where('created_by', $user->id)->sum('amount');
         $transfers = $transfersQuery->latest()->paginate(15, ['*'], 'transfers_page');
 
         // Balance histories (paginated)
@@ -126,8 +127,8 @@ class UserController extends Controller
         // Opening balance from user.amount
         $opening = (float) $user->amount;
 
-        // Current balance calculation: opening + transfers - debited
-        $currentBalance = $opening + $totalTransfers - $totalDebited;
+        // Current balance calculation: opening + received transfers - sent transfers - debited
+        $currentBalance = $opening + $totalTransfers - $totalTransfersSent - $totalDebited;
 
         return view('admin.users.show', [
             'user' => $user,

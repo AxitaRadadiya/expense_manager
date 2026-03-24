@@ -102,17 +102,24 @@
 
             {{-- Payment Mode --}}
             <div class="col-md-6 mb-3">
-              <label for="payment_mode">Payment Mode</label>
+              <label for="payment_mode">Payment Mode <span class="text-danger">*</span></label>
+
               <select class="form-control @error('payment_mode') is-invalid @enderror"
-                      name="payment_mode" id="payment_mode">
-                <option value="">-- Select Payment Mode --</option>
-                @foreach(['cash' => 'Cash', 'online' => 'online', 'cheque' => 'Cheque'] as $value => $label)
+                      name="payment_mode" id="payment_mode" required>
+
+                <option value="" disabled {{ old('payment_mode') ? '' : 'selected' }}>
+                  -- Select Payment Mode --
+                </option>
+
+                @foreach(['cash' => 'Cash', 'online' => 'Online', 'cheque' => 'Cheque'] as $value => $label)
                   <option value="{{ $value }}"
                     {{ old('payment_mode') == $value ? 'selected' : '' }}>
                     {{ $label }}
                   </option>
                 @endforeach
+
               </select>
+
               @error('payment_mode')
                 <span class="invalid-feedback">{{ $message }}</span>
               @enderror
