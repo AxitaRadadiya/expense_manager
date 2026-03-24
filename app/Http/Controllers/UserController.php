@@ -55,8 +55,7 @@ class UserController extends Controller
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
             'password'    => ['required', 'string', 'min:8', 'confirmed'],
-            'project_ids' => ['nullable', 'array'],
-            'project_ids.*' => ['exists:projects,id'],
+            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
 
@@ -68,17 +67,14 @@ class UserController extends Controller
             'status'   => $request->status,
             'note'     => $request->note,
             'amount'     => $request->amount,
+            'project_id' => $request->project_id,
             'password' => Hash::make($request->password),
         ]);
 
         $user->assignRole((int) $request->role_id);
 
-        // Sync many-to-many projects if provided. Keep single project_id for backward compatibility (first item)
-        if ($request->filled('project_ids') && is_array($request->project_ids)) {
-            $user->projects()->sync($request->project_ids);
-            $first = count($request->project_ids) ? $request->project_ids[0] : null;
-            if ($first) { $user->project_id = $first; $user->save(); }
-        }
+        // Persist single project via `project_id` column (no pivot sync required)
+        // `project_id` was already stored in the create above.
 
         $loginUser = Auth::user();
         Log::info('user.created', [
@@ -97,14 +93,34 @@ class UserController extends Controller
     {
         $user->load('role');
 
-        $expenses = Expense::with('project')
-            ->where('users_id', $user->id)
-            ->latest()
-            ->paginate(15);
+        // Expenses (paginated) and totals
+        $expensesQuery = Expense::with('project')->where('users_id', $user->id);
+        $totalDebited = (float) $expensesQuery->sum('amount');
+        $expenses = $expensesQuery->latest()->paginate(15);
+
+        // Transfers (paginated) and totals
+        $transfersQuery = \App\Models\Transfer::where('user_id', $user->id);
+        $totalTransfers = (float) $transfersQuery->sum('amount');
+        $transfers = $transfersQuery->latest()->paginate(15, ['*'], 'transfers_page');
+
+        // Balance histories (paginated)
+        $balanceHistories = \App\Models\UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(15, ['*'], 'balances_page');
+
+        // Opening balance from user.amount
+        $opening = (float) $user->amount;
+
+        // Current balance calculation: opening + transfers - debited
+        $currentBalance = $opening + $totalTransfers - $totalDebited;
 
         return view('admin.users.show', [
             'user' => $user,
             'expenses' => $expenses,
+            'totalDebited' => $totalDebited,
+            'transfers' => $transfers,
+            'totalTransfers' => $totalTransfers,
+            'balanceHistories' => $balanceHistories,
+            'opening' => $opening,
+            'currentBalance' => $currentBalance,
         ]);
     }
 
@@ -131,8 +147,7 @@ class UserController extends Controller
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
             'password'    => ['nullable', 'string', 'min:8', 'confirmed'],
-            'project_ids' => ['nullable', 'array'],
-            'project_ids.*' => ['exists:projects,id'],
+            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
 
@@ -152,19 +167,13 @@ class UserController extends Controller
         }
 
         $original = $user->getOriginal();
-        // capture original projects for comparison
-        $originalProjects = $user->projects()->pluck('id')->toArray();
+        // capture original project_id for comparison
+        $originalProject = $user->project_id;
 
         $user->update($data);
         $user->assignRole((int) $request->role_id);
 
-        // Sync projects if provided; update project_id for backward compatibility
-        if ($request->has('project_ids')) {
-            $ids = is_array($request->project_ids) ? $request->project_ids : [];
-            $user->projects()->sync($ids);
-            $user->project_id = count($ids) ? $ids[0] : null;
-            $user->save();
-        }
+        // project_id is handled by $user->update($data) above; no pivot sync required.
 
         // Detect changed fields for activity log
         $changes = [];
@@ -175,10 +184,9 @@ class UserController extends Controller
             }
         }
 
-        // projects change detection
-        $newProjects = $user->projects()->pluck('id')->toArray();
-        if (array_values($originalProjects) !== array_values($newProjects)) {
-            $changes['projects'] = ['old' => $originalProjects, 'new' => $newProjects];
+        // project change detection
+        if ((string)$originalProject !== (string)$user->project_id) {
+            $changes['project'] = ['old' => $originalProject, 'new' => $user->project_id];
         }
 
         $loginUser = Auth::user();
@@ -214,84 +222,66 @@ class UserController extends Controller
             ->withSuccess('User deleted successfully.');
     }
 
-    public function userList(Request $request)
-    {
-        $columns = [
-            0 => 'id',
-            1 => 'name',
-            2 => 'email',
-            3 => 'mobile',
-            4 => 'project',   // not orderable — handled below
-            5 => 'amount',
-            6 => 'role',      // not orderable — handled below
-            7 => 'status',    // not orderable — handled below
-            8 => 'action',    // not orderable
-        ];
+      public function userList(Request $request)
+        {
+            $query = User::with(['role', 'project']);
 
-        $orderableColumns = ['id', 'name', 'email', 'mobile', 'amount'];
-        $colIndex = (int) $request->input('order.0.column', 0);
-        $order    = $orderableColumns[$colIndex] ?? 'id';
-        $dir      = $request->input('order.0.dir', 'desc') === 'asc' ? 'asc' : 'desc';
+            $totalData = $query->count();
+            $totalFiltered = $totalData;
 
-        $totalData     = User::count();
-        $totalFiltered = $totalData;
-        $limit         = $request->input('length');
-        $start         = $request->input('start');
-        $search        = $request->input('search.value');
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $search = $request->input('search.value');
 
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name',   'like', "%{$search}%")
-                  ->orWhere('email',  'like', "%{$search}%")
-                  ->orWhere('mobile', 'like', "%{$search}%");
-            });
-            $totalFiltered = $query->count();
+            if (!empty($search)) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%");
+                });
+
+                $totalFiltered = $query->count();
+            }
+
+            $users = $query->offset($start)
+                ->limit($limit)
+                ->orderBy('id', 'desc')
+                ->get();
+
+            $data = [];
+
+            foreach ($users as $i => $u) {
+
+                $viewUrl = route('users.show', $u->id);
+                $editUrl = route('users.edit', $u->id);
+                $deleteUrl = route('users.destroy', $u->id);
+
+                $actionHtml  = '<a href="' . $viewUrl . '" class="btn btn-sm btn-info" title="View"><i class="fas fa-eye"></i></a> ';
+                $actionHtml .= '<a href="' . $editUrl . '" class="btn btn-sm btn-primary" title="Edit"><i class="fas fa-edit"></i></a> ';
+                $actionHtml .= '<form method="POST" action="' . $deleteUrl . '" style="display:inline-block;margin:0;padding:0;">';
+                $actionHtml .= '<input type="hidden" name="_token" value="' . csrf_token() . '">';
+                $actionHtml .= '<input type="hidden" name="_method" value="DELETE">';
+                $actionHtml .= '<button type="submit" class="btn btn-sm btn-danger deleteButton" title="Delete"><i class="fas fa-trash"></i></button>';
+                $actionHtml .= '</form>';
+
+                $data[] = [
+                    'id'      => $start + $i + 1,
+                    'name'    => $u->name,
+                    'email'   => $u->email,
+                    'mobile'  => $u->mobile,
+                    'project' => optional($u->project)->name,
+                    'amount'  => $u->amount,
+                    'role'    => optional($u->role)->name,
+                    'status'  => $u->status ? 'Active' : 'Inactive',
+                    'action'  => $actionHtml
+                ];
+            }
+
+            return response()->json([
+                'draw' => intval($request->input('draw')),
+                'recordsTotal' => $totalData,
+                'recordsFiltered' => $totalFiltered,
+                'data' => $data,
+            ]);
         }
-
-        $users = $query->offset($start)->limit($limit)->orderBy($order, $dir)->get();
-
-        $data = [];
-        foreach ($users as $i => $u) {
-            // Inline action icons (no three-dots dropdown)
-            $actions = '<div class="action-icons" style="display:flex;gap:8px;align-items:center;">';
-            $actions .= '<a href="' . route('users.show', $u->id) . '" title="View" class="text-decoration-none" style="color:#008d8d;"><i class="fas fa-eye"></i></a>';
-            $actions .= '<a href="' . route('users.edit', $u->id) . '" title="Edit" class="text-decoration-none" style="color:#006666;"><i class="fas fa-pen"></i></a>';
-            $actions .= '<form action="' . route('users.destroy', $u->id) . '" method="POST" class="d-inline-block" onsubmit="return confirm(\'Are you sure you want to delete this user?\');">'
-                . csrf_field()
-                . '<input type="hidden" name="_method" value="DELETE">'
-                . '<button type="submit" class="btn btn-link p-0 m-0" style="color:#dc2626;" title="Delete"><i class="fas fa-trash"></i></button>'
-                . '</form>';
-            $actions .= '</div>';
-
-            $statusBadge = $u->status
-                ? '<span class="sb sb-active">Active</span>'
-                : '<span class="sb sb-inactive">Inactive</span>';
-
-            $data[] = [
-                'id'      => $start + $i + 1,
-                'name'    => '<span style="font-weight:600;color:#0d2e2e;">' . e($u->name) . '</span>',
-                'email'   => '<span style="color:#5a8080;">' . e($u->email) . '</span>',
-                'mobile'  => '<span style="color:#5a8080;">' . e($u->mobile ?? '—') . '</span>',
-                'project' => $u->projects->isNotEmpty()
-                    ? '<span style="background:#e0f7f7;color:#006666;border:1px solid #a0d8d8;border-radius:6px;padding:.1rem .5rem;font-size:.76rem;font-weight:700;">'
-                      . e($u->projects->pluck('name')->implode(', ')) . '</span>'
-                    : '<span style="color:#a0cece;">—</span>',
-                'amount'  => $u->amount !== null
-                    ? '<span style="color:#006666;font-weight:700;">₹' . number_format((float) $u->amount, 0) . '</span>'
-                    : '<span style="color:#a0cece;">—</span>',
-                'role'    => $u->role
-                    ? '<span class="role-chip">' . e($u->role->name) . '</span>'
-                    : '<span style="color:#a0cece;">—</span>',
-                'status'  => $statusBadge,
-                'action'  => $actions,
-            ];
-        }
-
-        echo json_encode([
-            'draw'            => intval($request->input('draw')),
-            'recordsTotal'    => intval($totalData),
-            'recordsFiltered' => intval($totalFiltered),
-            'data'            => $data,
-        ]);
-    }
 }

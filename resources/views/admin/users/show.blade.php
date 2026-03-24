@@ -42,6 +42,30 @@
   </div>
 
   <div class="col-lg-8">
+    <!-- Summary -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0">Opening Balance</h6>
+            <div class="h5">₹ {{ number_format($opening, 2) }}</div>
+          </div>
+          <div>
+            <h6 class="mb-0">Total Transfers</h6>
+            <div class="h5">₹ {{ number_format($totalTransfers ?? 0, 2) }}</div>
+          </div>
+          <div>
+            <h6 class="mb-0">Total Debited</h6>
+            <div class="h5">₹ {{ number_format($totalDebited ?? 0, 2) }}</div>
+          </div>
+          <div>
+            <h6 class="mb-0">Current Balance</h6>
+            <div class="h5">₹ {{ number_format($currentBalance, 2) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-header d-flex align-items-center justify-content-between">
         <h5 class="mb-0">Debited (Expenses) — {{ $expenses->total() }} total</h5>
@@ -84,6 +108,88 @@
 
         @if($expenses->hasPages())
           <div class="mt-3">{{ $expenses->links('pagination::bootstrap-4') }}</div>
+        @endif
+      </div>
+    </div>
+
+    {{-- Transfers --}}
+    <div class="card mt-3">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Transfers — {{ $transfers->total() }} total</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th class="text-right">Amount (₹)</th>
+                <th>Created By</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($transfers as $i => $t)
+              <tr>
+                <td>{{ $transfers->firstItem() + $i }}</td>
+                <td>{{ optional($t->start_date)->format('d M Y') ?? '-' }}</td>
+                <td class="text-right">₹ {{ number_format((float) $t->amount, 2) }}</td>
+                <td>{{ optional($t->creator)->name ?? '-' }}</td>
+                <td>{{ \Illuminate\Support\Str::limit($t->note ?? '-', 80) }}</td>
+              </tr>
+              @empty
+              <tr><td colspan="5" class="text-center text-muted">No transfers found for this user.</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+        @if($transfers->hasPages())
+          <div class="mt-3">{{ $transfers->links('pagination::bootstrap-4') }}</div>
+        @endif
+      </div>
+    </div>
+    
+    {{-- Balance History --}}
+    <div class="card mt-3">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Balance History — {{ $balanceHistories->total() }} total</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th class="text-right">Change (₹)</th>
+                <th class="text-right">Before (₹)</th>
+                <th class="text-right">After (₹)</th>
+                <th>Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($balanceHistories as $i => $b)
+              <tr>
+                <td>{{ $balanceHistories->firstItem() + $i }}</td>
+                <td>{{ optional($b->created_at)->format('d M Y H:i') ?? '-' }}</td>
+                <td>{{ ucfirst($b->change_type ?? '-') }}</td>
+                <td class="text-right">₹ {{ number_format((float)$b->change_amount, 2) }}</td>
+                <td class="text-right">₹ {{ number_format((float)$b->balance_before, 2) }}</td>
+                <td class="text-right">₹ {{ number_format((float)$b->balance_after, 2) }}</td>
+                <td>{{ \Illuminate\Support\Str::limit($b->note ?? '-', 80) }}</td>
+              </tr>
+              @empty
+              <tr><td colspan="7" class="text-center text-muted">No balance history found for this user.</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+        @if($balanceHistories->hasPages())
+          <div class="mt-3">{{ $balanceHistories->links('pagination::bootstrap-4') }}</div>
         @endif
       </div>
     </div>

@@ -145,17 +145,17 @@ $(document).ready(function () {
                 data: { _token: '{{csrf_token()}}' }
             },
             columns: [
-                { data: 'id',      name: 'id' },
-                { data: 'name',    name: 'name' },
-                { data: 'email',   name: 'email' },
-                { data: 'mobile',  name: 'mobile',  orderable: false },
-                { data: 'project', name: 'project',  orderable: false, searchable: false },
-                { data: 'amount',  name: 'amount' },
-                { data: 'role',    name: 'role',    orderable: false, searchable: false },
-                { data: 'status',  name: 'status',  orderable: false, searchable: false },
-                { data: 'action',  name: 'action',  orderable: false, searchable: false }
-            ],
-            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
+            { data: 'id' },
+            { data: 'name' },
+            { data: 'email' },
+            { data: 'mobile' },
+            { data: 'project' },
+            { data: 'amount' },
+            { data: 'role' },
+            { data: 'status' },
+            { data: 'action' }
+        ]
+            , aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
         });
     }
     load_user();

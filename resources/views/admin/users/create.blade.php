@@ -216,13 +216,14 @@
           <div class="frow">
             {{-- Project --}}
             <div class="fgroup">
-              <label class="flabel" for="project_ids">Project(s)</label>
-              <select id="project_ids" name="project_ids[]" class="fselect @error('project_ids') is-invalid @enderror" multiple>
+              <label class="flabel" for="project_id">Project</label>
+              <select id="project_id" name="project_id" class="fselect @error('project_id') is-invalid @enderror">
+                <option value="">— Select Project —</option>
                 @foreach($projects as $project)
-                  <option value="{{ $project->id }}" {{ (collect(old('project_ids'))->contains($project->id)) ? 'selected' : '' }}>{{ $project->name }}</option>
+                  <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
                 @endforeach
               </select>
-              @error('project_ids') <span class="ferr">{{ $message }}</span> @enderror
+              @error('project_id') <span class="ferr">{{ $message }}</span> @enderror
             </div>
 
             {{-- Amount --}}
