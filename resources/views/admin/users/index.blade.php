@@ -128,6 +128,8 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Mobile</th>
+                <th>Project</th>
+                <th>Amount</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Actions</th>

@@ -69,6 +69,11 @@ class User extends Authenticatable
         return $this->belongsTo(Project::class, 'project_id');
     }
 
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'project_user', 'user_id', 'project_id');
+    }
+
     public function balanceHistories()
     {
         return $this->hasMany(UserBalanceHistory::class);

@@ -32,6 +32,11 @@ class Project extends Model
         return $this->hasMany(User::class, 'project_id');
     }
 
+    public function assignedUsers()
+    {
+        return $this->belongsToMany(User::class, 'project_user', 'project_id', 'user_id');
+    }
+
     public function expenses()
     {
         return $this->hasMany(Expense::class, 'projects_id');

@@ -138,9 +138,22 @@ $(document).ready(function () {
             paging: true, lengthChange: false, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
-            ajax: { url: '{{ route('users.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'users.list' } },
+            ajax: {
+                url: '{{ route('users.list') }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{csrf_token()}}' }
+            },
             columns: [
-                { data: 'id' }, { data: 'name' }, { data: 'email' }, { data: 'mobile' }, { data: 'role' }, { data: 'status' }, { data: 'action', orderable: false, searchable: false }
+                { data: 'id',      name: 'id' },
+                { data: 'name',    name: 'name' },
+                { data: 'email',   name: 'email' },
+                { data: 'mobile',  name: 'mobile',  orderable: false },
+                { data: 'project', name: 'project',  orderable: false, searchable: false },
+                { data: 'amount',  name: 'amount' },
+                { data: 'role',    name: 'role',    orderable: false, searchable: false },
+                { data: 'status',  name: 'status',  orderable: false, searchable: false },
+                { data: 'action',  name: 'action',  orderable: false, searchable: false }
             ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
         });
