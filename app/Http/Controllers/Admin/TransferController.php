@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Transfer;
 use App\Models\User;
+use App\Models\Expense;
+use App\Models\UserBalanceHistory;
 
 class TransferController extends Controller
 {
@@ -35,14 +37,51 @@ class TransferController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id'    => 'nullable|exists:users,id',
+            'user_id'    => 'required|exists:users,id',
             'start_date' => 'nullable|date',
-            'amount'     => 'required|numeric',
+            'amount'     => 'required|numeric|min:0.01',
         ]);
 
-        $data['created_by'] = auth()->id();
+        $sender = auth()->user();
 
-        Transfer::create($data);
+        if (! $sender) {
+            return redirect()->back()->withErrors(['auth' => 'User must be authenticated.'])->withInput();
+        }
+
+        if ((int) $data['user_id'] === (int) $sender->id) {
+            return redirect()->back()->withErrors(['user_id' => 'You cannot transfer amount to yourself.'])->withInput();
+        }
+
+        $openingBalance = (float) ($sender->amount ?? 0);
+        $receivedTransferTotal = (float) Transfer::where('user_id', $sender->id)->sum('amount');
+        $sentTransferTotal = (float) Transfer::where('created_by', $sender->id)->sum('amount');
+        $spentTotal = (float) Expense::where('users_id', $sender->id)->sum('amount');
+        $availableBalance = $openingBalance + $receivedTransferTotal - $sentTransferTotal - $spentTotal;
+        $transferAmount = (float) $data['amount'];
+
+        if ($availableBalance < $transferAmount) {
+            return redirect()->back()->withErrors(['amount' => 'Insufficient balance for this transfer.'])->withInput();
+        }
+
+        $data['created_by'] = $sender->id;
+
+        $transfer = Transfer::create($data);
+
+        try {
+            UserBalanceHistory::create([
+                'user_id' => $sender->id,
+                'change_type' => 'transfer',
+                'change_amount' => -abs($transferAmount),
+                'balance_before' => $availableBalance,
+                'balance_after' => $availableBalance - $transferAmount,
+                'reference_type' => 'transfer',
+                'reference_id' => $transfer->id,
+                'created_by' => $sender->id,
+                'note' => 'Transfer sent to user ID ' . $data['user_id'],
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Transfer balance history write failed: ' . $e->getMessage());
+        }
 
         return redirect()->route('transfer.index')->with('success', 'Transfer saved successfully.');
     }
