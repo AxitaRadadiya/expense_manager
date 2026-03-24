@@ -8,7 +8,6 @@ use App\Models\Transfer;
 use App\Models\User;
 use App\Models\Expense;
 use App\Models\UserBalanceHistory;
-use App\Models\UserBalanceHistory;
 use Illuminate\Support\Facades\DB;
 
 class TransferController extends Controller
