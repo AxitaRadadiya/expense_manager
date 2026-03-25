@@ -97,6 +97,9 @@ $(document).ready(function () {
     @if (session('error'))
         Toast.fire({ icon: 'error', title: '{{ session('error') }}' })
     @endif
+    @if (session('warning'))
+        Toast.fire({ icon: 'warning', title: '{{ session('warning') }}' })
+    @endif
 
     $(document).on('click', '.deleteButton', function (event) {
         event.preventDefault();
@@ -167,7 +170,7 @@ $(document).ready(function () {
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
             ajax: { url: '{{ route('projects.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'projects.list' } },
-            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'status' }, { data: 'amount' }, { data: 'action' } ],
+            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'action' } ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
         });
     }
@@ -283,6 +286,7 @@ $(document).ready(function () {
                 { data: 'id',         name: 'id' },
                 { data: 'user',       name: 'user',       orderable: false },
                 { data: 'start_date', name: 'start_date' },
+                { data: 'note',       name: 'note',       orderable: false },
                 { data: 'amount',     name: 'amount' },
             ]
         });

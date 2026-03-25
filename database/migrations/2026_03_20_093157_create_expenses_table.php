@@ -16,12 +16,12 @@ return new class extends Migration
             $table->foreignId('projects_id')->constrained()->cascadeOnDelete();
             $table->foreignId('users_id')->constrained()->cascadeOnDelete();
             $table->date('expense_date');
-            $table->string('category')->nullable();
+            $table->string('category');
             $table->string('sub_category')->nullable();
             $table->decimal('amount', 12, 2);
-            $table->text('description');
-            $table->string('bill_path');          
-            $table->string('bill_original_name'); 
+            $table->text('description')->nullable();
+            $table->string('bill_path')->nullable();
+            $table->string('bill_original_name')->nullable();
             $table->enum('payment_mode', ['cash', 'online', 'cheque'])->nullable();
             $table->string('reference_number')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');

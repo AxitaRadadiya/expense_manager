@@ -133,25 +133,29 @@
       background: rgba(0,141,141,.08) !important;
       border-bottom: 1px solid var(--border) !important;
       color: var(--text-dark) !important;
-      padding: .9rem 1rem;
+      padding: .78rem .95rem;
       display: flex;
       align-items: center;
-      gap: .65rem;
-      min-height: var(--nb-h);
+      gap: .9rem;
+      min-height: 68px;
       width: 100%;
       white-space: nowrap;
       overflow: hidden;
     }
     .brand-link .brand-image {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      border: 2px solid var(--pri);
+      width: 38px;
+      height: 38px;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,141,141,.22);
+      background: linear-gradient(180deg, #ffffff 0%, #eef9f9 100%);
+      box-shadow: 0 3px 10px rgba(0,141,141,.12);
       flex-shrink: 0;
-      object-fit: cover;
+      object-fit: contain;
     }
     .brand-link .brand-text {
       font-family: 'Playfair Display', serif;
-      font-size: .92rem;
+      font-size: 1rem;
       font-weight: 700;
       color: var(--pri-dk);
       white-space: nowrap;

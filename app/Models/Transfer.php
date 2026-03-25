@@ -15,6 +15,7 @@ class Transfer extends Model
         'created_by',
         'start_date',
         'amount',
+        'note',
     ];
 
     protected $casts = [

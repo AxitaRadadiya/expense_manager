@@ -79,9 +79,9 @@
             </div>
 
               <div class="col-md-6 mb-3">
-                <label for="category">Expense Category</label>
+                <label for="category">Expense Category <span class="text-danger">*</span></label>
                 <select class="form-control @error('category') is-invalid @enderror"
-                        name="category" id="category">
+                        name="category" id="category" required>
                   <option value="">-- Select Category --</option>
                   @foreach($categories as $cat)
                     <option value="{{ $cat->name }}" {{ old('category', $expense->category) == $cat->name ? 'selected' : '' }}>
@@ -94,9 +94,9 @@
                 @enderror
               </div>
             <div class="col-md-6 mb-3">
-              <label for="payment_mode">Payment Mode</label>
+              <label for="payment_mode">Payment Mode <span class="text-danger">*</span></label>
               <select class="form-control @error('payment_mode') is-invalid @enderror"
-                      name="payment_mode" id="payment_mode">
+                      name="payment_mode" id="payment_mode" required>
                 <option value="">-- Select Payment Mode --</option>
                 @foreach(['cash' => 'Cash', 'online' => 'online', 'cheque' => 'Cheque'] as $value => $label)
                   <option value="{{ $value }}"
@@ -184,14 +184,31 @@
               @enderror
             </div>
 
-            <div class="col-md-12 mb-3">
+            <div class="col-12">
+              <hr class="mt-2 mb-3">
+            </div>
+
+            <div class="col-md-6 mb-3">
               <label for="description">Description</label>
               <textarea class="form-control @error('description') is-invalid @enderror"
                         name="description" id="description"
-                        rows="3"
-                        placeholder="Enter expense description">{{ old('description', $expense->description) }}</textarea>
+                        rows="4"
+                        placeholder="Add a short description of the expense, items purchased, or purpose.">{{ old('description', $expense->description) }}</textarea>
+              <small class="text-muted d-block mt-1">Optional. Use this for supporting details.</small>
               @error('description')
-                <span class="invalid-feedback">{{ $message }}</span>
+                <span class="invalid-feedback d-block">{{ $message }}</span>
+              @enderror
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="note">Note <span class="text-danger">*</span></label>
+              <textarea class="form-control @error('note') is-invalid @enderror"
+                        name="note" id="note"
+                        rows="4"
+                        placeholder="Enter the key reason for this expense or any important internal note." required>{{ old('note', $expense->note) }}</textarea>
+              <small class="text-muted d-block mt-1">Required. This note will help identify the expense later.</small>
+              @error('note')
+                <span class="invalid-feedback d-block">{{ $message }}</span>
               @enderror
             </div>
           </div>

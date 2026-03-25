@@ -66,9 +66,9 @@
 
             {{-- Expense Category --}}
             <div class="col-md-6 mb-3">
-              <label for="category">Expense Category</label>
+              <label for="category">Expense Category <span class="text-danger">*</span></label>
               <select class="form-control @error('category') is-invalid @enderror"
-                      name="category" id="category">
+                      name="category" id="category" required>
                 <option value="">-- Select Category --</option>
                 @foreach($categories as $cat)
                   <option value="{{ $cat->name }}" {{ old('category') == $cat->name ? 'selected' : '' }}>
@@ -125,7 +125,7 @@
               @enderror
             </div>
 
-            {{-- Reference Number --}}
+            <!-- {{-- Reference Number --}}
             <div class="col-md-6 mb-3">
               <label for="reference_number">Reference Number</label>
               <input type="text"
@@ -136,16 +136,16 @@
               @error('reference_number')
                 <span class="invalid-feedback">{{ $message }}</span>
               @enderror
-            </div>
+            </div> -->
 
             {{-- Bill Upload --}}
             <div class="col-md-6 mb-3">
-              <label for="bill">Bill Upload <span class="text-danger">*</span></label>
+              <label for="bill">Bill Upload</label>
               <div class="custom-file">
                 <input type="file"
                        class="custom-file-input @error('bill') is-invalid @enderror"
                        name="bill" id="bill"
-                       accept=".pdf,.jpg,.jpeg,.png" required>
+                       accept=".pdf,.jpg,.jpeg,.png">
                 <label class="custom-file-label" for="bill">Choose file...</label>
               </div>
               <small class="text-muted d-block mt-1">
@@ -156,15 +156,31 @@
               @enderror
             </div>
 
-            {{-- Description --}}
-            <div class="col-md-12 mb-3">
-              <label for="description">Description <span class="text-danger">*</span></label>
+            <div class="col-12">
+              <hr class="mt-2 mb-3">
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="description">Description</label>
               <textarea class="form-control @error('description') is-invalid @enderror"
                         name="description" id="description"
-                        rows="3"
-                        placeholder="Enter expense description" required>{{ old('description') }}</textarea>
+                        rows="4"
+                        placeholder="Add a short description of the expense, items purchased, or purpose.">{{ old('description') }}</textarea>
+              <small class="text-muted d-block mt-1">Optional. Use this for supporting details.</small>
               @error('description')
-                <span class="invalid-feedback">{{ $message }}</span>
+                <span class="invalid-feedback d-block">{{ $message }}</span>
+              @enderror
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="note">Note <span class="text-danger">*</span></label>
+              <textarea class="form-control @error('note') is-invalid @enderror"
+                        name="note" id="note"
+                        rows="4"
+                        placeholder="Enter the key reason for this expense or any important internal note." required>{{ old('note') }}</textarea>
+              <small class="text-muted d-block mt-1">Required. This note will help identify the expense later.</small>
+              @error('note')
+                <span class="invalid-feedback d-block">{{ $message }}</span>
               @enderror
             </div>
 

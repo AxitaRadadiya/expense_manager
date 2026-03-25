@@ -41,6 +41,7 @@
                                     <th width="40">Sr No.</th>
                                     <th>User</th>
                                     <th>Start Date</th>
+                                    <th>Note</th>
                                     <th>Amount</th>
                                 </tr>
                             </thead>

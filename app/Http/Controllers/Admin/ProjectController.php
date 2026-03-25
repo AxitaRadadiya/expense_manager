@@ -27,10 +27,12 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
-            'status' => 'required|string|max:50',
+            'status' => 'nullable|string|max:50',
             'amount' => 'nullable|numeric',
             'note' => 'nullable|string',
         ]);
+
+        $data['status'] = $data['status'] ?? 'pending';
 
         Project::create($data);
 
@@ -53,10 +55,12 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
-            'status' => 'required|string|max:50',
+            'status' => 'nullable|string|max:50',
             'amount' => 'nullable|numeric',
             'note' => 'nullable|string',
         ]);
+
+        $data['status'] = $data['status'] ?? $project->status;
 
         $project->update($data);
 
@@ -107,8 +111,8 @@ class ProjectController extends Controller
                 $nestedData['name']       = $project->name;
                 $nestedData['start_date'] = $project->start_date ? $project->start_date->format('Y-m-d') : '';
                 $nestedData['end_date']   = $project->end_date ? $project->end_date->format('Y-m-d') : '';
-                $nestedData['status']     = ucfirst($project->status);
-                $nestedData['amount']     = $project->amount ? number_format($project->amount, 2) : '';
+                // $nestedData['status']     = ucfirst($project->status);
+                // $nestedData['amount']     = $project->amount ? number_format($project->amount, 2) : '';
 
                 $actions = '<div class="btn-group">';
 

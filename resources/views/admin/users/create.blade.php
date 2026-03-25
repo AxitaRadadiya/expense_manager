@@ -228,7 +228,7 @@
 
             {{-- Amount --}}
             <div class="fgroup">
-              <label class="flabel" for="amount">Amount</label>
+              <label class="flabel" for="amount">Opening Balance</label>
               <input id="amount" name="amount" type="number" min="0" step="0.01"
                      class="finput @error('amount') is-invalid @enderror"
                      value="{{ old('amount') }}" placeholder="e.g. 5000">

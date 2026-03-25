@@ -19,6 +19,7 @@ class Expense extends Model
         'sub_category',
         'amount',
         'description',
+        'note',
         'bill_path',
         'bill_original_name',
         'payment_mode',

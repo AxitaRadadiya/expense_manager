@@ -42,8 +42,7 @@
                                     <th>Project Name</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
-                                    <th>Status</th>
-                                    <th>Amount</th>
+                                    <!-- <th>Amount</th> -->
                                     <th width="120" class="text-center">Action</th>
                                 </tr>
                             </thead>

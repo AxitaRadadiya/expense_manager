@@ -1,9 +1,8 @@
 <!-- Brand Logo -->
 <a href="{{ route('dashboard') }}" class="brand-link">
-  <img src="{{ asset('images/brand-logo.png') }}"
+  <img src="{{ asset('admin/dist/img/logo.png') }}"
        alt="Expense Manager Logo"
-       class="brand-image"
-       style="width:32px;height:32px;border-radius:8px;object-fit:cover;border:2px solid #008d8d;opacity:.95;flex-shrink:0;">
+       class="brand-image">
   <span class="brand-text">Expense Manager</span>
 </a>
 

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Expense;
 use App\Models\Transfer;
 use App\Models\User;
-use App\Models\Expense;
 use App\Models\UserBalanceHistory;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TransferController extends Controller
@@ -26,6 +26,7 @@ class TransferController extends Controller
         }
 
         $transfers = Transfer::with(['user', 'creator'])->latest()->get();
+
         return view('admin.transfer.index', compact('transfers'));
     }
 
@@ -34,21 +35,22 @@ class TransferController extends Controller
         $auth = auth()->user();
         $usersQuery = User::orderBy('name');
 
-        // If the current user is an owner (not super-admin), only show users in the same project
         if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
             $usersQuery->where('project_id', $auth->project_id);
         }
 
         $users = $usersQuery->get();
+
         return view('admin.transfer.create', compact('users'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id'    => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id',
             'start_date' => 'nullable|date',
-            'amount'     => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.01',
+            'note' => 'nullable|string',
         ]);
 
         $sender = auth()->user();
@@ -61,6 +63,13 @@ class TransferController extends Controller
             return redirect()->back()->withErrors(['user_id' => 'You cannot transfer amount to yourself.'])->withInput();
         }
 
+        if (method_exists($sender, 'hasRole') && $sender->hasRole('owner') && ! $sender->hasRole('super-admin')) {
+            $target = User::find($data['user_id']);
+            if (! $target || (string) $target->project_id !== (string) $sender->project_id) {
+                return redirect()->back()->withInput()->with('error', 'You can only create transfers for users in your project.');
+            }
+        }
+
         $openingBalance = (float) ($sender->amount ?? 0);
         $receivedTransferTotal = (float) Transfer::where('user_id', $sender->id)->sum('amount');
         $sentTransferTotal = (float) Transfer::where('created_by', $sender->id)->sum('amount');
@@ -68,15 +77,16 @@ class TransferController extends Controller
         $availableBalance = $openingBalance + $receivedTransferTotal - $sentTransferTotal - $spentTotal;
         $transferAmount = (float) $data['amount'];
 
+        $warningMessage = null;
         if ($availableBalance < $transferAmount) {
-            return redirect()->back()->withErrors(['amount' => 'Insufficient balance for this transfer.'])->withInput();
+            $warningMessage = 'Transfer saved, but your balance was insufficient for this amount.';
         }
 
         $data['created_by'] = $sender->id;
 
-        $transfer = Transfer::create($data);
+        DB::transaction(function () use ($data, $sender, $availableBalance, $transferAmount) {
+            $transfer = Transfer::create($data);
 
-        try {
             UserBalanceHistory::create([
                 'user_id' => $sender->id,
                 'change_type' => 'transfer',
@@ -86,48 +96,33 @@ class TransferController extends Controller
                 'reference_type' => 'transfer',
                 'reference_id' => $transfer->id,
                 'created_by' => $sender->id,
-                'note' => 'Transfer sent to user ID ' . $data['user_id'],
+                'note' => $data['note'] ?? ('Transfer sent to user ID ' . $data['user_id']),
             ]);
-        } catch (\Exception $e) {
-            \Log::error('Transfer balance history write failed: ' . $e->getMessage());
-        }
-        // If the creator is an owner (not super-admin), enforce that the target user belongs to the same project
-        $auth = auth()->user();
-        if ($data['user_id'] && $auth && method_exists($auth, 'hasRole') && $auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            $target = User::find($data['user_id']);
-            if (! $target || (string)$target->project_id !== (string)$auth->project_id) {
-                return redirect()->back()->withInput()->with('error', 'You can only create transfers for users in your project.');
-            }
-        }
 
-        // Wrap in transaction: create transfer, update user balance and add history
-        DB::transaction(function () use ($data) {
-            $transfer = Transfer::create($data);
+            $user = User::find($data['user_id']);
+            if ($user) {
+                $before = (float) $user->amount;
+                $after = $before + (float) $data['amount'];
+                $user->amount = $after;
+                $user->save();
 
-            if (! empty($data['user_id'])) {
-                $user = User::find($data['user_id']);
-                if ($user) {
-                    $before = (float) $user->amount;
-                    $after = $before + (float) $data['amount'];
-                    $user->amount = $after;
-                    $user->save();
-
-                    UserBalanceHistory::create([
-                        'user_id' => $user->id,
-                        'change_type' => 'transfer',
-                        'change_amount' => $data['amount'],
-                        'balance_before' => $before,
-                        'balance_after' => $after,
-                        'reference_type' => 'transfer',
-                        'reference_id' => $transfer->id,
-                        'created_by' => auth()->id(),
-                        'note' => 'Transfer created',
-                    ]);
-                }
+                UserBalanceHistory::create([
+                    'user_id' => $user->id,
+                    'change_type' => 'transfer',
+                    'change_amount' => $data['amount'],
+                    'balance_before' => $before,
+                    'balance_after' => $after,
+                    'reference_type' => 'transfer',
+                    'reference_id' => $transfer->id,
+                    'created_by' => auth()->id(),
+                    'note' => $data['note'] ?? 'Transfer created',
+                ]);
             }
         });
 
-        return redirect()->route('transfer.index')->with('success', 'Transfer saved successfully.');
+        return redirect()->route('transfer.index')
+            ->with('success', 'Transfer saved successfully.')
+            ->with('warning', $warningMessage);
     }
 
     public function list(Request $request)
@@ -136,47 +131,43 @@ class TransferController extends Controller
 
         if (! $auth || ! (method_exists($auth, 'hasRole') && $auth->hasRole(['super-admin', 'owner']))) {
             return response()->json([
-                'draw'            => intval($request->input('draw', 1)),
-                'recordsTotal'    => 0,
+                'draw' => intval($request->input('draw', 1)),
+                'recordsTotal' => 0,
                 'recordsFiltered' => 0,
-                'data'            => [],
+                'data' => [],
             ]);
         }
 
         $query = Transfer::with('user', 'creator');
 
-        // Owner sees only their own transfers
         if ($auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            // owners should see transfers for users in their same project
             $query->whereHas('user', function ($q) use ($auth) {
                 $q->where('project_id', $auth->project_id);
             });
         }
 
-        // FIX: Wrap orWhere in a grouped closure to avoid breaking other conditions
-        if (!empty($request->input('search.value'))) {
+        if (! empty($request->input('search.value'))) {
             $search = $request->input('search.value');
             $query->where(function ($q) use ($search) {
                 $q->whereHas('user', function ($q2) use ($search) {
                     $q2->where('name', 'like', "%{$search}%");
-                })->orWhere('amount', 'like', "%{$search}%");
+                })->orWhere('amount', 'like', "%{$search}%")
+                    ->orWhere('note', 'like', "%{$search}%");
             });
         }
 
-        // Ordering
         $orderColumnIndex = $request->input('order.0.column', 0);
-        $orderDir         = $request->input('order.0.dir', 'desc') === 'asc' ? 'asc' : 'desc';
-        $columns          = ['id', 'user', 'start_date', 'amount'];
-        $orderColumn      = $columns[$orderColumnIndex] ?? 'id';
+        $orderDir = $request->input('order.0.dir', 'desc') === 'asc' ? 'asc' : 'desc';
+        $columns = ['id', 'user', 'start_date', 'note', 'amount'];
+        $orderColumn = $columns[$orderColumnIndex] ?? 'id';
 
-        // Only order by real DB columns (skip 'user' relation column)
-        if (in_array($orderColumn, ['id', 'start_date', 'amount'])) {
+        if (in_array($orderColumn, ['id', 'start_date', 'amount'], true)) {
             $query->orderBy($orderColumn, $orderDir);
         } else {
             $query->latest();
         }
 
-        $totalData     = Transfer::count();
+        $totalData = Transfer::count();
         $totalFiltered = $query->count();
 
         $transfers = $query
@@ -187,8 +178,6 @@ class TransferController extends Controller
         $start = (int) $request->input('start', 0);
 
         $data = $transfers->map(function ($transfer, $i) use ($start) {
-
-            // FIX: Safely format start_date — handle both string and Carbon instances
             if ($transfer->start_date) {
                 try {
                     $date = $transfer->start_date instanceof \Carbon\Carbon
@@ -196,27 +185,28 @@ class TransferController extends Controller
                         : \Carbon\Carbon::parse($transfer->start_date);
                     $formattedDate = $date->format('d M Y');
                 } catch (\Exception $e) {
-                    $formattedDate = '—';
+                    $formattedDate = '-';
                 }
             } else {
-                $formattedDate = '—';
+                $formattedDate = '-';
             }
 
             return [
-                'id'         => $start + $i + 1,
-                'user'       => '<strong>' . e($transfer->user->name ?? '—') . '</strong>'
-                              . '<br><small class="text-muted">by ' . e($transfer->creator->name ?? '—') . '</small>',
+                'id' => $start + $i + 1,
+                'user' => '<strong>' . e($transfer->user->name ?? '-') . '</strong>'
+                    . '<br><small class="text-muted">by ' . e($transfer->creator->name ?? '-') . '</small>',
                 'start_date' => $formattedDate,
-                'amount'     => '<span class="text-success font-weight-bold">₹'
-                              . number_format((float) $transfer->amount, 2) . '</span>',
+                'note' => e(filled($transfer->note) ? $transfer->note : '-'),
+                'amount' => '<span class="text-success font-weight-bold">₹'
+                    . number_format((float) $transfer->amount, 2) . '</span>',
             ];
         });
 
         return response()->json([
-            'draw'            => intval($request->input('draw', 1)),
-            'recordsTotal'    => $totalData,
+            'draw' => intval($request->input('draw', 1)),
+            'recordsTotal' => $totalData,
             'recordsFiltered' => $totalFiltered,
-            'data'            => $data,
+            'data' => $data,
         ]);
     }
 }

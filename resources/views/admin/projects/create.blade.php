@@ -28,14 +28,14 @@
             <label class="form-label">End Date</label>
             <input type="date" name="end_date" value="{{ old('end_date') }}" class="form-control">
         </div>
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <label class="form-label">Status</label>
             <input name="status" value="{{ old('status','pending') }}" class="form-control">
-        </div>
-        <div class="mb-3">
+        </div> -->
+        <!-- <div class="mb-3">
             <label class="form-label">Amount</label>
             <input name="amount" value="{{ old('amount','0.00') }}" class="form-control" type="number" step="0.01">
-        </div>
+        </div> -->
         <div class="mb-3">
             <label class="form-label">Note</label>
             <textarea name="note" class="form-control">{{ old('note') }}</textarea>

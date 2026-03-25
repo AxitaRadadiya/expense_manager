@@ -36,6 +36,11 @@
             <input name="amount" value="{{ old('amount','0.00') }}" class="form-control" type="number" step="0.01" required>
         </div>
 
+        <div class="mb-3">
+            <label class="form-label">Note</label>
+            <textarea name="note" class="form-control" rows="3" placeholder="Optional note for this transfer">{{ old('note') }}</textarea>
+        </div>
+
         <button class="btn btn-primary">Create</button>
         <a href="{{ route('dashboard') }}" class="btn btn-secondary">Cancel</a>
     </form>

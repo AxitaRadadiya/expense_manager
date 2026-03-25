@@ -59,12 +59,13 @@ class ExpenseController extends Controller
                 'projects_id'  => 'required|exists:projects,id',
                 'expense_date' => 'required|date',
                 'amount'       => 'required|numeric|min:0',
-                'bill'         => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-                'category'     => 'nullable|string|max:255',
+                'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                'category'     => 'required|string|max:255',
 
                 'payment_mode' => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
+                'note'             => 'required|string',
                 'status'           => 'nullable',
             ],
             [
@@ -78,16 +79,15 @@ class ExpenseController extends Controller
                 'amount.numeric'        => 'The amount must be a valid number.',
                 'amount.min'            => 'The amount must be at least 0.',
 
-                'bill.required'         => 'Please upload a bill or receipt.',
                 'bill.file'             => 'The bill must be a valid file.',
                 'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
                 'bill.max'              => 'The bill file size must not exceed 2MB.',
+                'category.required'     => 'Please select an expense category.',
+                'note.required'         => 'Please enter a note.',
             ]
         );
 
         $validated['users_id'] = auth()->id();
-
-        $validated['category'] = $validated['category'] ?? 'Other';
 
         if ($request->hasFile('bill')) {
             $billFile = $request->file('bill');
@@ -119,8 +119,9 @@ class ExpenseController extends Controller
         $spentTotal = (float) Expense::where('users_id', $user->id)->sum('amount');
         $available = (float) ($user->amount ?? 0) + $transferInTotal - $transferOutTotal - $spentTotal;
 
+        $warningMessage = null;
         if ($available < $amount) {
-            return redirect()->back()->withErrors(['amount' => 'Insufficient funds.'])->withInput();
+            $warningMessage = 'Expense saved, but your balance was insufficient for this amount.';
         }
 
         // Create expense only after availability check
@@ -143,7 +144,8 @@ class ExpenseController extends Controller
         }
 
         return redirect()->route('expense.index')
-            ->with('success', 'Expense created successfully.');
+            ->with('success', 'Expense created successfully.')
+            ->with('warning', $warningMessage);
     }
 
     public function show($id): View
@@ -173,11 +175,12 @@ class ExpenseController extends Controller
                 'expense_date' => 'required|date',
                 'amount'       => 'required|numeric|min:0',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-                'category'     => 'nullable|string|max:255',
+                'category'     => 'required|string|max:255',
 
-                'payment_mode'     => 'nullable',
+                'payment_mode'     => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
+                'note'             => 'required|string',
             ],
             [
                 'projects_id.required'  => 'Please select a project.',
@@ -193,6 +196,9 @@ class ExpenseController extends Controller
                 'bill.file'             => 'The bill must be a valid file.',
                 'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
                 'bill.max'              => 'The bill file size must not exceed 2MB.',
+                'category.required'     => 'Please select an expense category.',
+                'payment_mode.required' => 'Please select a payment mode.',
+                'note.required'         => 'Please enter a note.',
             ]
         );
 

@@ -194,7 +194,7 @@
       </div>
     </div>
 
-    {{-- Total Expenses --}}
+    <!-- {{-- Total Expenses --}}
     <div class="col-12 col-sm-6 col-xl-3 mb-3">
       <div class="scard">
         <div class="scard-stripe" style="background:linear-gradient(180deg,#be123c,#f43f5e);"></div>
@@ -208,7 +208,7 @@
         </div>
         <i class="fas fa-receipt scard-watermark"></i>
       </div>
-    </div>
+    </div> -->
 
     <!-- {{-- Remaining Balance --}}
     <div class="col-12 col-sm-6 col-xl-3 mb-3">
@@ -239,7 +239,7 @@
   ════════════════════════════════════════ --}}
   <div class="row g-3">
 
-    {{-- Card 1: My Transfer Count --}}
+    <!-- {{-- Card 1: My Transfer Count --}}
     <div class="col-12 col-sm-6 col-xl-3 mb-3">
       <div class="scard">
         <div class="scard-stripe" style="background:linear-gradient(180deg,#006666,#00b5b5);"></div>
@@ -253,9 +253,9 @@
         </div>
         <i class="fas fa-list-alt scard-watermark"></i>
       </div>
-    </div>
+    </div> -->
 
-    {{-- Card 2: Amount Transferred Out --}}
+    <!-- {{-- Card 2: Amount Transferred Out --}}
     <div class="col-12 col-sm-6 col-xl-3 mb-3">
       <div class="scard">
         <div class="scard-stripe" style="background:linear-gradient(180deg,#1e8449,#27ae60);"></div>
@@ -269,7 +269,7 @@
         </div>
         <i class="fas fa-paper-plane scard-watermark"></i>
       </div>
-    </div>
+    </div> -->
 
     {{-- Card 3: Amount Received / Allocated --}}
     <div class="col-12 col-sm-6 col-xl-3 mb-3">
@@ -287,7 +287,7 @@
         </div>
       </div>
 
-    {{-- Card 4: Transfer Amount --}}
+    <!-- {{-- Card 4: Transfer Amount --}}
     <div class="col-12 col-sm-6 col-xl-3 mb-3">
       <div class="scard">
         <div class="scard-stripe" style="background:linear-gradient(180deg,#b45309,#f59e0b);"></div>
@@ -301,7 +301,7 @@
         </div>
         <i class="fas fa-arrow-up scard-watermark"></i>
       </div>
-    </div>
+    </div> -->
 
 
   </div><!-- /.row user cards -->
