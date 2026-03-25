@@ -297,9 +297,14 @@ class UserController extends Controller
                 $actionHtml .= '<button type="submit" class="btn btn-sm btn-danger deleteButton" title="Delete"><i class="fas fa-trash"></i></button>';
                 $actionHtml .= '</form>';
 
+                $avatarHtml = '<div class="user-name-cell">'
+                    . '<img src="' . e($u->profile_image_url) . '" alt="' . e($u->name) . '" class="user-list-avatar">'
+                    . '<span>' . e($u->name) . '</span>'
+                    . '</div>';
+
                 $data[] = [
                     'id'      => $start + $i + 1,
-                    'name'    => $u->name,
+                    'name'    => $avatarHtml,
                     'email'   => $u->email,
                     'mobile'  => $u->mobile,
                     'project' => optional($u->project)->name,

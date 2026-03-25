@@ -88,6 +88,21 @@
     padding:.75rem 1rem; color:#006666; font-size:.84rem; font-weight:600;
     display:flex; align-items:center; gap:.5rem; margin-bottom:1rem;
   }
+  .user-name-cell {
+    display:flex;
+    align-items:center;
+    gap:.7rem;
+    min-width:0;
+  }
+  .user-list-avatar {
+    width:34px;
+    height:34px;
+    object-fit:cover;
+    border-radius:50%;
+    border:2px solid #d0eded;
+    flex-shrink:0;
+    background:#fff;
+  }
 </style>
 
 {{-- HERO --}}

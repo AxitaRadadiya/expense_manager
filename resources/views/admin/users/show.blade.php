@@ -28,10 +28,10 @@
       <div class="col-lg-3 col-md-4 mb-4">
         <div class="card card-outline card-primary shadow-sm">
           <div class="card-body text-center pt-4">
-            <div class="info-box-icon bg-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
-                 style="width:64px;height:64px;font-size:1.6rem;">
-              {{ strtoupper(substr($user->name, 0, 1)) }}
-            </div>
+            <img src="{{ $user->profile_image_url }}"
+                 alt="{{ $user->name }}"
+                 class="rounded-circle mb-3"
+                 style="width:72px;height:72px;object-fit:cover;border:3px solid rgba(0, 141, 141, .15);padding:4px;background:#fff;">
             <h5 class="font-weight-bold mb-1">{{ $user->name }}</h5>
             <p class="text-muted mb-2">{{ $user->email }}</p>
             <span class="badge {{ $user->status ? 'badge-success' : 'badge-danger' }} mb-3">

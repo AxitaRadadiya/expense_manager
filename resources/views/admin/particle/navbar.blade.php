@@ -14,7 +14,9 @@
   <li class="nav-item dropdown ml-1">
     <a class="nav-link navbar-user-pill" data-toggle="dropdown" href="#">
       <span class="user-avatar">
-        <i class="fas fa-user" style="font-size:11px;color:#fff;"></i>
+        <img src="{{ auth()->user()->profile_image_url }}"
+             alt="{{ auth()->user()->name }}"
+             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
       </span>
       <span class="d-none d-md-inline"
             style="font-size:.83rem;font-weight:600;color:#fff;">
