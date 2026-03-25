@@ -5,6 +5,7 @@
 
 <div class="content-header">
   <div class="container-fluid">
+    @if(auth()->user() && auth()->user()->hasRole('super-admin'))
     <div class="row mb-2">
       <div class="col-sm-6">
         <h1 class="m-0">
@@ -375,5 +376,7 @@
       </div>
     </div>{{-- /.row panels --}}
   </div>
+</section>
+  @endif
 </section>
 @endsection
