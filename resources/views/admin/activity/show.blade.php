@@ -3,180 +3,189 @@
 
 @section('content')
 
-<style>
-  .page-hero { background:linear-gradient(135deg,#006666 0%,#008d8d 60%,#00a8a8 100%); padding:1.6rem 2rem 4.2rem; position:relative; overflow:hidden; }
-  .page-hero::before { content:''; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(rgba(0,141,141,.15) 1px,transparent 1px); background-size:26px 26px; }
-  .page-hero .orb { position:absolute; border-radius:50%; pointer-events:none; width:180px; height:180px; background:radial-gradient(circle,rgba(0,141,141,.2) 0%,transparent 65%); top:-50px; right:40px; }
-  .page-hero h1 { font-family:'Playfair Display',serif; font-size:1.45rem; font-weight:800; color:#fff; margin:0 0 .25rem; position:relative; z-index:2; }
-  .page-hero p { color:rgba(255,255,255,.4); font-size:.82rem; margin:0; position:relative; z-index:2; }
-
-  .pull-card { margin-top:-2.4rem; position:relative; z-index:10; padding:0 1.5rem; }
-
-  .detail-card { background:#fff; border-radius:16px; box-shadow:0 6px 32px rgba(0,141,141,.10); border:1px solid #d0eded; overflow:hidden; margin-bottom:1.25rem; }
-  .detail-head { padding:1rem 1.4rem; border-bottom:1px solid #e4f0f0; background:#f9fdfd; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.6rem; }
-  .detail-title { font-size:.92rem; font-weight:800; color:#0d2e2e; display:flex; align-items:center; gap:.5rem; }
-  .detail-title i { color:#008d8d; }
-  .detail-body { padding:1.4rem; }
-
-  /* Meta grid */
-  .meta-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
-  @media(max-width:768px){ .meta-grid { grid-template-columns:1fr 1fr; } }
-  @media(max-width:480px){ .meta-grid { grid-template-columns:1fr; } }
-
-  .meta-item { background:#f0fafa; border-radius:10px; padding:.9rem 1rem; }
-  .meta-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#5a8080; margin-bottom:.35rem; }
-  .meta-value { font-size:.88rem; font-weight:600; color:#0d2e2e; word-break:break-all; }
-
-  /* Action badge */
-  .ab { display:inline-flex; align-items:center; gap:.3rem; border-radius:20px; padding:.25rem .85rem; font-size:.75rem; font-weight:700; }
-  .ab-green  { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
-  .ab-blue   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
-  .ab-gold   { background:#e0f7f7; color:#006666; border:1px solid rgba(0,141,141,.3); }
-  .ab-orange { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
-  .ab-red    { background:#fff1f2; color:#be123c; border:1px solid #fecdd3; }
-  .ab-grey   { background:#f0fafa; color:#5a8080; border:1px solid #e2e8f0; }
-
-  /* Diff table */
-  .diff-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-  @media(max-width:640px){ .diff-grid { grid-template-columns:1fr; } }
-
-  .diff-panel { border-radius:10px; overflow:hidden; border:1px solid #d0eded; }
-  .diff-panel-head { padding:.6rem 1rem; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.8px; }
-  .diff-panel-head.old { background:#fff1f2; color:#be123c; }
-  .diff-panel-head.new { background:#f0fdf4; color:#15803d; }
-  .diff-table { width:100%; border-collapse:collapse; }
-  .diff-table tr { border-bottom:1px solid #e4f0f0; }
-  .diff-table tr:last-child { border-bottom:none; }
-  .diff-table td { padding:.55rem .9rem; font-size:.8rem; vertical-align:top; }
-  .diff-table td:first-child { font-weight:700; color:#5a8080; width:40%; border-right:1px solid #e4f0f0; background:#f0fafa; }
-  .diff-table td:last-child { color:#0d2e2e; word-break:break-all; }
-  .diff-table.old-table td:last-child { color:#be123c; }
-  .diff-table.new-table td:last-child { color:#15803d; }
-
-  .btn-back { background:#f0fafa; color:#5a8080; border:1.5px solid #c8e6e6; border-radius:8px; padding:.45rem 1.1rem; font-size:.82rem; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:.4rem; }
-  .btn-back:hover { background:#e2e8f0; }
-</style>
-
-<div class="page-hero">
-  <div class="orb"></div>
-  <div class="container-fluid" style="position:relative;z-index:2;">
-    <h1><i class="fas fa-search mr-2" style="color:rgba(255,255,255,.85);font-size:1rem;"></i>Activity Detail</h1>
-    <p>Full information for this log entry.</p>
+{{-- Page Header --}}
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0">
+          <i class="fas fa-search mr-2 text-teal"></i>Activity Detail
+        </h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('activity-logs.index') }}">Activity Logs</a></li>
+          <li class="breadcrumb-item active">Detail</li>
+        </ol>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="pull-card">
-  <div class="container-fluid" style="padding:0;">
+<section class="content">
+  <div class="container-fluid">
 
-    {{-- ── Meta Info ── --}}
-    <div class="detail-card">
-      <div class="detail-head">
-        <div class="detail-title"><i class="fas fa-info-circle"></i> Log Summary</div>
-        <a href="{{ route('activity-logs.index') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+    {{-- ── Log Summary Card ── --}}
+    <div class="card card-outline card-teal shadow-sm mb-3">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-info-circle mr-2"></i>Log Summary
+        </h3>
+        <div class="card-tools">
+          <a href="{{ route('activity-logs.index') }}" class="btn btn-default btn-sm">
+            <i class="fas fa-arrow-left mr-1"></i>Back
+          </a>
+        </div>
       </div>
-      <div class="detail-body">
+      <div class="card-body">
 
         @php
+          $actionBadge = match($log->action) {
+            'login'   => 'badge-success',
+            'logout'  => 'badge-secondary',
+            'created' => 'badge-primary',
+            'updated' => 'badge-info',
+            'deleted' => 'badge-danger',
+            default   => 'badge-light',
+          };
           $icons = ['login'=>'sign-in-alt','logout'=>'sign-out-alt','created'=>'plus','updated'=>'pen','deleted'=>'trash'];
         @endphp
 
-        <div class="meta-grid">
+        <div class="row">
 
-          <div class="meta-item">
-            <div class="meta-label">Action</div>
-            <div class="meta-value">
-              <span class="ab ab-{{ $log->action_color }}">
-                <i class="fas fa-{{ $icons[$log->action] ?? 'circle' }}"></i>
-                {{ $log->action_label }}
-              </span>
-            </div>
-          </div>
-
-          <div class="meta-item">
-            <div class="meta-label">Performed By</div>
-            <div class="meta-value" style="display:flex;align-items:center;gap:.5rem;">
-              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#006666,#008d8d);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem;font-weight:800;flex-shrink:0;">
-                {{ strtoupper(substr($log->user_name ?? '?', 0, 1)) }}
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="info-box shadow-none bg-light mb-0">
+              <span class="info-box-icon bg-teal"><i class="fas fa-bolt"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text font-weight-bold">Action</span>
+                <span class="info-box-number">
+                  <span class="badge {{ $actionBadge }} badge-lg">
+                    <i class="fas fa-{{ $icons[$log->action] ?? 'circle' }} mr-1"></i>
+                    {{ $log->action_label }}
+                  </span>
+                </span>
               </div>
-              {{ $log->user_name ?? '—' }}
             </div>
           </div>
 
-          <div class="meta-item">
-            <div class="meta-label">Date & Time</div>
-            <div class="meta-value">{{ $log->created_at->format('d M Y, h:i A') }}</div>
-            <div style="font-size:.74rem;color:#5a8080;margin-top:.2rem;">{{ $log->created_at->diffForHumans() }}</div>
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="info-box shadow-none bg-light mb-0">
+              <span class="info-box-icon bg-primary"><i class="fas fa-user"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text font-weight-bold">Performed By</span>
+                <span class="info-box-number" style="font-size:1rem;">{{ $log->user_name ?? '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="info-box shadow-none bg-light mb-0">
+              <span class="info-box-icon bg-warning"><i class="fas fa-clock"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text font-weight-bold">Date &amp; Time</span>
+                <span class="info-box-number" style="font-size:1rem;">{{ $log->created_at->format('d M Y, h:i A') }}</span>
+                <span class="progress-description text-muted">{{ $log->created_at->diffForHumans() }}</span>
+              </div>
+            </div>
           </div>
 
           @if($log->model_type)
-          <div class="meta-item">
-            <div class="meta-label">Affected Model</div>
-            <div class="meta-value">
-              <span style="background:#f0f4ff;color:#4f46e5;border:1px solid #c7d2fe;border-radius:6px;padding:.15rem .55rem;font-size:.78rem;font-weight:700;">
-                {{ $log->model_name }}
-              </span>
-              #{{ $log->model_id }}
+            <div class="col-md-4 col-sm-6 mb-3">
+              <div class="info-box shadow-none bg-light mb-0">
+                <span class="info-box-icon bg-secondary"><i class="fas fa-database"></i></span>
+                <div class="info-box-content">
+                  <span class="info-box-text font-weight-bold">Affected Model</span>
+                  <span class="info-box-number" style="font-size:1rem;">
+                    <span class="badge badge-secondary">{{ $log->model_name }}</span> #{{ $log->model_id }}
+                  </span>
+                  @if($log->model_label)
+                    <span class="progress-description text-muted">{{ $log->model_label }}</span>
+                  @endif
+                </div>
+              </div>
             </div>
-            @if($log->model_label)
-            <div style="font-size:.78rem;color:#5a8080;margin-top:.3rem;">{{ $log->model_label }}</div>
-            @endif
-          </div>
           @endif
 
-          <div class="meta-item" style="grid-column:span 2;">
-            <div class="meta-label">Description</div>
-            <div class="meta-value" style="font-weight:400;color:#2a5050;">{{ $log->description ?? '—' }}</div>
+          <div class="col-md-8 col-sm-12 mb-3">
+            <div class="info-box shadow-none bg-light mb-0">
+              <span class="info-box-icon bg-info"><i class="fas fa-align-left"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text font-weight-bold">Description</span>
+                <span class="info-box-number" style="font-size:.9rem;font-weight:400;color:#333;">
+                  {{ $log->description ?? '—' }}
+                </span>
+              </div>
+            </div>
           </div>
 
         </div>
       </div>
     </div>
 
-    {{-- ── Old vs New Values (for created/updated/deleted) ── --}}
+    {{-- ── Data Changes Card (old vs new) ── --}}
     @if($log->old_values || $log->new_values)
-    <div class="detail-card">
-      <div class="detail-head">
-        <div class="detail-title"><i class="fas fa-exchange-alt"></i> Data Changes</div>
-      </div>
-      <div class="detail-body">
-        <div class="diff-grid">
+      <div class="card card-outline card-teal shadow-sm">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-exchange-alt mr-2"></i>Data Changes
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
 
-          {{-- Old values --}}
-          @if($log->old_values)
-          <div class="diff-panel">
-            <div class="diff-panel-head old"><i class="fas fa-minus-circle"></i> Before</div>
-            <table class="diff-table old-table">
-              @foreach($log->old_values as $key => $val)
-              <tr>
-                <td>{{ $key }}</td>
-                <td>{{ is_array($val) ? json_encode($val) : ($val ?? '—') }}</td>
-              </tr>
-              @endforeach
-            </table>
+            {{-- Before --}}
+            @if($log->old_values)
+              <div class="col-md-6 mb-3">
+                <div class="card card-danger card-outline shadow-none mb-0">
+                  <div class="card-header p-2">
+                    <h3 class="card-title" style="font-size:.82rem;">
+                      <i class="fas fa-minus-circle mr-1 text-danger"></i>Before
+                    </h3>
+                  </div>
+                  <div class="card-body p-0">
+                    <table class="table table-sm table-bordered mb-0">
+                      @foreach($log->old_values as $key => $val)
+                        <tr>
+                          <td class="font-weight-bold text-muted bg-light" width="40%">{{ $key }}</td>
+                          <td class="text-danger">{{ is_array($val) ? json_encode($val) : ($val ?? '—') }}</td>
+                        </tr>
+                      @endforeach
+                    </table>
+                  </div>
+                </div>
+              </div>
+            @endif
+
+            {{-- After --}}
+            @if($log->new_values)
+              <div class="col-md-6 mb-3">
+                <div class="card card-success card-outline shadow-none mb-0">
+                  <div class="card-header p-2">
+                    <h3 class="card-title" style="font-size:.82rem;">
+                      <i class="fas fa-plus-circle mr-1 text-success"></i>After
+                    </h3>
+                  </div>
+                  <div class="card-body p-0">
+                    <table class="table table-sm table-bordered mb-0">
+                      @foreach($log->new_values as $key => $val)
+                        <tr>
+                          <td class="font-weight-bold text-muted bg-light" width="40%">{{ $key }}</td>
+                          <td class="text-success">{{ is_array($val) ? json_encode($val) : ($val ?? '—') }}</td>
+                        </tr>
+                      @endforeach
+                    </table>
+                  </div>
+                </div>
+              </div>
+            @endif
+
           </div>
-          @endif
-
-          {{-- New values --}}
-          @if($log->new_values)
-          <div class="diff-panel">
-            <div class="diff-panel-head new"><i class="fas fa-plus-circle"></i> After</div>
-            <table class="diff-table new-table">
-              @foreach($log->new_values as $key => $val)
-              <tr>
-                <td>{{ $key }}</td>
-                <td>{{ is_array($val) ? json_encode($val) : ($val ?? '—') }}</td>
-              </tr>
-              @endforeach
-            </table>
-          </div>
-          @endif
-
         </div>
       </div>
-    </div>
     @endif
 
   </div>
-</div>
-<div style="height:2rem;"></div>
+</section>
+
 @endsection

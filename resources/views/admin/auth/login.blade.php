@@ -244,7 +244,7 @@
             font-size: 1.4rem; font-weight: 800; color: var(--text-dk);
         }
 
-        /* Session status */
+        /* Session status — success (teal) */
         .ls-status {
             background: #e0f7f7; border-left: 3px solid var(--pri);
             border-radius: 8px; padding: .75rem 1rem;
@@ -252,6 +252,22 @@
             margin-bottom: 1.2rem;
             display: flex; align-items: center; gap: .5rem;
         }
+
+        /* Session kicked-out warning (orange/amber) */
+        .ls-status-warn {
+            background: #fff7ed;
+            border-left: 3px solid #f59e0b;
+            border-radius: 8px;
+            padding: .85rem 1rem;
+            font-size: .83rem;
+            color: #92400e;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: .6rem;
+            line-height: 1.5;
+        }
+        .ls-status-warn svg { flex-shrink: 0; margin-top: 1px; }
 
         /* Heading */
         .ls-rhead { margin-bottom: 2rem; }
@@ -468,9 +484,21 @@
             <span>{{ config('app.name', 'Expense Manager') }}</span>
         </div>
 
-        @if (session('status'))
+        {{-- ── Kicked-out warning (single device enforcement) ── --}}
+        @if (session('status') && str_contains(session('status'), 'another device'))
+            <div class="ls-status-warn">
+                <svg width="16" height="16" fill="#f59e0b" viewBox="0 0 24 24">
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                </svg>
+                <span>{{ session('status') }}</span>
+            </div>
+
+        {{-- ── Normal success status (e.g. password reset) ── --}}
+        @elseif (session('status'))
             <div class="ls-status">
-                <svg width="14" height="14" fill="#006666" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <svg width="14" height="14" fill="#006666" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
                 {{ session('status') }}
             </div>
         @endif

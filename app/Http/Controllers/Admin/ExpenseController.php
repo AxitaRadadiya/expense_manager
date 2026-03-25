@@ -56,32 +56,32 @@ class ExpenseController extends Controller
     {
         $validated = $request->validate(
             [
-                'projects_id'  => 'required|exists:projects,id',
-                'expense_date' => 'required|date',
-                'amount'       => 'required|numeric|min:0',
-                'bill'         => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-                'category'     => 'nullable|string|max:255',
-
+                'projects_id'      => 'required|exists:projects,id',
+                'expense_date'     => 'required|date|before_or_equal:today',
+                'amount'           => 'required|numeric|min:0',
+                'bill'             => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                'category'         => 'nullable|string|max:255',
                 'payment_mode'     => 'nullable',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
                 'status'           => 'nullable',
             ],
             [
-                'projects_id.required'  => 'Please select a project.',
-                'projects_id.exists'    => 'The selected project is invalid.',
+                'projects_id.required'       => 'Please select a project.',
+                'projects_id.exists'         => 'The selected project is invalid.',
 
-                'expense_date.required' => 'Please enter the expense date.',
-                'expense_date.date'     => 'The expense date must be a valid date.',
+                'expense_date.required'      => 'Please enter the expense date.',
+                'expense_date.date'          => 'The expense date must be a valid date.',
+                'expense_date.before_or_equal' => 'The expense date cannot be a future date.',
 
-                'amount.required'       => 'Please enter the amount.',
-                'amount.numeric'        => 'The amount must be a valid number.',
-                'amount.min'            => 'The amount must be at least 0.',
+                'amount.required'            => 'Please enter the amount.',
+                'amount.numeric'             => 'The amount must be a valid number.',
+                'amount.min'                 => 'The amount must be at least 0.',
 
-                'bill.required'         => 'Please upload a bill or receipt.',
-                'bill.file'             => 'The bill must be a valid file.',
-                'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
-                'bill.max'              => 'The bill file size must not exceed 2MB.',
+                'bill.required'              => 'Please upload a bill or receipt.',
+                'bill.file'                  => 'The bill must be a valid file.',
+                'bill.mimes'                 => 'Only PDF, JPG, and PNG files are allowed.',
+                'bill.max'                   => 'The bill file size must not exceed 2MB.',
             ]
         );
 
@@ -99,9 +99,7 @@ class ExpenseController extends Controller
             $validated['bill_original_name'] = $billFile->getClientOriginalName();
         }
 
-
         unset($validated['bill']);
-
 
         $validated['status'] = $validated['status'] ?? 'pending';
 
@@ -145,15 +143,15 @@ class ExpenseController extends Controller
                 $transfer->save();
 
                 UserBalanceHistory::create([
-                    'user_id' => $user->id,
-                    'change_type' => 'transfer_debit',
-                    'change_amount' => -abs($deduct),
+                    'user_id'        => $user->id,
+                    'change_type'    => 'transfer_debit',
+                    'change_amount'  => -abs($deduct),
                     'balance_before' => $tBefore,
-                    'balance_after' => $tAfter,
+                    'balance_after'  => $tAfter,
                     'reference_type' => 'transfer',
-                    'reference_id' => $transfer->id,
-                    'created_by' => auth()->id(),
-                    'note' => 'Debited by expense #' . $expense->id,
+                    'reference_id'   => $transfer->id,
+                    'created_by'     => auth()->id(),
+                    'note'           => 'Debited by expense #' . $expense->id,
                 ]);
 
                 $remaining -= $deduct;
@@ -162,20 +160,20 @@ class ExpenseController extends Controller
             // If any remaining amount, deduct from user's opening balance
             if ($remaining > 0) {
                 $before = (float) ($user->amount ?? 0);
-                $after = $before - $remaining;
+                $after  = $before - $remaining;
                 $user->amount = $after;
                 $user->save();
 
                 UserBalanceHistory::create([
-                    'user_id' => $user->id,
-                    'change_type' => 'expense',
-                    'change_amount' => -abs($remaining),
+                    'user_id'        => $user->id,
+                    'change_type'    => 'expense',
+                    'change_amount'  => -abs($remaining),
                     'balance_before' => $before,
-                    'balance_after' => $after,
+                    'balance_after'  => $after,
                     'reference_type' => 'expense',
-                    'reference_id' => $expense->id,
-                    'created_by' => auth()->id(),
-                    'note' => 'Expense recorded via web',
+                    'reference_id'   => $expense->id,
+                    'created_by'     => auth()->id(),
+                    'note'           => 'Expense recorded via web',
                 ]);
             }
 
@@ -196,9 +194,9 @@ class ExpenseController extends Controller
 
     public function edit($id): View
     {
-        $expense  = Expense::findOrFail($id);
-        $projects = Project::orderBy('name')->get();
-        $users    = User::orderBy('name')->get();
+        $expense    = Expense::findOrFail($id);
+        $projects   = Project::orderBy('name')->get();
+        $users      = User::orderBy('name')->get();
         $categories = Category::orderBy('name')->get();
 
         return view('admin.expense.edit', compact('expense', 'projects', 'users', 'categories'));
@@ -210,30 +208,30 @@ class ExpenseController extends Controller
 
         $validated = $request->validate(
             [
-                'projects_id'  => 'required|exists:projects,id',
-                'expense_date' => 'required|date',
-                'amount'       => 'required|numeric|min:0',
-                'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-                'category'     => 'nullable|string|max:255',
-
+                'projects_id'      => 'required|exists:projects,id',
+                'expense_date'     => 'required|date|before_or_equal:today',
+                'amount'           => 'required|numeric|min:0',
+                'bill'             => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                'category'         => 'nullable|string|max:255',
                 'payment_mode'     => 'nullable',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
             ],
             [
-                'projects_id.required'  => 'Please select a project.',
-                'projects_id.exists'    => 'The selected project is invalid.',
+                'projects_id.required'         => 'Please select a project.',
+                'projects_id.exists'           => 'The selected project is invalid.',
 
-                'expense_date.required' => 'Please enter the expense date.',
-                'expense_date.date'     => 'The expense date must be a valid date.',
+                'expense_date.required'        => 'Please enter the expense date.',
+                'expense_date.date'            => 'The expense date must be a valid date.',
+                'expense_date.before_or_equal' => 'The expense date cannot be a future date.',
 
-                'amount.required'       => 'Please enter the amount.',
-                'amount.numeric'        => 'The amount must be a valid number.',
-                'amount.min'            => 'The amount must be at least 0.',
+                'amount.required'              => 'Please enter the amount.',
+                'amount.numeric'               => 'The amount must be a valid number.',
+                'amount.min'                   => 'The amount must be at least 0.',
 
-                'bill.file'             => 'The bill must be a valid file.',
-                'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
-                'bill.max'              => 'The bill file size must not exceed 2MB.',
+                'bill.file'                    => 'The bill must be a valid file.',
+                'bill.mimes'                   => 'Only PDF, JPG, and PNG files are allowed.',
+                'bill.max'                     => 'The bill file size must not exceed 2MB.',
             ]
         );
 
@@ -316,20 +314,20 @@ class ExpenseController extends Controller
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('category',           'like', "%{$search}%")
-                ->orWhere('sub_category',     'like', "%{$search}%")
-                ->orWhere('description',      'like', "%{$search}%")
-                ->orWhere('amount',           'like', "%{$search}%")
-                ->orWhere('expense_date',     'like', "%{$search}%")
-                ->orWhere('payment_mode',     'like', "%{$search}%")
-                ->orWhere('reference_number', 'like', "%{$search}%")
-                ->orWhere('status',           'like', "%{$search}%")
-                ->orWhereHas('project', function ($pq) use ($search) {
-                    $pq->where('name', 'like', "%{$search}%");
-                })
-                ->orWhereHas('user', function ($uq) use ($search) {
-                    $uq->where('name',  'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                });
+                  ->orWhere('sub_category',     'like', "%{$search}%")
+                  ->orWhere('description',      'like', "%{$search}%")
+                  ->orWhere('amount',           'like', "%{$search}%")
+                  ->orWhere('expense_date',     'like', "%{$search}%")
+                  ->orWhere('payment_mode',     'like', "%{$search}%")
+                  ->orWhere('reference_number', 'like', "%{$search}%")
+                  ->orWhere('status',           'like', "%{$search}%")
+                  ->orWhereHas('project', function ($pq) use ($search) {
+                      $pq->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name',  'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
             });
 
             $totalFiltered = $query->count();
@@ -347,17 +345,17 @@ class ExpenseController extends Controller
 
             foreach ($expenses as $item) {
 
-                // ── Status Badge ─────────────────────────────────────────────────
+                // ── Status Badge ──────────────────────────────────────────────
                 $statusClass = match($item->status) {
                     'approved' => 'badge-success',
                     'rejected' => 'badge-danger',
                     default    => 'badge-warning',
                 };
                 $statusBadge = '<span class="badge ' . $statusClass . '">'
-                            . ucfirst($item->status)
-                            . '</span>';
+                             . ucfirst($item->status)
+                             . '</span>';
 
-                // ── Action Buttons ────────────────────────────────────────────────
+                // ── Action Buttons ────────────────────────────────────────────
                 $actions  = '<div class="btn-group">';
                 $actions .= '<a href="' . route('expense.show', $item->id) . '"
                                 class="btn-sm text-info" title="View">
@@ -388,7 +386,7 @@ class ExpenseController extends Controller
                     'user'         => optional($item->user)->name    ?? '—',
                     'expense_date' => \Carbon\Carbon::parse($item->expense_date)->format('d M, Y'),
                     'amount'       => '₹ ' . number_format((float) $item->amount, 2),
-                    'payment_mode' => $item->payment_mode             // ← was missing
+                    'payment_mode' => $item->payment_mode
                                     ? ucfirst(str_replace('_', ' ', $item->payment_mode))
                                     : '—',
                     'status'       => $statusBadge,

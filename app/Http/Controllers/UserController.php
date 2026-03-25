@@ -190,9 +190,6 @@ class UserController extends Controller
         $user->update($data);
         $user->assignRole((int) $request->role_id);
 
-        // project_id is handled by $user->update($data) above; no pivot sync required.
-
-        // Detect changed fields for activity log
         $changes = [];
         foreach ($data as $field => $newVal) {
             if ($field === 'password') continue;
