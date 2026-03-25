@@ -3,7 +3,6 @@
 
 @section('content')
 
-{{-- Page Header --}}
 <div class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
@@ -25,10 +24,8 @@
 
 <section class="content">
   <div class="container-fluid">
-
     {{-- ── STAT CARDS ── --}}
     <div class="row">
-
       {{-- Total Users --}}
       <div class="col-12 col-sm-6 col-xl-3 mb-3">
         <div class="info-box shadow-sm">
@@ -41,6 +38,37 @@
         </div>
       </div>
 
+    {{-- Total Transfers --}}
+    <div class="col-12 col-sm-6 col-xl-3 mb-3">
+      <div class="scard">
+        <div class="scard-stripe" style="background:linear-gradient(180deg,#1e8449,#27ae60);"></div>
+        <div class="scard-icon" style="background:#e8f8f0;">
+          <i class="fas fa-exchange-alt" style="color:#27ae60;"></i>
+        </div>
+        <div>
+          <div class="scard-label">Total Transferred</div>
+          <div class="scard-num" style="color:#1e8449;">₹{{ number_format($totalTransferred ?? 0, 0) }}</div>
+          <div class="scard-sub" style="color:#1e8449;">Across all users</div>
+        </div>
+        <i class="fas fa-exchange-alt scard-watermark"></i>
+      </div>
+    </div>
+
+    {{-- Total Expenses --}}
+    <div class="col-12 col-sm-6 col-xl-3 mb-3">
+      <div class="scard">
+        <div class="scard-stripe" style="background:linear-gradient(180deg,#be123c,#f43f5e);"></div>
+        <div class="scard-icon" style="background:#fff1f2;">
+          <i class="fas fa-receipt" style="color:#be123c;"></i>
+        </div>
+        <div>
+          <div class="scard-label">Total Expenses</div>
+          <div class="scard-num" style="color:#be123c;">₹{{ number_format($totalExpenses ?? 0, 0) }}</div>
+          <div class="scard-sub" style="color:#be123c;">Total debited</div>
+        </div>
+        <i class="fas fa-receipt scard-watermark"></i>
+      </div>
+    </div>
       {{-- Total Transferred --}}
       <div class="col-12 col-sm-6 col-xl-3 mb-3">
         <div class="info-box shadow-sm">
@@ -129,9 +157,7 @@
             </h3>
           </div>
           <div class="card-body">
-
             @if(auth()->user() && auth()->user()->hasRole('super-admin'))
-
               {{-- User-wise Debited --}}
               <p class="text-uppercase text-muted font-weight-bold mb-2" style="font-size:.7rem;letter-spacing:1px;">
                 <i class="fas fa-users mr-1"></i> User-wise Debited Totals
@@ -219,9 +245,7 @@
                   @endif
                 </table>
               </div>
-
             @else
-
               {{-- Regular user: recent debits --}}
               <p class="text-uppercase text-muted font-weight-bold mb-2" style="font-size:.7rem;letter-spacing:1px;">
                 <i class="fas fa-receipt mr-1"></i> Your Recent Debits
@@ -266,9 +290,7 @@
           </div>
         </div>
       </div>
-
     </div>{{-- /.row panels --}}
-
   </div>
 </section>
 @endsection

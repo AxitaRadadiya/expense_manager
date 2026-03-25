@@ -111,18 +111,19 @@ class ExpenseController extends Controller
 
         $amount = (float) $validated['amount'];
 
-        // Calculate available funds: user.amount + sum of positive transfers
-        $transferTotal = (float) Transfer::where('user_id', $user->id)->where('amount', '>', 0)->sum('amount');
-        $available = (float) ($user->amount ?? 0) + $transferTotal;
+        // Available balance = opening balance + received transfers - sent transfers - expenses.
+        $transferInTotal = (float) Transfer::where('user_id', $user->id)->sum('amount');
+        $transferOutTotal = (float) Transfer::where('created_by', $user->id)->sum('amount');
+        $spentTotal = (float) Expense::where('users_id', $user->id)->sum('amount');
+        $available = (float) ($user->amount ?? 0) + $transferInTotal - $transferOutTotal - $spentTotal;
 
         if ($available < $amount) {
-            return redirect()->back()->withErrors(['amount' => 'Insufficient funds (opening balance + transfers)'])->withInput();
+            return redirect()->back()->withErrors(['amount' => 'Insufficient funds.'])->withInput();
         }
 
         // Create expense only after availability check
         $expense = Expense::create($validated);
 
-        // Consume transfers FIFO (oldest first) until expense amount covered
         try {
             $remaining = $amount;
 
@@ -176,9 +177,8 @@ class ExpenseController extends Controller
                     'note'           => 'Expense recorded via web',
                 ]);
             }
-
         } catch (\Exception $e) {
-            \Log::error('Balance/transfer consumption failed: ' . $e->getMessage());
+            \Log::error('Balance history write failed: ' . $e->getMessage());
         }
 
         return redirect()->route('expense.index')

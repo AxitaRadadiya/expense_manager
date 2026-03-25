@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('description');
             $table->string('bill_path');          
             $table->string('bill_original_name'); 
-            $table->enum('payment_mode', ['cash', 'bank_transfer', 'online', 'cheque'])->nullable();
+            $table->enum('payment_mode', ['cash', 'online', 'cheque'])->nullable();
             $table->string('reference_number')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
