@@ -117,70 +117,10 @@
               </div>
             </div>
 
-            {{-- Expense Date --}}
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="expense_date" class="font-weight-bold">
-                  Expense Date <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                  </div>
-                  <input type="date"
-                         class="form-control @error('expense_date') is-invalid @enderror"
-                         name="expense_date" id="expense_date"
-                         value="{{ old('expense_date', date('Y-m-d')) }}"
-                         max="{{ date('Y-m-d') }}" required>
-                  @error('expense_date')
-                    <span class="invalid-feedback">{{ $message }}</span>
-                  @enderror
-                </div>
-              </div>
-            </div>
+            
 
-            {{-- Expense Category --}}
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="category" class="font-weight-bold">Expense Category</label>
-                <select class="form-control @error('category') is-invalid @enderror"
-                        name="category" id="category">
-                  <option value="">— Select Category —</option>
-                  @foreach($categories as $cat)
-                    <option value="{{ $cat->name }}"
-                      {{ old('category') == $cat->name ? 'selected' : '' }}>
-                      {{ $cat->name }}
-                    </option>
-                  @endforeach
-                </select>
-                @error('category')
-                  <span class="invalid-feedback">{{ $message }}</span>
-                @enderror
-              </div>
-            </div>
 
-            {{-- Amount --}}
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="amount" class="font-weight-bold">
-                  Amount <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">₹</span>
-                  </div>
-                  <input type="number"
-                         class="form-control @error('amount') is-invalid @enderror"
-                         name="amount" id="amount"
-                         value="{{ old('amount') }}"
-                         min="0" step="0.01"
-                         placeholder="0.00" required>
-                  @error('amount')
-                    <span class="invalid-feedback">{{ $message }}</span>
-                  @enderror
-                </div>
-              </div>
-            </div>
+            
 
             {{-- Payment Mode --}}
             <div class="col-md-6">
