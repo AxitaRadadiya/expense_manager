@@ -1,9 +1,9 @@
 <!-- Brand Logo -->
 <a href="{{ route('dashboard') }}" class="brand-link">
   <img src="{{ asset('admin/dist/img/logo.png') }}"
-       alt="Expense Manager Logo"
+       alt="Daily Expense Logo"
        class="brand-image">
-  <span class="brand-text">Expense Manager</span>
+  <span class="brand-text">Daily Expense</span>
 </a>
 
 <!-- Sidebar -->
