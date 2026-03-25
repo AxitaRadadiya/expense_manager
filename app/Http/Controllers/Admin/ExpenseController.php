@@ -103,7 +103,11 @@ class ExpenseController extends Controller
 
         unset($validated['bill']);
 
-        $validated['status'] = $validated['status'] ?? 'pending';
+        $validated['status']           = $validated['status'] ?? 'pending';
+
+        // Ensure nullable string columns never pass null to a NOT NULL DB column
+        $validated['description']      = $validated['description']      ?? '';
+        $validated['reference_number'] = $validated['reference_number'] ?? '';
 
         // Ensure authenticated user
         $user = auth()->user();
@@ -265,6 +269,10 @@ class ExpenseController extends Controller
 
         // Remove 'bill' key — no such column in DB
         unset($validated['bill']);
+
+        // Ensure nullable string columns never pass null to a NOT NULL DB column
+        $validated['description']      = $validated['description']      ?? '';
+        $validated['reference_number'] = $validated['reference_number'] ?? '';
 
         $expense->update($validated);
 

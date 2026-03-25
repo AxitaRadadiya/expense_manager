@@ -69,9 +69,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">Email Address <span class="text-danger">*</span></label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                  </div>
                   <input id="email" name="email" type="email"
                          class="form-control @error('email') is-invalid @enderror"
                          value="{{ old('email', $user->email) }}" required>
@@ -83,9 +80,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">Mobile Number</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                  </div>
                   <input id="mobile" name="mobile" type="text"
                          class="form-control @error('mobile') is-invalid @enderror"
                          value="{{ old('mobile', $user->mobile) }}" maxlength="15">

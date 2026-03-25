@@ -63,9 +63,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">Email Address <span class="text-danger">*</span></label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                  </div>
                   <input id="email" name="email" type="email"
                          class="form-control @error('email') is-invalid @enderror"
                          value="{{ old('email') }}" placeholder="user@example.com" required>
@@ -77,9 +74,7 @@
               <div class="form-group">
                 <label class="font-weight-bold">Mobile Number</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                  </div>
+                  
                   <input id="mobile" name="mobile" type="text"
                          class="form-control @error('mobile') is-invalid @enderror"
                          value="{{ old('mobile') }}" placeholder="+91 98765 43210" maxlength="15">
@@ -135,7 +130,7 @@
               <div class="form-group">
                 <label class="font-weight-bold">Opening Balance</label>
                 <div class="input-group">
-                  <div class="input-group-prepend"><span class="input-group-text">₹</span></div>
+                 
                   <input id="amount" name="amount" type="number" min="0" step="0.01"
                          class="form-control @error('amount') is-invalid @enderror"
                          value="{{ old('amount') }}" placeholder="0.00">

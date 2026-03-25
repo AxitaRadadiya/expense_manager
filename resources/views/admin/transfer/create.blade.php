@@ -58,9 +58,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">Transfer Date</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                  </div>
                   <input type="date" name="start_date"
                          value="{{ old('start_date', now()->toDateString()) }}"
                          class="form-control @error('start_date') is-invalid @enderror">
@@ -71,7 +68,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">Amount <span class="text-danger">*</span></label>
                 <div class="input-group">
-                  <div class="input-group-prepend"><span class="input-group-text">₹</span></div>
                   <input name="amount" value="{{ old('amount','0.00') }}"
                          class="form-control @error('amount') is-invalid @enderror"
                          type="number" step="0.01" min="0" placeholder="0.00" required>

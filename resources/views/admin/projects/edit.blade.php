@@ -58,9 +58,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">Start Date</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                  </div>
                   <input type="date" name="start_date"
                          value="{{ old('start_date', optional($project->start_date)->format('Y-m-d')) }}"
                          class="form-control">
@@ -71,9 +68,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">End Date</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                  </div>
                   <input type="date" name="end_date"
                          value="{{ old('end_date', optional($project->end_date)->format('Y-m-d')) }}"
                          class="form-control">

@@ -56,9 +56,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">Start Date</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                  </div>
                   <input type="date" name="start_date" value="{{ old('start_date') }}"
                          class="form-control @error('start_date') is-invalid @enderror">
                   @error('start_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
@@ -69,9 +66,6 @@
               <div class="form-group">
                 <label class="font-weight-bold">End Date</label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                  </div>
                   <input type="date" name="end_date" value="{{ old('end_date') }}"
                          class="form-control @error('end_date') is-invalid @enderror">
                   @error('end_date')<span class="invalid-feedback">{{ $message }}</span>@enderror

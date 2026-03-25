@@ -102,9 +102,6 @@
                   Amount <span class="text-danger">*</span>
                 </label>
                 <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text">₹</span>
-                  </div>
                   <input type="number"
                          class="form-control @error('amount') is-invalid @enderror"
                          name="amount" id="amount"
