@@ -22,6 +22,7 @@ class DashboardController extends Controller
     public function index()
     {
         $authUser = Auth::user();
+        $userReceivedAmount = 0;
 
         // ── Role check ──────────────────────────────────────────────
         $isSuper = false;
@@ -29,6 +30,14 @@ class DashboardController extends Controller
             $isSuper = method_exists($authUser, 'hasRole')
                 ? $authUser->hasRole('super-admin')
                 : (optional($authUser->role)->name === 'super-admin');
+        }
+
+        if ($authUser) {
+            $openingBalance = (float) ($authUser->amount ?? 0);
+            $receivedTransferTotal = (float) Transfer::where('user_id', $authUser->id)->sum('amount');
+            $sentTransferTotal = (float) Transfer::where('created_by', $authUser->id)->sum('amount');
+            $spentTotal = (float) Expense::where('users_id', $authUser->id)->sum('amount');
+            $userReceivedAmount = $openingBalance + $receivedTransferTotal - $sentTransferTotal - $spentTotal;
         }
 
         if ($isSuper) {
@@ -84,7 +93,6 @@ class DashboardController extends Controller
                 ->get();
 
             // Not used for super-admin
-            $userReceivedAmount = null;
             $userRemaining      = null;
             $userTransferList   = collect();
             $userCreatedTransferCount = null;

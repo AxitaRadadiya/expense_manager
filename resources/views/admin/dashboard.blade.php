@@ -3,9 +3,9 @@
 
 @section('content')
 
+{{-- Page Header --}}
 <div class="content-header">
   <div class="container-fluid">
-    @if(auth()->user() && auth()->user()->hasRole('super-admin'))
     <div class="row mb-2">
       <div class="col-sm-6">
         <h1 class="m-0">
@@ -25,8 +25,24 @@
 
 <section class="content">
   <div class="container-fluid">
+
     {{-- ── STAT CARDS ── --}}
     <div class="row">
+
+      {{-- Available Amount --}}
+      <div class="col-12 col-sm-6 col-xl-3 mb-3">
+        <div class="info-box shadow-sm">
+          <span class="info-box-icon bg-primary"><i class="fas fa-wallet"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text text-uppercase font-weight-bold">Available Amount</span>
+            <span class="info-box-number">₹{{ number_format((float)($userReceivedAmount ?? 0), 0) }}</span>
+            <span class="progress-description text-muted">Current balance</span>
+          </div>
+        </div>
+      </div>
+
+      @if($isSuper)
+
       {{-- Total Users --}}
       <div class="col-12 col-sm-6 col-xl-3 mb-3">
         <div class="info-box shadow-sm">
@@ -39,55 +55,7 @@
         </div>
       </div>
 
-    {{-- Total Transfers --}}
-    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#1e8449,#27ae60);"></div>
-        <div class="scard-icon" style="background:#e8f8f0;">
-          <i class="fas fa-exchange-alt" style="color:#27ae60;"></i>
-        </div>
-        <div>
-          <div class="scard-label">Total Transferred</div>
-          <div class="scard-num" style="color:#1e8449;">₹{{ number_format($totalTransferred ?? 0, 0) }}</div>
-          <div class="scard-sub" style="color:#1e8449;">Across all users</div>
-        </div>
-        <i class="fas fa-exchange-alt scard-watermark"></i>
-      </div>
-    </div>
-
-    <!-- {{-- Total Expenses --}}
-    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#be123c,#f43f5e);"></div>
-        <div class="scard-icon" style="background:#fff1f2;">
-          <i class="fas fa-receipt" style="color:#be123c;"></i>
-        </div>
-        <div>
-          <div class="scard-label">Total Expenses</div>
-          <div class="scard-num" style="color:#be123c;">₹{{ number_format($totalExpenses ?? 0, 0) }}</div>
-          <div class="scard-sub" style="color:#be123c;">Total debited</div>
-        </div>
-        <i class="fas fa-receipt scard-watermark"></i>
-      </div>
-    </div> -->
-
-    <!-- {{-- Remaining Balance --}}
-    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-      @php $remaining = ($totalTransferred ?? 0); @endphp
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#b7770d,#f59e0b);"></div>
-        <div class="scard-icon" style="background:#fef9ec;">
-          <i class="fas fa-wallet" style="color:#b7770d;"></i>
-        </div>
-        <div>
-          <div class="scard-label">Remaining Balance</div>
-          <div class="scard-num" style="color:{{ $remaining >= 0 ? '#006666' : '#be123c' }};">
-            ₹{{ number_format(abs($remaining), 0) }}
-          </div>
-          <div class="scard-sub" style="color:{{ $remaining >= 0 ? '#008d8d' : '#be123c' }};">
-            {{ $remaining >= 0 ? 'Available' : 'Overspent' }}
-    </div>
-      {{-- Total Transferred --}}
+      <!-- {{-- Total Transferred --}}
       <div class="col-12 col-sm-6 col-xl-3 mb-3">
         <div class="info-box shadow-sm">
           <span class="info-box-icon bg-success"><i class="fas fa-exchange-alt"></i></span>
@@ -97,76 +65,10 @@
             <span class="progress-description text-muted">Across all users</span>
           </div>
         </div>
-      </div>
-  </div><!-- /.row super-admin cards -->
-
-  @else
-  {{-- ════════════════════════════════════════
-       REGULAR USER: 4 personalised cards
-  ════════════════════════════════════════ --}}
-  <div class="row g-3">
-
-    <!-- {{-- Card 1: My Transfer Count --}}
-    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#006666,#00b5b5);"></div>
-        <div class="scard-icon" style="background:#e0f7f7;">
-          <i class="fas fa-list-alt" style="color:#008d8d;"></i>
-        </div>
-        <div>
-          <div class="scard-label">My Transfers</div>
-          <div class="scard-num">{{ $userCreatedTransferCount ?? 0 }}</div>
-          <div class="scard-sub" style="color:#008d8d;">Created by you</div>
-        </div>
-        <i class="fas fa-list-alt scard-watermark"></i>
-      </div>
-    </div> -->
-
-    <!-- {{-- Card 2: Amount Transferred Out --}}
-    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#1e8449,#27ae60);"></div>
-        <div class="scard-icon" style="background:#e8f8f0;">
-          <i class="fas fa-paper-plane" style="color:#27ae60;"></i>
-        </div>
-        <div>
-          <div class="scard-label">Transfers Received</div>
-          <div class="scard-num" style="color:#1e8449;">₹{{ number_format($totalTransferred ?? 0, 0) }}</div>
-          <div class="scard-sub" style="color:#1e8449;">Incoming transfer total</div>
-        </div>
-        <i class="fas fa-paper-plane scard-watermark"></i>
-      </div>
-    </div> -->
-
-    {{-- Card 3: Amount Received / Allocated --}}
-    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#5b21b6,#7c3aed);"></div>
-        <div class="scard-icon" style="background:#f5f3ff;">
-          <i class="fas fa-hand-holding-usd" style="color:#7c3aed;"></i>
-        </div>
-        <div>
-          <div class="scard-label">Total Available</div>
-          <div class="scard-num" style="color:#5b21b6;">₹{{ number_format($userReceivedAmount ?? 0, 0) }}</div>
-          <div class="scard-sub" style="color:#7c3aed;">Remaining balance</div>
-        </div>
-        <i class="fas fa-hand-holding-usd scard-watermark"></i>
-        </div>
-      </div>
-
-    <!-- {{-- Card 4: Transfer Amount --}}
-    <div class="col-12 col-sm-6 col-xl-3 mb-3">
-      <div class="scard">
-        <div class="scard-stripe" style="background:linear-gradient(180deg,#b45309,#f59e0b);"></div>
-        <div class="scard-icon" style="background:#fffbeb;">
-          <i class="fas fa-arrow-up" style="color:#b45309;"></i>
-        </div>
-      </div>
-    </div> -->
-
+      </div> -->
 
       {{-- Total Expenses --}}
-      <div class="col-12 col-sm-6 col-xl-3 mb-3">
+      <!-- <div class="col-12 col-sm-6 col-xl-3 mb-3">
         <div class="info-box shadow-sm">
           <span class="info-box-icon bg-danger"><i class="fas fa-receipt"></i></span>
           <div class="info-box-content">
@@ -175,20 +77,10 @@
             <span class="progress-description text-muted">Total debited</span>
           </div>
         </div>
-      </div>
+      </div> -->
 
-      {{-- Pending Expenses --}}
-      <div class="col-12 col-sm-6 col-xl-3 mb-3">
-        <div class="info-box shadow-sm">
-          <span class="info-box-icon bg-warning"><i class="fas fa-clock"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-uppercase font-weight-bold">Pending Expenses</span>
-            <span class="info-box-number">{{ $pendingExpenses ?? 0 }}</span>
-            <span class="progress-description text-muted">Awaiting approval</span>
-          </div>
-        </div>
-      </div>
 
+      @endif
     </div>{{-- /.row stat cards --}}
 
     {{-- ── PANELS ROW ── --}}
@@ -241,7 +133,9 @@
             </h3>
           </div>
           <div class="card-body">
-            @if(auth()->user() && auth()->user()->hasRole('super-admin'))
+
+            @if($isSuper)
+
               {{-- User-wise Debited --}}
               <p class="text-uppercase text-muted font-weight-bold mb-2" style="font-size:.7rem;letter-spacing:1px;">
                 <i class="fas fa-users mr-1"></i> User-wise Debited Totals
@@ -329,7 +223,9 @@
                   @endif
                 </table>
               </div>
+
             @else
+
               {{-- Regular user: recent debits --}}
               <p class="text-uppercase text-muted font-weight-bold mb-2" style="font-size:.7rem;letter-spacing:1px;">
                 <i class="fas fa-receipt mr-1"></i> Your Recent Debits
@@ -374,9 +270,9 @@
           </div>
         </div>
       </div>
+
     </div>{{-- /.row panels --}}
+
   </div>
-</section>
-  @endif
 </section>
 @endsection
