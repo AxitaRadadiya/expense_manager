@@ -29,7 +29,7 @@ class UserController extends Controller
     public function index(): View
     {
         return view('admin.users.index', [
-            'users' => User::with('role')->orderBy('id')->paginate(15),
+            'users' => User::with(['role', 'projects'])->orderBy('id')->paginate(15),
         ]);
     }
 
@@ -57,9 +57,17 @@ class UserController extends Controller
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
             'password'    => ['required', 'string', 'min:8', 'confirmed'],
-            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'project_ids' => ['nullable', 'array'],
+            'project_ids.*' => ['integer', 'exists:projects,id'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
+
+        $projectIds = collect($request->input('project_ids', []))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
 
         $user = User::create([
             'name'     => $request->name,
@@ -69,14 +77,12 @@ class UserController extends Controller
             'status'   => $request->status,
             'note'     => $request->note,
             'amount'     => $request->amount,
-            'project_id' => $request->project_id,
+            'project_id' => $projectIds[0] ?? null,
             'password' => Hash::make($request->password),
         ]);
 
         $user->assignRole((int) $request->role_id);
-
-        // Persist single project via `project_id` column (no pivot sync required)
-        // `project_id` was already stored in the create above.
+        $user->projects()->sync($projectIds);
 
         // If an opening amount was provided, record opening balance history
         if (! empty($request->amount) && (float)$request->amount != 0) {
@@ -108,7 +114,7 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
-        $user->load('role');
+        $user->load(['role', 'projects']);
 
         // Expenses (paginated) and totals
         $expensesQuery = Expense::with('project')->where('users_id', $user->id);
@@ -144,7 +150,7 @@ class UserController extends Controller
 
     public function edit($id): View
     {
-        $user = User::with('role')->findOrFail($id);
+        $user = User::with(['role', 'projects'])->findOrFail($id);
 
         return view('admin.users.edit', [
             'user'  => $user,
@@ -165,9 +171,17 @@ class UserController extends Controller
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
             'password'    => ['nullable', 'string', 'min:8', 'confirmed'],
-            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'project_ids' => ['nullable', 'array'],
+            'project_ids.*' => ['integer', 'exists:projects,id'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
+
+        $projectIds = collect($request->input('project_ids', []))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
 
         $data = [
             'name'    => $request->name,
@@ -176,7 +190,7 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'status'  => $request->status,
             'note'    => $request->note,
-            'project_id' => $request->project_id,
+            'project_id' => $projectIds[0] ?? null,
             'amount'     => $request->amount,
         ];
 
@@ -185,11 +199,11 @@ class UserController extends Controller
         }
 
         $original = $user->getOriginal();
-        // capture original project_id for comparison
-        $originalProject = $user->project_id;
+        $originalProjects = $user->projects()->pluck('projects.id')->map(fn ($id) => (int) $id)->all();
 
         $user->update($data);
         $user->assignRole((int) $request->role_id);
+        $user->projects()->sync($projectIds);
 
         $changes = [];
         foreach ($data as $field => $newVal) {
@@ -199,9 +213,8 @@ class UserController extends Controller
             }
         }
 
-        // project change detection
-        if ((string)$originalProject !== (string)$user->project_id) {
-            $changes['project'] = ['old' => $originalProject, 'new' => $user->project_id];
+        if ($originalProjects !== $projectIds) {
+            $changes['projects'] = ['old' => $originalProjects, 'new' => $projectIds];
         }
 
         // amount change: store balance history
@@ -257,7 +270,7 @@ class UserController extends Controller
 
       public function userList(Request $request)
         {
-            $query = User::with(['role', 'project']);
+            $query = User::with(['role', 'projects']);
 
             $totalData = $query->count();
             $totalFiltered = $totalData;
@@ -307,7 +320,7 @@ class UserController extends Controller
                     'name'    => $avatarHtml,
                     'email'   => $u->email,
                     'mobile'  => $u->mobile,
-                    'project' => optional($u->project)->name,
+                    'project' => $u->assignedProjectNames() ?: '—',
                     'amount'  => $u->amount,
                     'role'    => optional($u->role)->name,
                     'status'  => $u->status ? 'Active' : 'Inactive',

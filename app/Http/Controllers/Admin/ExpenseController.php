@@ -40,8 +40,8 @@ class ExpenseController extends Controller
         if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('super-admin')) {
             $projects = Project::orderBy('name')->get();
         } else {
-            if ($auth && $auth->project_id) {
-                $projects = Project::where('id', $auth->project_id)->orderBy('name')->get();
+            if ($auth) {
+                $projects = Project::whereIn('id', $auth->assignedProjectIds())->orderBy('name')->get();
             } else {
                 $projects = collect();
             }

@@ -115,17 +115,20 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label class="font-weight-bold">Project</label>
-                <select id="project_id" name="project_id"
-                        class="form-control @error('project_id') is-invalid @enderror">
-                  <option value="">— Select Project —</option>
+                <label class="font-weight-bold">Projects</label>
+                <select id="project_ids" name="project_ids[]"
+                        class="form-control select2 @error('project_ids') is-invalid @enderror @error('project_ids.*') is-invalid @enderror"
+                        multiple
+                        data-placeholder="Select one or more projects">
                   @foreach($projects as $project)
-                    <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
+                    <option value="{{ $project->id }}" {{ in_array($project->id, old('project_ids', [])) ? 'selected' : '' }}>
                       {{ $project->name }}
                     </option>
                   @endforeach
                 </select>
-                @error('project_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                <small class="text-muted d-block mt-1">You can assign multiple projects. The first selected project stays as the primary fallback.</small>
+                @error('project_ids')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                @error('project_ids.*')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
               </div>
             </div>
             <div class="col-md-6">

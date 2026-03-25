@@ -47,8 +47,8 @@
                 <span class="float-right">{{ $user->mobile ?? '—' }}</span>
               </li>
               <li class="list-group-item">
-                <b><i class="fas fa-folder mr-1 text-primary"></i>Project</b>
-                <span class="float-right">{{ optional($user->project)->name ?? '—' }}</span>
+                <b><i class="fas fa-folder mr-1 text-primary"></i>Projects</b>
+                <span class="float-right text-right" style="max-width:60%;">{{ $user->assignedProjectNames() ?: '—' }}</span>
               </li>
               <li class="list-group-item">
                 <b><i class="fas fa-rupee-sign mr-1 text-primary"></i>Opening Balance</b>

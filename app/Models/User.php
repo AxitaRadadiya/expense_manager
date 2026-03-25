@@ -96,6 +96,32 @@ class User extends Authenticatable
         return $this->hasMany(Expense::class, 'users_id');
     }
 
+    public function assignedProjectIds(): array
+    {
+        $projectIds = $this->relationLoaded('projects')
+            ? $this->projects->pluck('id')->all()
+            : $this->projects()->pluck('projects.id')->all();
+
+        if (empty($projectIds) && $this->project_id) {
+            $projectIds = [(int) $this->project_id];
+        }
+
+        return array_values(array_unique(array_map('intval', $projectIds)));
+    }
+
+    public function assignedProjectNames(): string
+    {
+        $names = $this->relationLoaded('projects')
+            ? $this->projects->pluck('name')->all()
+            : $this->projects()->pluck('projects.name')->all();
+
+        if (empty($names) && $this->project) {
+            $names = [$this->project->name];
+        }
+
+        return implode(', ', array_unique($names));
+    }
+
     public function getProfileImagePathAttribute(): string
     {
         return $this->profile_image ?: 'admin/dist/img/logo1.png';

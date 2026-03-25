@@ -34,9 +34,12 @@ class TransferController extends Controller
     {
         $auth = auth()->user();
         $usersQuery = User::orderBy('name');
+        $assignedProjectIds = $auth ? $auth->assignedProjectIds() : [];
 
         if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            $usersQuery->where('project_id', $auth->project_id);
+            $usersQuery->whereHas('projects', function ($query) use ($assignedProjectIds) {
+                $query->whereIn('projects.id', $assignedProjectIds);
+            });
         }
 
         $users = $usersQuery->get();
@@ -65,7 +68,11 @@ class TransferController extends Controller
 
         if (method_exists($sender, 'hasRole') && $sender->hasRole('owner') && ! $sender->hasRole('super-admin')) {
             $target = User::find($data['user_id']);
-            if (! $target || (string) $target->project_id !== (string) $sender->project_id) {
+            $sharedProjects = $target
+                ? array_intersect($sender->assignedProjectIds(), $target->assignedProjectIds())
+                : [];
+
+            if (! $target || empty($sharedProjects)) {
                 return redirect()->back()->withInput()->with('error', 'You can only create transfers for users in your project.');
             }
         }
@@ -141,8 +148,12 @@ class TransferController extends Controller
         $query = Transfer::with('user', 'creator');
 
         if ($auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            $query->whereHas('user', function ($q) use ($auth) {
-                $q->where('project_id', $auth->project_id);
+            $assignedProjectIds = $auth->assignedProjectIds();
+
+            $query->whereHas('user', function ($q) use ($assignedProjectIds) {
+                $q->whereHas('projects', function ($projectQuery) use ($assignedProjectIds) {
+                    $projectQuery->whereIn('projects.id', $assignedProjectIds);
+                });
             });
         }
 
