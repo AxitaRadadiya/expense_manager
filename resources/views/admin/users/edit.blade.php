@@ -1,6 +1,4 @@
-{{-- ============================================================
-     USER EDIT  →  resources/views/admin/users/edit.blade.php
-     ============================================================ --}}
+
 @extends('admin.layouts.app')
 @section('title', 'Edit User')
 @section('content')

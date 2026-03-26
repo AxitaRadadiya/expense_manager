@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TransferController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Support\Facades\Artisan;
 
 
@@ -37,6 +38,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::get('roles-list', [RoleController::class, 'roleList'])->name('roles.list');
     Route::resource('roles', RoleController::class);
     Route::get('permissions-list', [PermissionController::class, 'permissionsList'])->name('permissions.list');
@@ -57,6 +59,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('transfer', TransferController::class);
     Route::get('activity-logs',       [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
+
+    // Admin profile (admin area)
+    Route::get('admin/profile', [AdminController::class, 'edit'])->name('admin.profile.edit');
+    Route::get('admin/profile/password', [AdminController::class, 'password'])->name('admin.profile.password');
+    Route::patch('admin/profile', [AdminController::class, 'update'])->name('admin.profile.update');
+    Route::post('admin/profile/password', [AdminController::class, 'updatePassword'])->name('admin.profile.updatePassword');
 });
 
 require __DIR__.'/auth.php';

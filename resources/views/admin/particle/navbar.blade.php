@@ -30,13 +30,14 @@
         {{ ucfirst(Auth()->user()->name) }}
       </span>
 
-      @can('profile-edit')
       <div class="dropdown-divider"></div>
       <a href="{{ route('admin.profile.edit') }}" class="dropdown-item">
         <i class="fas fa-user-circle mr-2" style="color:#008d8d;"></i> My Profile
       </a>
-      @endcan
-
+       <a href="{{ route('admin.profile.password') }}" class="dropdown-item">
+        <i class="fas fa-user-circle mr-2" style="color:#008d8d;"></i> Change Password
+      </a>
+      
       <div class="dropdown-divider"></div>
       <form method="POST" action="{{ route('logout') }}">
         @csrf

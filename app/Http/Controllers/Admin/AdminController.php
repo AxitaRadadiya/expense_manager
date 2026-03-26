@@ -28,20 +28,51 @@ class AdminController extends Controller
     }
 
     /**
+     * Show the change password page for admin.
+     */
+    public function password(Request $request): View
+    {
+        return view('admin.profile.password', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'name' => 'required',
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'mobile' => 'nullable|string|max:20',
+            'note' => 'nullable|string|max:1000',
+            'amount' => 'nullable|numeric|min:0',
+            'project_ids' => 'nullable|array',
+            'project_ids.*' => 'integer|exists:projects,id',
+            'profile_image' => 'nullable|image|max:2048',
         ]);
 
-        $loginId = Auth()->id();
-        $userInput = [
-            'name' => $request->name,
-        ];
+        $user = $request->user();
 
-        User::where('id',$loginId)->update($userInput);
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->mobile = $validated['mobile'] ?? $user->mobile;
+        $user->note = $validated['note'] ?? $user->note;
+        if (isset($validated['amount'])) { $user->amount = $validated['amount']; }
+
+        // profile image upload
+        if ($request->hasFile('profile_image')) {
+            $path = $request->file('profile_image')->store('profiles', 'public');
+            $user->profile_image = $path;
+        }
+
+        $user->save();
+
+        // sync projects if provided
+        if (! empty($validated['project_ids'])) {
+            $user->projects()->sync($validated['project_ids']);
+        }
 
         return Redirect::route('admin.profile.edit')->withSuccess('profile-updated');
     }

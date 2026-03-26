@@ -18,7 +18,7 @@ class AdminPermissionsSeeder extends Seeder
     public function run()
     {
         $userData = [
-            'name' => 'mahipal',
+            'name' => 'Innoveza',
             'email' => 'admin@gmail.com',
             'email_verified_at' => now(),
             'role_id' => 1,
