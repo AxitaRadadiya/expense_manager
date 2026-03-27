@@ -51,7 +51,7 @@
                 <span class="float-right text-right" style="max-width:60%;">{{ $user->assignedProjectNames() ?: '—' }}</span>
               </li>
               <li class="list-group-item">
-                <b><i class="fas fa-rupee-sign mr-1 text-primary"></i>Opening Balance</b>
+                <b><i class="fas fa-rupee-sign mr-1 text-primary"></i>Direct Balance</b>
                 <span class="float-right text-success font-weight-bold">
                   ₹{{ number_format((float)($user->amount ?? 0), 2) }}
                 </span>
@@ -82,7 +82,7 @@
             <div class="info-box shadow-sm">
               <span class="info-box-icon bg-success"><i class="fas fa-exchange-alt"></i></span>
               <div class="info-box-content">
-                <span class="info-box-text">Total Transfers</span>
+                <span class="info-box-text">Transfer Balance</span>
                 <span class="info-box-number" style="font-size:1rem;">₹{{ number_format($totalTransfers ?? 0, 2) }}</span>
               </div>
             </div>

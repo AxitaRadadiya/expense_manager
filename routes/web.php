@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ExpenseController;
+use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TransferController;
 use App\Http\Controllers\ActivityLogController;
@@ -51,6 +52,9 @@ Route::group(['middleware' => ['auth']], function () {
     // Expenses
     Route::get('expense-list', [ExpenseController::class, 'list'])->name('expense.list');
     Route::resource('expense', ExpenseController::class);
+    // Credits
+    Route::get('credit-list', [CreditController::class, 'list'])->name('credit.list');
+    Route::resource('credit', CreditController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
    
     Route::get('category-list', [CategoryController::class, 'list'])->name('category.list');
     Route::resource('category', CategoryController::class);

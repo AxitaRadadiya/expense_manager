@@ -41,4 +41,9 @@ class Project extends Model
     {
         return $this->hasMany(Expense::class, 'projects_id');
     }
+
+    public function credits()
+    {
+        return $this->hasMany(Credit::class, 'projects_id');
+    }
 }

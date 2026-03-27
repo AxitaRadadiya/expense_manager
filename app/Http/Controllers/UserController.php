@@ -15,10 +15,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use App\Models\UserBalanceHistory;
 use Illuminate\Support\Facades\DB;
+use App\Services\BalanceService;
 
 class UserController extends Controller
 {
-    public function __construct()
+    public function __construct(protected BalanceService $balanceService)
     {
         $this->middleware('auth');
     }
@@ -84,20 +85,7 @@ class UserController extends Controller
         $user->assignRole((int) $request->role_id);
         $user->projects()->sync($projectIds);
 
-        // If an opening amount was provided, record opening balance history
-        if (! empty($request->amount) && (float)$request->amount != 0) {
-            UserBalanceHistory::create([
-                'user_id' => $user->id,
-                'change_type' => 'opening',
-                'change_amount' => $request->amount,
-                'balance_before' => 0,
-                'balance_after' => $request->amount,
-                'reference_type' => 'user',
-                'reference_id' => $user->id,
-                'created_by' => Auth::id(),
-                'note' => 'Opening balance set',
-            ]);
-        }
+        $this->balanceService->recordOpeningBalance($user, (float) ($request->amount ?? 0), Auth::id());
 
         $loginUser = Auth::user();
         Log::info('user.created', [
@@ -130,11 +118,15 @@ class UserController extends Controller
         // Balance histories (paginated)
         $balanceHistories = \App\Models\UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(15, ['*'], 'balances_page');
 
-        // Opening balance from user.amount
-        $opening = (float) $user->amount;
-
-        // Current balance calculation: opening + received transfers - sent transfers - debited
-        $currentBalance = $opening + $totalTransfers - $totalTransfersSent - $totalDebited;
+        $opening = (float) optional(
+            \App\Models\UserBalanceHistory::where('user_id', $user->id)
+                ->where('change_type', 'opening')
+                ->oldest()
+                ->first()
+        )->change_amount;
+        $directBalance = (float) ($user->amount ?? 0);
+        $transferBalance = 0.0;
+        $currentBalance = $directBalance;
 
         return view('admin.users.show', [
             'user' => $user,
@@ -142,8 +134,11 @@ class UserController extends Controller
             'totalDebited' => $totalDebited,
             'transfers' => $transfers,
             'totalTransfers' => $totalTransfers,
+            'totalTransfersSent' => $totalTransfersSent,
             'balanceHistories' => $balanceHistories,
             'opening' => $opening,
+            'directBalance' => $directBalance,
+            'transferBalance' => $transferBalance,
             'currentBalance' => $currentBalance,
         ]);
     }
@@ -220,20 +215,7 @@ class UserController extends Controller
         // amount change: store balance history
         $oldAmount = isset($original['amount']) ? (float)$original['amount'] : 0.0;
         $newAmount = (float)$user->amount;
-        if ($oldAmount !== $newAmount) {
-            $diff = $newAmount - $oldAmount;
-            UserBalanceHistory::create([
-                'user_id' => $user->id,
-                'change_type' => 'adjustment',
-                'change_amount' => $diff,
-                'balance_before' => $oldAmount,
-                'balance_after' => $newAmount,
-                'reference_type' => 'user',
-                'reference_id' => $user->id,
-                'created_by' => Auth::id(),
-                'note' => 'Admin updated balance',
-            ]);
-        }
+        $this->balanceService->recordAdjustment($user, $oldAmount, $newAmount, Auth::id());
 
         $loginUser = Auth::user();
         if (!empty($changes)) {

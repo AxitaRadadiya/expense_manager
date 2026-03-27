@@ -270,7 +270,7 @@ $(document).ready(function () {
             $('#categoryForm').submit();
         });
         
-        function load_transfer() {
+    function load_transfer() {
         $('#TransferTable').DataTable({
             processing: true,
             serverSide: true,
@@ -292,6 +292,31 @@ $(document).ready(function () {
         });
     }
     load_transfer();
+
+    function load_credit() {
+        $('#CreditTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            autoWidth: false,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("credit.list") }}',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'project', name: 'project', orderable: false },
+                { data: 'credit_date', name: 'credit_date' },
+                { data: 'amount', name: 'amount' },
+                { data: 'created_by', name: 'created_by', orderable: false },
+                { data: 'note', name: 'note', orderable: false },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ]
+        });
+    }
+    load_credit();
 
 
 });

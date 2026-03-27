@@ -13,9 +13,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use App\Services\BalanceService;
 
 class ExpenseController extends Controller
 {
+    public function __construct(protected BalanceService $balanceService)
+    {
+    }
+
     public function index(): View
     {
         $auth = auth()->user();
@@ -115,82 +120,17 @@ class ExpenseController extends Controller
             return redirect()->back()->withErrors(['auth' => 'User must be authenticated'])->withInput();
         }
 
-        $amount = (float) $validated['amount'];
-
-        // Available balance = opening balance + received transfers - sent transfers - expenses.
-        $transferInTotal = (float) Transfer::where('user_id', $user->id)->sum('amount');
-        $transferOutTotal = (float) Transfer::where('created_by', $user->id)->sum('amount');
-        $spentTotal = (float) Expense::where('users_id', $user->id)->sum('amount');
-        $available = (float) ($user->amount ?? 0) + $transferInTotal - $transferOutTotal - $spentTotal;
-
-        $warningMessage = null;
-        if ($available < $amount) {
-            $warningMessage = 'Expense saved, but your balance was insufficient for this amount.';
-        }
-
-        // Create expense only after availability check
-        $expense = Expense::create($validated);
-
         try {
-            $remaining = $amount;
-
-            $transfers = Transfer::where('user_id', $user->id)
-                ->where('amount', '>', 0)
-                ->orderBy('start_date', 'asc')
-                ->orderBy('id', 'asc')
-                ->get();
-
-            foreach ($transfers as $transfer) {
-                if ($remaining <= 0) break;
-
-                $tBefore = (float) $transfer->amount;
-                $deduct = min($tBefore, $remaining);
-                $tAfter = $tBefore - $deduct;
-
-                $transfer->amount = $tAfter;
-                $transfer->save();
-
-                UserBalanceHistory::create([
-                    'user_id'        => $user->id,
-                    'change_type'    => 'transfer_debit',
-                    'change_amount'  => -abs($deduct),
-                    'balance_before' => $tBefore,
-                    'balance_after'  => $tAfter,
-                    'reference_type' => 'transfer',
-                    'reference_id'   => $transfer->id,
-                    'created_by'     => auth()->id(),
-                    'note'           => 'Debited by expense #' . $expense->id,
-                ]);
-
-                $remaining -= $deduct;
-            }
-
-            // If any remaining amount, deduct from user's opening balance
-            if ($remaining > 0) {
-                $before = (float) ($user->amount ?? 0);
-                $after  = $before - $remaining;
-                $user->amount = $after;
-                $user->save();
-
-                UserBalanceHistory::create([
-                    'user_id'        => $user->id,
-                    'change_type'    => 'expense',
-                    'change_amount'  => -abs($remaining),
-                    'balance_before' => $before,
-                    'balance_after'  => $after,
-                    'reference_type' => 'expense',
-                    'reference_id'   => $expense->id,
-                    'created_by'     => auth()->id(),
-                    'note'           => 'Expense recorded via web',
-                ]);
-            }
+            $this->balanceService->createExpense($user, $validated);
         } catch (\Exception $e) {
-            \Log::error('Balance history write failed: ' . $e->getMessage());
+            \Log::error('Expense balance flow failed: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['expense' => 'Expense could not be saved.']);
         }
 
         return redirect()->route('expense.index')
-            ->with('success', 'Expense created successfully.')
-            ->with('warning', $warningMessage);
+            ->with('success', 'Expense created successfully.');
     }
 
     public function show($id): View
@@ -309,6 +249,7 @@ class ExpenseController extends Controller
         ];
 
         $auth = auth()->user();
+        $canEditExpense = $auth && method_exists($auth, 'hasRole') && $auth->hasRole('super-admin');
 
         // Base query respects permissions: super-admin sees all, others only their own
         $baseQuery = Expense::query();
@@ -377,10 +318,12 @@ class ExpenseController extends Controller
                                 class="btn-sm text-info" title="View">
                                 <i class="fa fa-eye"></i>
                             </a>&nbsp;';
-                $actions .= '<a href="' . route('expense.edit', $item->id) . '"
-                                class="btn-sm text-primary" title="Edit">
-                                <i class="fa fa-edit"></i>
-                            </a>&nbsp;';
+                if ($canEditExpense) {
+                    $actions .= '<a href="' . route('expense.edit', $item->id) . '"
+                                    class="btn-sm text-primary" title="Edit">
+                                    <i class="fa fa-edit"></i>
+                                </a>&nbsp;';
+                }
                 $actions .= '
                     <form action="' . route('expense.destroy', $item->id) . '"
                         method="POST"

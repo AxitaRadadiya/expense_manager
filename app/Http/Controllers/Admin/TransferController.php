@@ -7,12 +7,13 @@ use App\Models\Expense;
 use App\Models\Transfer;
 use App\Models\User;
 use App\Models\UserBalanceHistory;
+use App\Services\BalanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TransferController extends Controller
 {
-    public function __construct()
+    public function __construct(protected BalanceService $balanceService)
     {
         $this->middleware('auth');
     }
@@ -77,59 +78,11 @@ class TransferController extends Controller
             }
         }
 
-        $openingBalance = (float) ($sender->amount ?? 0);
-        $receivedTransferTotal = (float) Transfer::where('user_id', $sender->id)->sum('amount');
-        $sentTransferTotal = (float) Transfer::where('created_by', $sender->id)->sum('amount');
-        $spentTotal = (float) Expense::where('users_id', $sender->id)->sum('amount');
-        $availableBalance = $openingBalance + $receivedTransferTotal - $sentTransferTotal - $spentTotal;
-        $transferAmount = (float) $data['amount'];
-
-        $warningMessage = null;
-        if ($availableBalance < $transferAmount) {
-            $warningMessage = 'Transfer saved, but your balance was insufficient for this amount.';
-        }
-
-        $data['created_by'] = $sender->id;
-
-        DB::transaction(function () use ($data, $sender, $availableBalance, $transferAmount) {
-            $transfer = Transfer::create($data);
-
-            UserBalanceHistory::create([
-                'user_id' => $sender->id,
-                'change_type' => 'transfer',
-                'change_amount' => -abs($transferAmount),
-                'balance_before' => $availableBalance,
-                'balance_after' => $availableBalance - $transferAmount,
-                'reference_type' => 'transfer',
-                'reference_id' => $transfer->id,
-                'created_by' => $sender->id,
-                'note' => $data['note'] ?? ('Transfer sent to user ID ' . $data['user_id']),
-            ]);
-
-            $user = User::find($data['user_id']);
-            if ($user) {
-                $before = (float) $user->amount;
-                $after = $before + (float) $data['amount'];
-                $user->amount = $after;
-                $user->save();
-
-                UserBalanceHistory::create([
-                    'user_id' => $user->id,
-                    'change_type' => 'transfer',
-                    'change_amount' => $data['amount'],
-                    'balance_before' => $before,
-                    'balance_after' => $after,
-                    'reference_type' => 'transfer',
-                    'reference_id' => $transfer->id,
-                    'created_by' => auth()->id(),
-                    'note' => $data['note'] ?? 'Transfer created',
-                ]);
-            }
-        });
+        $recipient = User::findOrFail($data['user_id']);
+        $this->balanceService->createTransfer($sender, $recipient, $data);
 
         return redirect()->route('transfer.index')
-            ->with('success', 'Transfer saved successfully.')
-            ->with('warning', $warningMessage);
+            ->with('success', 'Transfer saved successfully.');
     }
 
     public function list(Request $request)

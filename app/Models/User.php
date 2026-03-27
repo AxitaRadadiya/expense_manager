@@ -96,6 +96,11 @@ class User extends Authenticatable
         return $this->hasMany(Expense::class, 'users_id');
     }
 
+    public function credits()
+    {
+        return $this->hasMany(Credit::class, 'users_id');
+    }
+
     public function assignedProjectIds(): array
     {
         $projectIds = $this->relationLoaded('projects')
