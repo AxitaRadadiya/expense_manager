@@ -35,38 +35,24 @@
           <span class="info-box-icon bg-primary"><i class="fas fa-wallet"></i></span>
           <div class="info-box-content">
             <span class="info-box-text text-uppercase font-weight-bold">Available Amount</span>
-            <span class="info-box-number">₹{{ number_format((float)($userReceivedAmount ?? 0), 0) }}</span>
+            <span class="info-box-number">₹{{ number_format((float)($availableAmount ?? 0), 0) }}</span>
             <span class="progress-description text-muted">Current balance</span>
           </div>
         </div>
       </div>
 
-      @if($isSuper || auth()->user()?->hasRole('owner'))
-      <div class="col-12 col-sm-6 col-xl-3 mb-3">
+      <!-- <div class="col-12 col-sm-6 col-xl-3 mb-3">
         <div class="info-box shadow-sm">
           <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
           <div class="info-box-content">
-            <span class="info-box-text text-uppercase font-weight-bold">{{ $isSuper ? 'Project Credits' : 'Your Credits' }}</span>
+            <span class="info-box-text text-uppercase font-weight-bold">Credit Amount</span>
             <span class="info-box-number">₹{{ number_format((float)($totalCredits ?? 0), 0) }}</span>
-            <span class="progress-description text-muted">{{ $isSuper ? 'Income added from projects' : 'Credits added by you' }}</span>
+            <span class="progress-description text-muted">{{ $isSuper ? 'Total credited amount' : 'Your total credited amount' }}</span>
           </div>
         </div>
-      </div>
-      @endif
+      </div> -->
 
       @if($isSuper)
-
-      {{-- Total Users --}}
-        <div class="col-12 col-sm-6 col-xl-3 mb-3">
-          <div class="info-box shadow-sm">
-            <span class="info-box-icon bg-teal"><i class="fas fa-users"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text text-uppercase font-weight-bold">Total Users</span>
-              <span class="info-box-number">{{ $totalUsers ?? 0 }}</span>
-              <span class="progress-description text-muted">Active accounts</span>
-            </div>
-          </div>
-        </div>
 
       <!-- {{-- Total Transferred --}}
       <div class="col-12 col-sm-6 col-xl-3 mb-3">
@@ -99,12 +85,13 @@
     {{-- ── PANELS ROW ── --}}
     <div class="row">
 
-      {{-- User Transfers --}}
+      {{-- User Transfers (visible only to super-admin) --}}
+      @if($isSuper)
       <div class="col-12 col-lg-4 mb-4">
         <div class="card card-teal card-outline shadow-sm h-100">
           <div class="card-header">
             <h3 class="card-title">
-              <i class="fas {{ $isSuper ? 'fa-wallet' : 'fa-exchange-alt' }} mr-2 text-teal"></i>{{ $isSuper ? 'User Balances' : 'User Transfers' }}
+              <i class="fas fa-wallet mr-2 text-teal"></i>User Balances
             </h3>
             <div class="card-tools">
               <span class="badge badge-teal">{{ count($usersWithTransfers) }}</span>
@@ -120,28 +107,23 @@
                   </span>
                   <div>
                     <div class="font-weight-bold" style="font-size:.87rem;">{{ $u->name }}</div>
-                    <div class="text-muted" style="font-size:.75rem;">
-                      {{ $isSuper ? 'Current amount' : ($u->email ?? '-') }}
-                    </div>
+                    <div class="text-muted" style="font-size:.75rem;">Current amount</div>
                   </div>
                 </div>
                 <span class="badge badge-success badge-pill" style="font-size:.82rem;">
-                  @if($isSuper)
-                    ₹{{ number_format((float) ($u->amount ?? 0), 0) }}
-                  @else
-                    ₹{{ number_format((float) ($u->transfers_sum_amount ?? 0), 0) }}
-                  @endif
+                  ₹{{ number_format((float) ($u->amount ?? 0), 0) }}
                 </span>
               </div>
             @empty
               <div class="text-center text-muted py-4">
-                <i class="fas {{ $isSuper ? 'fa-users' : 'fa-exchange-alt' }} fa-2x mb-2 d-block opacity-50"></i>
-                {{ $isSuper ? 'No users found.' : 'No transfers found.' }}
+                <i class="fas fa-users fa-2x mb-2 d-block opacity-50"></i>
+                No users found.
               </div>
             @endforelse
           </div>
         </div>
       </div>
+      @endif
 
       {{-- Debited Totals --}}
       <div class="col-12 col-lg-8 mb-4">

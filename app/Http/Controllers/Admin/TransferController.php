@@ -37,10 +37,24 @@ class TransferController extends Controller
         $usersQuery = User::orderBy('name');
         $assignedProjectIds = $auth ? $auth->assignedProjectIds() : [];
 
-        if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            $usersQuery->whereHas('projects', function ($query) use ($assignedProjectIds) {
-                $query->whereIn('projects.id', $assignedProjectIds);
-            });
+        // If the authenticated user is not a super-admin, limit the dropdown
+        // to users who belong to any of the same projects as the auth user.
+        if ($auth && (! method_exists($auth, 'hasRole') || ! $auth->hasRole('super-admin'))) {
+            if (! empty($assignedProjectIds)) {
+                $usersQuery->where(function ($q) use ($assignedProjectIds) {
+                    $q->whereHas('projects', function ($query) use ($assignedProjectIds) {
+                        $query->whereIn('projects.id', $assignedProjectIds);
+                    })->orWhereIn('project_id', $assignedProjectIds);
+                });
+            } else {
+                // No assigned projects — return empty set
+                $usersQuery->whereRaw('1 = 0');
+            }
+        }
+
+        // Exclude the current user from the recipient dropdown
+        if ($auth) {
+            $usersQuery->where('id', '<>', $auth->id);
         }
 
         $users = $usersQuery->get();

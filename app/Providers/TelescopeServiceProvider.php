@@ -4,6 +4,17 @@ namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
+
+if (!class_exists(\Laravel\Telescope\TelescopeApplicationServiceProvider::class)) {
+    // Telescope is not installed — register a no-op provider to prevent fatal errors.
+    class TelescopeServiceProvider extends \Illuminate\Support\ServiceProvider
+    {
+        public function register(): void {}
+        public function boot(): void {}
+    }
+    return;
+}
+
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;

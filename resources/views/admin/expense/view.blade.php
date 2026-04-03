@@ -159,11 +159,11 @@
                      class="btn btn-outline-primary btn-sm mr-2">
                     <i class="fas fa-eye mr-1"></i>Open
                   </a>
-                  <a href="{{ asset('storage/' . $expense->bill_path) }}"
+                  <!-- <a href="{{ asset('storage/' . $expense->bill_path) }}"
                      download="{{ $expense->bill_original_name ?? 'bill' }}"
                      class="btn btn-success btn-sm">
                     <i class="fas fa-download mr-1"></i>Download
-                  </a>
+                  </a> -->
                 @else
                   <div class="py-5 text-muted">
                     <i class="fas fa-file-upload fa-3x mb-2 d-block text-secondary"></i>

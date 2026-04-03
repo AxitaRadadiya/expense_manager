@@ -20,7 +20,7 @@ class DashboardController extends Controller
     public function index()
     {
         $authUser = Auth::user();
-        $userReceivedAmount = 0;
+        $availableAmount = 0;
 
         $isSuper = false;
         if ($authUser) {
@@ -29,15 +29,12 @@ class DashboardController extends Controller
                 : (optional($authUser->role)->name === 'super-admin');
         }
 
-        if ($authUser) {
-            $userReceivedAmount = (float) ($authUser->amount ?? 0);
-        }
-
         if ($isSuper) {
             $totalUsers = User::count();
             $totalTransferred = Transfer::sum('amount');
             $totalExpenses = Expense::sum('amount');
             $totalCredits = Credit::sum('amount');
+            $availableAmount = (float) ($authUser->amount ?? 0);
 
             $usersWithTransfers = User::query()
                 ->select('id', 'name', 'email', 'amount')
@@ -96,8 +93,8 @@ class DashboardController extends Controller
             $totalExpenses = Expense::where('users_id', $userId)->sum('amount');
             $totalCredits = Credit::where('users_id', $userId)->sum('amount');
 
-            $userReceivedAmount = (float) ($authUser->amount ?? 0);
-            $userRemaining = $userReceivedAmount;
+            $availableAmount = (float) ($authUser->amount ?? 0);
+            $userRemaining = $availableAmount;
 
             $userTransferList = Transfer::where('user_id', $userId)
                 ->with('creator')
@@ -143,7 +140,7 @@ class DashboardController extends Controller
             'userDebitedTotals',
             'projectDebitedTotals',
             'projectCreditTotals',
-            'userReceivedAmount',
+            'availableAmount',
             'userRemaining',
             'userTransferList',
             'userCreatedTransferCount',

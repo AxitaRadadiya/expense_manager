@@ -126,7 +126,7 @@ class ExpenseController extends Controller
             \Log::error('Expense balance flow failed: ' . $e->getMessage());
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['expense' => 'Expense could not be saved.']);
+                ->withErrors(['expense' => $e->getMessage() ?: 'Expense could not be saved.']);
         }
 
         return redirect()->route('expense.index')

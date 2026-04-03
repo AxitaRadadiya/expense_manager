@@ -79,18 +79,80 @@ class BalanceService
 
     public function createExpense(User $user, array $data): Expense
     {
-        return DB::transaction(function () use ($data) {
-            return Expense::create($data);
+        return DB::transaction(function () use ($user, $data) {
+            $user->refresh();
+
+            $balanceBefore = (float) ($user->amount ?? 0);
+            $expenseAmount = (float) ($data['amount'] ?? 0);
+            $balanceAfter = $balanceBefore - $expenseAmount;
+
+            if ($balanceAfter < 0) {
+                throw new \RuntimeException('Insufficient available amount for this expense.');
+            }
+
+            $expense = Expense::create([
+                ...$data,
+                'users_id' => $user->id,
+                'bill_path' => $data['bill_path'] ?? '',
+                'bill_original_name' => $data['bill_original_name'] ?? '',
+                'sub_category' => $data['sub_category'] ?? null,
+                'payment_mode' => $data['payment_mode'] ?? null,
+                'reference_number' => $data['reference_number'] ?? null,
+                'status' => $data['status'] ?? 'pending',
+            ]);
+
+            $user->update([
+                'amount' => $balanceAfter,
+            ]);
+
+            $this->createHistory(
+                userId: $user->id,
+                changeType: 'expense',
+                changeAmount: -$expenseAmount,
+                balanceBefore: $balanceBefore,
+                balanceAfter: $balanceAfter,
+                referenceType: 'expense',
+                referenceId: $expense->id,
+                createdBy: auth()->id(),
+                note: $data['note'] ?? 'Expense added'
+            );
+
+            return $expense;
         });
     }
 
     public function createCredit(User $user, array $data): Credit
     {
         return DB::transaction(function () use ($user, $data) {
-            return Credit::create([
+            $user->refresh();
+
+            $balanceBefore = (float) ($user->amount ?? 0);
+            $creditAmount = (float) ($data['amount'] ?? 0);
+
+            $credit = Credit::create([
                 ...$data,
                 'users_id' => $user->id,
             ]);
+
+            $balanceAfter = $balanceBefore + $creditAmount;
+
+            $user->update([
+                'amount' => $balanceAfter,
+            ]);
+
+            $this->createHistory(
+                userId: $user->id,
+                changeType: 'credit',
+                changeAmount: $creditAmount,
+                balanceBefore: $balanceBefore,
+                balanceAfter: $balanceAfter,
+                referenceType: 'credit',
+                referenceId: $credit->id,
+                createdBy: auth()->id(),
+                note: $data['note'] ?? 'Credit added'
+            );
+
+            return $credit;
         });
     }
 

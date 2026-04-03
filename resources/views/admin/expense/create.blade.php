@@ -54,7 +54,7 @@
             {{-- Project --}}
             <div class="col-md-6 mb-3">
               <label for="projects_id">Project <span class="text-danger">*</span></label>
-              <select class="form-control @error('projects_id') is-invalid @enderror"
+              <select class="form-control select2 @error('projects_id') is-invalid @enderror"
                       name="projects_id" id="projects_id" required>
                 <option value="">-- Select Project --</option>
                 @foreach($projects as $project)
@@ -85,7 +85,7 @@
             {{-- Expense Category --}}
             <div class="col-md-6 mb-3">
               <label for="category">Expense Category <span class="text-danger">*</span></label>
-              <select class="form-control @error('category') is-invalid @enderror"
+              <select class="form-control select2 @error('category') is-invalid @enderror"
                       name="category" id="category" required>
                 <option value="">-- Select Category --</option>
                 @foreach($categories as $cat)
