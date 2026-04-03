@@ -29,3 +29,23 @@
   <link rel="stylesheet" href="{{ asset('admin/plugins/summernote/summernote-bs4.min.css') }}">
 
   {{-- <link rel="stylesheet" href="{{ asset('admin/plugins/autocomplete/jquery.autocomplete.css') }}"> --}}
+
+  <style>
+    .project-user-select + .select2-container .select2-selection--multiple {
+      position: relative;
+      padding-right: 34px !important;
+    }
+
+    .project-user-select + .select2-container .select2-selection--multiple::after {
+      content: "\f078";
+      font-family: "Font Awesome 5 Free";
+      font-weight: 900;
+      color: #6c757d;
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 12px;
+    }
+  </style>

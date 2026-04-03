@@ -62,23 +62,22 @@ class CreditController extends Controller
 
         $data = $request->validate([
             'projects_id' => 'required|exists:projects,id',
-            'credit_date' => 'required|date|before_or_equal:today',
+            'credit_date' => 'required|date|after_or_equal:today',
             'category' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'payment_mode' => 'nullable|in:cash,online,cheque',
             'reference_number' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'note' => 'required|string',
+            'note' => 'nullable|string',
         ], [
             'projects_id.required' => 'Please select a project.',
             'projects_id.exists' => 'The selected project is invalid.',
             'credit_date.required' => 'Please enter the credit date.',
-            'credit_date.before_or_equal' => 'The credit date cannot be a future date.',
+            'credit_date.after_or_equal' => 'The credit date cannot be a past date.',
             'category.required' => 'Please select a credit category.',
             'amount.required' => 'Please enter the amount.',
             'amount.min' => 'The amount must be greater than 0.',
-            'note.required' => 'Please enter a note.',
         ]);
 
         $allowedProjectIds = $this->allowedProjects($auth)->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -100,6 +99,7 @@ class CreditController extends Controller
         unset($data['bill']);
         $data['description'] = $data['description'] ?? '';
         $data['reference_number'] = $data['reference_number'] ?? '';
+        $data['note'] = $data['note'] ?? '';
         $data['status'] = $data['status'] ?? 'pending';
 
         $this->balanceService->createCredit($auth, $data);
@@ -145,23 +145,34 @@ class CreditController extends Controller
 
         $data = $request->validate([
             'projects_id' => 'required|exists:projects,id',
-            'credit_date' => 'required|date|before_or_equal:today',
+            'credit_date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) use ($credit) {
+                    $selectedDate = \Carbon\Carbon::parse($value)->toDateString();
+                    $today = now()->toDateString();
+                    $originalDate = optional($credit->credit_date)?->toDateString()
+                        ?? \Carbon\Carbon::parse($credit->credit_date)->toDateString();
+
+                    if ($selectedDate < $today && $selectedDate !== $originalDate) {
+                        $fail('The credit date cannot be a past date.');
+                    }
+                },
+            ],
             'category' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'payment_mode' => 'nullable|in:cash,online,cheque',
             'reference_number' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'note' => 'required|string',
+            'note' => 'nullable|string',
         ], [
             'projects_id.required' => 'Please select a project.',
             'projects_id.exists' => 'The selected project is invalid.',
             'credit_date.required' => 'Please enter the credit date.',
-            'credit_date.before_or_equal' => 'The credit date cannot be a future date.',
             'category.required' => 'Please select a credit category.',
             'amount.required' => 'Please enter the amount.',
             'amount.min' => 'The amount must be greater than 0.',
-            'note.required' => 'Please enter a note.',
         ]);
 
         $allowedProjectIds = $this->allowedProjects($auth)->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -187,6 +198,7 @@ class CreditController extends Controller
         unset($data['bill']);
         $data['description'] = $data['description'] ?? '';
         $data['reference_number'] = $data['reference_number'] ?? '';
+        $data['note'] = $data['note'] ?? '';
         $credit->update($data);
 
         return redirect()->route('credit.index')->with('success', 'Credit updated successfully.');

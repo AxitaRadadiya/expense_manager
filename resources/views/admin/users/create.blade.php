@@ -110,24 +110,6 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label class="font-weight-bold">Projects</label>
-                <select id="project_ids" name="project_ids[]"
-                        class="form-control select2 @error('project_ids') is-invalid @enderror @error('project_ids.*') is-invalid @enderror"
-                        multiple
-                        data-placeholder="Select one or more projects">
-                  @foreach($projects as $project)
-                    <option value="{{ $project->id }}" {{ in_array($project->id, old('project_ids', [])) ? 'selected' : '' }}>
-                      {{ $project->name }}
-                    </option>
-                  @endforeach
-                </select>
-                <small class="text-muted d-block mt-1">You can assign multiple projects. The first selected project stays as the primary fallback.</small>
-                @error('project_ids')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                @error('project_ids.*')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
                 <label class="font-weight-bold">Opening Balance</label>
                 <div class="input-group">
                  
@@ -136,6 +118,7 @@
                          value="{{ old('amount') }}" placeholder="0.00">
                   @error('amount')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
+                <small class="text-muted d-block mt-1">Assign this user to projects from the project screen after creation.</small>
               </div>
             </div>
           </div>

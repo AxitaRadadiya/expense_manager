@@ -29,12 +29,12 @@ class Project extends Model
 
     public function users()
     {
-        return $this->hasMany(User::class, 'project_id');
+        return $this->belongsToMany(User::class, 'project_user', 'project_id', 'user_id');
     }
 
-    public function assignedUsers()
+    public function primaryUsers()
     {
-        return $this->belongsToMany(User::class, 'project_user', 'project_id', 'user_id');
+        return $this->hasMany(User::class, 'project_id');
     }
 
     public function expenses()

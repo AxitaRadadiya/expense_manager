@@ -6,15 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth;
 use App\Models\Role;
-use App\Models\Project;
 use Illuminate\View\View;
 use App\Models\User;
 use App\Models\Expense;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
-use App\Models\UserBalanceHistory;
-use Illuminate\Support\Facades\DB;
 use App\Services\BalanceService;
 
 class UserController extends Controller
@@ -41,7 +38,6 @@ class UserController extends Controller
     {
         return view('admin.users.create', [
             'roles' => Role::orderBy('name')->get(),
-            'projects' => Project::orderBy('name')->get(),
         ]);
     }
 
@@ -58,17 +54,8 @@ class UserController extends Controller
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
             'password'    => ['required', 'string', 'min:8', 'confirmed'],
-            'project_ids' => ['nullable', 'array'],
-            'project_ids.*' => ['integer', 'exists:projects,id'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
-
-        $projectIds = collect($request->input('project_ids', []))
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
 
         $user = User::create([
             'name'     => $request->name,
@@ -77,13 +64,11 @@ class UserController extends Controller
             'role_id'  => $request->role_id,
             'status'   => $request->status,
             'note'     => $request->note,
-            'amount'     => $request->amount,
-            'project_id' => $projectIds[0] ?? null,
+            'amount'   => $request->amount,
             'password' => Hash::make($request->password),
         ]);
 
         $user->assignRole((int) $request->role_id);
-        $user->projects()->sync($projectIds);
 
         $this->balanceService->recordOpeningBalance($user, (float) ($request->amount ?? 0), Auth::id());
 
@@ -150,7 +135,6 @@ class UserController extends Controller
         return view('admin.users.edit', [
             'user'  => $user,
             'roles' => Role::orderBy('name')->get(),
-            'projects' => Project::orderBy('name')->get(),
         ]);
     }
 
@@ -166,17 +150,8 @@ class UserController extends Controller
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
             'password'    => ['nullable', 'string', 'min:8', 'confirmed'],
-            'project_ids' => ['nullable', 'array'],
-            'project_ids.*' => ['integer', 'exists:projects,id'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
-
-        $projectIds = collect($request->input('project_ids', []))
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
 
         $data = [
             'name'    => $request->name,
@@ -185,8 +160,7 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'status'  => $request->status,
             'note'    => $request->note,
-            'project_id' => $projectIds[0] ?? null,
-            'amount'     => $request->amount,
+            'amount'  => $request->amount,
         ];
 
         if ($request->filled('password')) {
@@ -194,11 +168,8 @@ class UserController extends Controller
         }
 
         $original = $user->getOriginal();
-        $originalProjects = $user->projects()->pluck('projects.id')->map(fn ($id) => (int) $id)->all();
-
         $user->update($data);
         $user->assignRole((int) $request->role_id);
-        $user->projects()->sync($projectIds);
 
         $changes = [];
         foreach ($data as $field => $newVal) {
@@ -206,10 +177,6 @@ class UserController extends Controller
             if (isset($original[$field]) && (string) $original[$field] !== (string) $newVal) {
                 $changes[$field] = ['old' => $original[$field], 'new' => $newVal];
             }
-        }
-
-        if ($originalProjects !== $projectIds) {
-            $changes['projects'] = ['old' => $originalProjects, 'new' => $projectIds];
         }
 
         // amount change: store balance history

@@ -152,12 +152,12 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label for="note">Note <span class="text-danger">*</span></label>
+              <label for="note">Note</label>
               <textarea class="form-control @error('note') is-invalid @enderror"
                         name="note" id="note"
                         rows="4"
-                        placeholder="Enter the key reason for this credit or any important internal note." required>{{ old('note', $credit->note) }}</textarea>
-              <small class="text-muted d-block mt-1">Required. This note will help identify the credit later.</small>
+                        placeholder="Enter the key reason for this credit or any important internal note.">{{ old('note', $credit->note) }}</textarea>
+              <small class="text-muted d-block mt-1">Optional. Add any helpful internal note if needed.</small>
               @error('note')
                 <span class="invalid-feedback d-block">{{ $message }}</span>
               @enderror

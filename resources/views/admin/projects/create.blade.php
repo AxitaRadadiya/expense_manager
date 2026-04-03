@@ -79,6 +79,24 @@
                           placeholder="Optional project note...">{{ old('note') }}</textarea>
               </div>
             </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="font-weight-bold">Assign Users</label>
+                <select id="user_ids" name="user_ids[]"
+                        class="form-control select2 project-user-select @error('user_ids') is-invalid @enderror @error('user_ids.*') is-invalid @enderror"
+                        multiple
+                        data-placeholder="Select one or more users">
+                  @foreach($users as $user)
+                    <option value="{{ $user->id }}" {{ in_array($user->id, old('user_ids', [])) ? 'selected' : '' }}>
+                      {{ $user->name }}
+                    </option>
+                  @endforeach
+                </select>
+                <small class="text-muted d-block mt-1">Choose the users who should be part of this project.</small>
+                @error('user_ids')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                @error('user_ids.*')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+              </div>
+            </div>
           </div>
       </div>
       <div class="card-footer">

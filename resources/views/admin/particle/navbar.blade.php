@@ -38,7 +38,7 @@
         <i class="fas fa-user-circle mr-2" style="color:#008d8d;"></i> Change Password
       </a>
       
-      <div class="dropdown-divider"></div>
+      <!-- <div class="dropdown-divider"></div>
       <form method="POST" action="{{ route('logout') }}">
         @csrf
         <a href="{{ route('logout') }}" class="dropdown-item"
@@ -47,7 +47,7 @@
           <i class="fas fa-sign-out-alt mr-2"></i> Logout
         </a>
       </form>
-    </div>
+    </div> -->
   </li>
 
   <!-- Fullscreen -->

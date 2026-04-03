@@ -75,8 +75,7 @@
               <input type="date"
                      class="form-control @error('expense_date') is-invalid @enderror"
                      name="expense_date" id="expense_date"
-                     value="{{ old('expense_date', \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d')) }}"
-                     max="{{ date('Y-m-d') }}" required>
+                     value="{{ old('expense_date', \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d')) }}" required>
               @error('expense_date')
                 <span class="invalid-feedback">{{ $message }}</span>
               @enderror
@@ -203,12 +202,12 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label for="note">Note <span class="text-danger">*</span></label>
+              <label for="note">Note</label>
               <textarea class="form-control @error('note') is-invalid @enderror"
                         name="note" id="note"
                         rows="4"
-                        placeholder="Enter the key reason for this expense or any important internal note." required>{{ old('note', $expense->note) }}</textarea>
-              <small class="text-muted d-block mt-1">Required. This note will help identify the expense later.</small>
+                        placeholder="Enter the key reason for this expense or any important internal note.">{{ old('note', $expense->note) }}</textarea>
+              <small class="text-muted d-block mt-1">Optional. Add any helpful internal note if needed.</small>
               @error('note')
                 <span class="invalid-feedback d-block">{{ $message }}</span>
               @enderror
@@ -236,9 +235,6 @@
 @push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    var el = document.getElementById('expense_date');
-    if (el) { el.removeAttribute('min'); }
-
     document.getElementById('bill').addEventListener('change', function () {
       var fileName = this.files[0] ? this.files[0].name : (this.getAttribute('data-placeholder') || 'Choose file...');
       this.nextElementSibling.textContent = fileName;

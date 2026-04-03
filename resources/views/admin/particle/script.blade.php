@@ -119,7 +119,7 @@ $(document).ready(function () {
     $('#roleTable').DataTable({
         paging: true, lengthChange: false, searching: true, ordering: true, info: true,
         autoWidth: false, responsive: true, processing: true, serverSide: true,
-        order: [0, 'desc'],
+        order: [0, 'asc'],
         ajax: { url: '{{ route('roles.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'roles.list' } },
         columns: [{ data: 'id' }, { data: 'name' }],
         aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
@@ -170,7 +170,7 @@ $(document).ready(function () {
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
             ajax: { url: '{{ route('projects.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'projects.list' } },
-            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'action' } ],
+            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'users_count' }, { data: 'action' } ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
         });
     }

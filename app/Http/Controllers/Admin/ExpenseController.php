@@ -62,7 +62,7 @@ class ExpenseController extends Controller
         $validated = $request->validate(
             [
                 'projects_id'  => 'required|exists:projects,id',
-                'expense_date'     => 'required|date|before_or_equal:today',
+                'expense_date'     => 'required|date|after_or_equal:today',
                 'amount'       => 'required|numeric|min:0',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
@@ -70,7 +70,7 @@ class ExpenseController extends Controller
                 'payment_mode' => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
-                'note'             => 'required|string',
+                'note'             => 'nullable|string',
                 'status'           => 'nullable',
             ],
             [
@@ -79,7 +79,7 @@ class ExpenseController extends Controller
 
                 'expense_date.required'      => 'Please enter the expense date.',
                 'expense_date.date'          => 'The expense date must be a valid date.',
-                'expense_date.before_or_equal' => 'The expense date cannot be a future date.',
+                'expense_date.after_or_equal' => 'The expense date cannot be a past date.',
 
                 'amount.required'            => 'Please enter the amount.',
                 'amount.numeric'             => 'The amount must be a valid number.',
@@ -89,7 +89,6 @@ class ExpenseController extends Controller
                 'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
                 'bill.max'              => 'The bill file size must not exceed 2MB.',
                 'category.required'     => 'Please select an expense category.',
-                'note.required'         => 'Please enter a note.',
 
             ]
         );
@@ -113,6 +112,7 @@ class ExpenseController extends Controller
         // Ensure nullable string columns never pass null to a NOT NULL DB column
         $validated['description']      = $validated['description']      ?? '';
         $validated['reference_number'] = $validated['reference_number'] ?? '';
+        $validated['note']             = $validated['note']             ?? '';
 
         // Ensure authenticated user
         $user = auth()->user();
@@ -157,14 +157,27 @@ class ExpenseController extends Controller
         $validated = $request->validate(
             [
                 'projects_id'  => 'required|exists:projects,id',
-                'expense_date'     => 'required|date|before_or_equal:today',
+                'expense_date'     => [
+                    'required',
+                    'date',
+                    function ($attribute, $value, $fail) use ($expense) {
+                        $selectedDate = \Carbon\Carbon::parse($value)->toDateString();
+                        $today = now()->toDateString();
+                        $originalDate = optional($expense->expense_date)?->toDateString()
+                            ?? \Carbon\Carbon::parse($expense->expense_date)->toDateString();
+
+                        if ($selectedDate < $today && $selectedDate !== $originalDate) {
+                            $fail('The expense date cannot be a past date.');
+                        }
+                    },
+                ],
                 'amount'       => 'required|numeric|min:0',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
                 'payment_mode'     => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
-                'note'             => 'required|string',
+                'note'             => 'nullable|string',
             ],
             [
                 'projects_id.required'         => 'Please select a project.',
@@ -172,7 +185,6 @@ class ExpenseController extends Controller
 
                 'expense_date.required'        => 'Please enter the expense date.',
                 'expense_date.date'            => 'The expense date must be a valid date.',
-                'expense_date.before_or_equal' => 'The expense date cannot be a future date.',
 
                 'amount.required'              => 'Please enter the amount.',
                 'amount.numeric'               => 'The amount must be a valid number.',
@@ -182,7 +194,6 @@ class ExpenseController extends Controller
                 'bill.max'              => 'The bill file size must not exceed 2MB.',
                 'category.required'     => 'Please select an expense category.',
                 'payment_mode.required' => 'Please select a payment mode.',
-                'note.required'         => 'Please enter a note.',
 
             ]
         );
@@ -213,6 +224,7 @@ class ExpenseController extends Controller
         // Ensure nullable string columns never pass null to a NOT NULL DB column
         $validated['description']      = $validated['description']      ?? '';
         $validated['reference_number'] = $validated['reference_number'] ?? '';
+        $validated['note']             = $validated['note']             ?? '';
 
         $expense->update($validated);
 

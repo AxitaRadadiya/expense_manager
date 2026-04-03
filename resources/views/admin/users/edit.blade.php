@@ -114,26 +114,6 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label class="font-weight-bold">Projects</label>
-                <select id="project_ids" name="project_ids[]"
-                        class="form-control select2 @error('project_ids') is-invalid @enderror @error('project_ids.*') is-invalid @enderror"
-                        multiple
-                        data-placeholder="Select one or more projects">
-                  @php($selectedProjectIds = old('project_ids', $user->projects->pluck('id')->all()))
-                  @foreach($projects as $project)
-                    <option value="{{ $project->id }}"
-                      {{ in_array($project->id, $selectedProjectIds) ? 'selected' : '' }}>
-                      {{ $project->name }}
-                    </option>
-                  @endforeach
-                </select>
-                <small class="text-muted d-block mt-1">You can assign multiple projects. The first selected project stays as the primary fallback.</small>
-                @error('project_ids')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                @error('project_ids.*')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
                 <label class="font-weight-bold">Opening Balance</label>
                 <div class="input-group">
                   <div class="input-group-prepend"><span class="input-group-text">₹</span></div>
@@ -142,6 +122,14 @@
                          value="{{ old('amount', $user->amount) }}" placeholder="0.00">
                   @error('amount')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
+                <small class="text-muted d-block mt-1">Project assignment is managed from each project screen.</small>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="font-weight-bold">Assigned Projects</label>
+                <input type="text" class="form-control" value="{{ $user->assignedProjectNames() ?: 'No projects assigned' }}" readonly>
+                <small class="text-muted d-block mt-1">Open a project to add or remove this user.</small>
               </div>
             </div>
             <div class="col-md-12">

@@ -70,7 +70,8 @@
               <input type="date"
                      class="form-control @error('credit_date') is-invalid @enderror"
                      name="credit_date" id="credit_date"
-                     value="{{ old('credit_date', date('Y-m-d')) }}" required>
+                     value="{{ old('credit_date', date('Y-m-d')) }}"
+                     min="{{ date('Y-m-d') }}" required>
               @error('credit_date')
                 <span class="invalid-feedback">{{ $message }}</span>
               @enderror
@@ -149,12 +150,12 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label for="note">Note <span class="text-danger">*</span></label>
+              <label for="note">Note</label>
               <textarea class="form-control @error('note') is-invalid @enderror"
                         name="note" id="note"
                         rows="4"
-                        placeholder="Enter the key reason for this credit or any important internal note." required>{{ old('note') }}</textarea>
-              <small class="text-muted d-block mt-1">Required. This note will help identify the credit later.</small>
+                        placeholder="Enter the key reason for this credit or any important internal note.">{{ old('note') }}</textarea>
+              <small class="text-muted d-block mt-1">Optional. Add any helpful internal note if needed.</small>
               @error('note')
                 <span class="invalid-feedback d-block">{{ $message }}</span>
               @enderror
@@ -180,6 +181,9 @@
 @push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    var creditDate = document.getElementById('credit_date');
+    if (creditDate) { creditDate.min = '{{ date('Y-m-d') }}'; }
+
     document.getElementById('bill').addEventListener('change', function () {
       var fileName = this.files[0] ? this.files[0].name : 'Choose file...';
       this.nextElementSibling.textContent = fileName;
