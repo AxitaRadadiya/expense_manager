@@ -101,10 +101,10 @@ class CategoryController extends Controller
                 $nestedData['id'] = $i;
                 $nestedData['name'] = $row->name;
 
-                $actions = '<div class="btn-group">';
+                $actions = '<div class="table-action-group">';
                 if (auth()->user()) {
-                    $actions .= '<a href="#" data-id="' . $row->id . '" data-name="' . htmlspecialchars($row->name, ENT_QUOTES) . '" class="btn-sm edit-category-date-modal"><i class="fa fa-edit"></i></a>';
-                    $actions .= '<form action="' . route('category.destroy', $row->id) . '" method="POST" class="deleteForm">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE"><button type="submit" class="deleteButton border-0 bg-white text-danger"><i class="fa fa-trash"></i></button></form>';
+                    $actions .= '<a href="#" data-id="' . $row->id . '" data-name="' . htmlspecialchars($row->name, ENT_QUOTES) . '" class="table-action-btn is-edit edit-category-date-modal" title="Edit"><i class="fa fa-edit"></i></a>';
+                    $actions .= '<form action="' . route('category.destroy', $row->id) . '" method="POST" class="table-action-form deleteForm">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE"><button type="submit" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }
                 $actions .= '</div>';
 

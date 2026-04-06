@@ -68,6 +68,15 @@ $(document).ready(function () {
 
     $('.select2').select2();
 
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        newestOnTop: true,
+        positionClass: 'toast-top-right',
+        timeOut: 5000,
+        extendedTimeOut: 1500
+    };
+
     // Date range pickers
     $('.single_date').daterangepicker({
         singleDatePicker: true,
@@ -99,6 +108,12 @@ $(document).ready(function () {
     @endif
     @if (session('warning'))
         Toast.fire({ icon: 'warning', title: '{{ session('warning') }}' })
+    @endif
+    @if ($errors->any())
+        const validationErrors = @json($errors->all());
+        validationErrors.forEach(function (message) {
+            toastr.error(message, 'Validation Error');
+        });
     @endif
 
     $(document).on('click', '.deleteButton', function (event) {

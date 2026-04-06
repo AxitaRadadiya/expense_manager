@@ -268,6 +268,42 @@
     color: var(--text-dark);
   }
 
+  .table-action-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: nowrap;
+  }
+
+  .table-action-form {
+    display: inline-block;
+    margin: 0;
+  }
+
+  .table-action-btn {
+    width: 34px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff !important;
+    text-decoration: none !important;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
+    transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+  }
+
+  .table-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+    color: #fff !important;
+  }
+
+  .table-action-btn.is-view { background: linear-gradient(135deg, #0a7ea4, #1497bd); }
+  .table-action-btn.is-edit { background: linear-gradient(135deg, #0b8f8f, #12b3b3); }
+  .table-action-btn.is-delete { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+
   @media (max-width: 1199.98px) {
     .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }

@@ -8,13 +8,18 @@
 
 <!-- Sidebar -->
 <div class="sidebar">
+  @php
+    $authUser = auth()->user();
+    $isSupervisor = $authUser && $authUser->hasRole('superviour');
+    $canManageExpenses = $authUser && $authUser->hasRole(['super-admin', 'owner', 'superviour']);
+  @endphp
+
   <nav class="mt-1">
     <ul class="nav nav-pills nav-sidebar flex-column"
       data-widget="treeview"
       role="menu"
       data-accordion="false">
 
-      {{-- ── Dashboard ── --}}
       <li class="nav-item">
         <a href="{{ route('dashboard') }}"
           class="nav-link {{ Route::is('dashboard') ? 'active' : '' }}">
@@ -23,18 +28,11 @@
         </a>
       </li>
 
-      {{-- ── System (admin only) ── --}}
+      @if(! $isSupervisor)
       <li class="nav-header">System</li>
+      @endif
 
-      @if(auth()->user() && auth()->user()->hasRole('super-admin'))
-
-      <li class="nav-item">
-        <a href="{{ route('users.index') }}"
-          class="nav-link {{ Request::routeIs('users.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-users"></i>
-          <p>Users</p>
-        </a>
-      </li>
+      @if($canManageExpenses)
       <li class="nav-item">
         <a href="{{ route('expense.index') }}"
           class="nav-link {{ Request::routeIs('expense.*') ? 'active' : '' }}">
@@ -43,7 +41,7 @@
         </a>
       </li>
 
-      @if(auth()->user() && auth()->user()->hasRole(['super-admin', 'owner']))
+      @if(! $isSupervisor)
       <li class="nav-item">
         <a href="{{ route('credit.index') }}"
           class="nav-link {{ Request::routeIs('credit.*') ? 'active' : '' }}">
@@ -60,6 +58,17 @@
         </a>
       </li>
       @endif
+      @endif
+
+      @if($authUser && $authUser->hasRole('super-admin'))
+      <li class="nav-item">
+        <a href="{{ route('users.index') }}"
+          class="nav-link {{ Request::routeIs('users.*') ? 'active' : '' }}">
+          <i class="nav-icon fas fa-users"></i>
+          <p>Users</p>
+        </a>
+      </li>
+
       <li class="nav-item">
         <a href="{{ route('category.index') }}"
           class="nav-link {{ Request::routeIs('category.*') ? 'active' : '' }}">
@@ -67,6 +76,7 @@
           <p>Categories</p>
         </a>
       </li>
+
       <li class="nav-item">
         <a href="{{ route('projects.index') }}"
           class="nav-link {{ Request::routeIs('projects.*') ? 'active' : '' }}">
@@ -91,7 +101,6 @@
               <p>Roles</p>
             </a>
           </li>
-
         </ul>
       </li>
 
@@ -102,7 +111,6 @@
           <p>Activity Logs</p>
         </a>
       </li>
-
       @endif
     </ul>
   </nav>

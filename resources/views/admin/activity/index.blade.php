@@ -113,9 +113,11 @@
                     <div class="page-note">{{ $log->created_at->format('h:i A') }}</div>
                   </td>
                   <td>
-                    <a href="{{ route('activity-logs.show', $log->id) }}" class="btn btn-xs btn-info">
-                      <i class="fas fa-eye mr-1"></i>View
-                    </a>
+                    <div class="table-action-group">
+                      <a href="{{ route('activity-logs.show', $log->id) }}" class="table-action-btn is-view" title="View">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                    </div>
                   </td>
                 </tr>
               @empty

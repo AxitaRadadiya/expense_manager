@@ -266,7 +266,7 @@ class CreditController extends Controller
                 'amount' => '<span class="text-success font-weight-bold">Rs. ' . number_format((float) $credit->amount, 2) . '</span>',
                 'created_by' => e(optional($credit->user)->name ?? '-'),
                 'note' => e(filled($credit->category) ? $credit->category : '-'),
-                'action' => '<div class="btn-group"><a href="' . route('credit.show', $credit->id) . '" class="btn-sm text-info" title="View"><i class="fa fa-eye"></i></a>&nbsp;<a href="' . route('credit.edit', $credit->id) . '" class="btn-sm text-primary" title="Edit"><i class="fa fa-edit"></i></a></div>',
+                'action' => '<div class="table-action-group"><a href="' . route('credit.show', $credit->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a><a href="' . route('credit.edit', $credit->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a></div>',
             ];
         });
 

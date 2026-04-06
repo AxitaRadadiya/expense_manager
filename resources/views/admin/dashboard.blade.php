@@ -26,7 +26,7 @@
 <section class="content">
   <div class="container-fluid">
 
-    {{-- ── STAT CARDS ── --}}
+    {{-- Stat Cards --}}
     <div class="row">
 
       {{-- Available Amount --}}
@@ -35,7 +35,7 @@
           <span class="info-box-icon bg-primary"><i class="fas fa-wallet"></i></span>
           <div class="info-box-content">
             <span class="info-box-text text-uppercase font-weight-bold">Available Amount</span>
-            <span class="info-box-number">₹{{ number_format((float)($availableAmount ?? 0), 0) }}</span>
+            <span class="info-box-number">&#8377;{{ number_format((float) ($availableAmount ?? 0), 2) }}</span>
             <span class="progress-description text-muted">Current balance</span>
           </div>
         </div>
@@ -46,7 +46,7 @@
           <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
           <div class="info-box-content">
             <span class="info-box-text text-uppercase font-weight-bold">Credit Amount</span>
-            <span class="info-box-number">₹{{ number_format((float)($totalCredits ?? 0), 0) }}</span>
+            <span class="info-box-number">&#8377;{{ number_format((float) ($totalCredits ?? 0), 2) }}</span>
             <span class="progress-description text-muted">{{ $isSuper ? 'Total credited amount' : 'Your total credited amount' }}</span>
           </div>
         </div>
@@ -60,7 +60,7 @@
           <span class="info-box-icon bg-success"><i class="fas fa-exchange-alt"></i></span>
           <div class="info-box-content">
             <span class="info-box-text text-uppercase font-weight-bold">Total Transferred</span>
-            <span class="info-box-number">₹{{ number_format($totalTransferred ?? 0, 0) }}</span>
+            <span class="info-box-number">&#8377;{{ number_format((float) ($totalTransferred ?? 0), 2) }}</span>
             <span class="progress-description text-muted">Across all users</span>
           </div>
         </div>
@@ -72,20 +72,17 @@
           <span class="info-box-icon bg-danger"><i class="fas fa-receipt"></i></span>
           <div class="info-box-content">
             <span class="info-box-text text-uppercase font-weight-bold">Total Expenses</span>
-            <span class="info-box-number">₹{{ number_format($totalExpenses ?? 0, 0) }}</span>
+            <span class="info-box-number">&#8377;{{ number_format((float) ($totalExpenses ?? 0), 2) }}</span>
             <span class="progress-description text-muted">Total debited</span>
           </div>
         </div>
       </div> -->
 
-
       @endif
-    </div>{{-- /.row stat cards --}}
+    </div>
 
-    {{-- ── PANELS ROW ── --}}
     <div class="row">
 
-      {{-- User Transfers (visible only to super-admin) --}}
       @if($isSuper)
       <div class="col-12 col-lg-4 mb-4">
         <div class="card card-teal card-outline shadow-sm h-100">
@@ -111,7 +108,7 @@
                   </div>
                 </div>
                 <span class="badge badge-success badge-pill" style="font-size:.82rem;">
-                  ₹{{ number_format((float) ($u->amount ?? 0), 0) }}
+                  &#8377;{{ number_format((float) ($u->amount ?? 0), 2) }}
                 </span>
               </div>
             @empty
@@ -125,7 +122,6 @@
       </div>
       @endif
 
-      {{-- Debited Totals --}}
       <div class="col-12 col-lg-8 mb-4">
         <div class="card card-teal card-outline shadow-sm h-100">
           <div class="card-header">
@@ -137,7 +133,6 @@
 
             @if($isSuper)
 
-              {{-- User-wise Debited --}}
               <p class="text-uppercase text-muted font-weight-bold mb-2" style="font-size:.7rem;letter-spacing:1px;">
                 <i class="fas fa-users mr-1"></i> User-wise Debited Totals
               </p>
@@ -156,10 +151,10 @@
                       <tr>
                         <td class="text-muted">{{ $i + 1 }}</td>
                         <td>
-                          <span class="font-weight-bold">{{ $u->user->name ?? '—' }}</span>
+                          <span class="font-weight-bold">{{ $u->user->name ?? '-' }}</span>
                         </td>
                         <td class="text-right">
-                          <span class="badge badge-danger">₹{{ number_format((float)($u->total_debited ?? 0), 0) }}</span>
+                          <span class="badge badge-danger">&#8377;{{ number_format((float) ($u->total_debited ?? 0), 2) }}</span>
                         </td>
                         <td class="text-right text-muted">{{ $u->expenses_count }}</td>
                       </tr>
@@ -173,7 +168,7 @@
                     <tfoot class="bg-light">
                       <tr>
                         <td colspan="2" class="text-right font-weight-bold">Total</td>
-                        <td class="text-right font-weight-bold text-danger">₹{{ number_format($userDebitedTotals->sum('total_debited'), 0) }}</td>
+                        <td class="text-right font-weight-bold text-danger">&#8377;{{ number_format((float) $userDebitedTotals->sum('total_debited'), 2) }}</td>
                         <td class="text-right font-weight-bold">{{ $userDebitedTotals->sum('expenses_count') }}</td>
                       </tr>
                     </tfoot>
@@ -181,7 +176,6 @@
                 </table>
               </div>
 
-              {{-- Project-wise Debited --}}
               <p class="text-uppercase text-muted font-weight-bold mb-2" style="font-size:.7rem;letter-spacing:1px;">
                 <i class="fas fa-folder-open mr-1"></i> Project-wise Debited Totals
               </p>
@@ -200,10 +194,10 @@
                       <tr>
                         <td class="text-muted">{{ $i + 1 }}</td>
                         <td>
-                          <span class="badge badge-info">{{ $p->project->name ?? '—' }}</span>
+                          <span class="badge badge-info">{{ $p->project->name ?? '-' }}</span>
                         </td>
                         <td class="text-right">
-                          <span class="badge badge-danger">₹{{ number_format((float)($p->total_debited ?? 0), 0) }}</span>
+                          <span class="badge badge-danger">&#8377;{{ number_format((float) ($p->total_debited ?? 0), 2) }}</span>
                         </td>
                         <td class="text-right text-muted">{{ $p->expenses_count }}</td>
                       </tr>
@@ -217,7 +211,7 @@
                     <tfoot class="bg-light">
                       <tr>
                         <td colspan="2" class="text-right font-weight-bold">Total</td>
-                        <td class="text-right font-weight-bold text-danger">₹{{ number_format($projectDebitedTotals->sum('total_debited'), 0) }}</td>
+                        <td class="text-right font-weight-bold text-danger">&#8377;{{ number_format((float) $projectDebitedTotals->sum('total_debited'), 2) }}</td>
                         <td class="text-right font-weight-bold">{{ $projectDebitedTotals->sum('expenses_count') }}</td>
                       </tr>
                     </tfoot>
@@ -227,7 +221,6 @@
 
             @else
 
-              {{-- Regular user: recent debits --}}
               <p class="text-uppercase text-muted font-weight-bold mb-2" style="font-size:.7rem;letter-spacing:1px;">
                 <i class="fas fa-receipt mr-1"></i> Your Recent Debits
               </p>
@@ -245,16 +238,16 @@
                     @forelse($debitedList as $d)
                       <tr>
                         <td class="text-muted text-nowrap">
-                          {{ $d->expense_date ? \Carbon\Carbon::parse($d->expense_date)->format('d M Y') : '—' }}
+                          {{ $d->expense_date ? \Carbon\Carbon::parse($d->expense_date)->format('d M Y') : '-' }}
                         </td>
                         <td>
-                          <span class="badge badge-info">{{ $d->project->name ?? '—' }}</span>
+                          <span class="badge badge-info">{{ $d->project->name ?? '-' }}</span>
                         </td>
                         <td class="text-right">
-                          <span class="badge badge-danger">₹{{ number_format((float)$d->amount, 0) }}</span>
+                          <span class="badge badge-danger">&#8377;{{ number_format((float) $d->amount, 2) }}</span>
                         </td>
                         <td class="text-muted" style="font-size:.82rem;">
-                          {{ \Illuminate\Support\Str::limit($d->description ?? '—', 80) }}
+                          {{ \Illuminate\Support\Str::limit($d->description ?? '-', 80) }}
                         </td>
                       </tr>
                     @empty
@@ -272,7 +265,7 @@
         </div>
       </div>
 
-    </div>{{-- /.row panels --}}
+    </div>
 
     @if($isSuper || auth()->user()?->hasRole('owner'))
     <div class="row">
@@ -299,10 +292,10 @@
                     <tr>
                       <td class="text-muted">{{ $i + 1 }}</td>
                       <td>
-                        <span class="badge badge-info">{{ $credit->project->name ?? '—' }}</span>
+                        <span class="badge badge-info">{{ $credit->project->name ?? '-' }}</span>
                       </td>
                       <td class="text-right">
-                        <span class="badge badge-success">₹{{ number_format((float)($credit->total_credited ?? 0), 0) }}</span>
+                        <span class="badge badge-success">&#8377;{{ number_format((float) ($credit->total_credited ?? 0), 2) }}</span>
                       </td>
                       <td class="text-right text-muted">{{ $credit->credits_count }}</td>
                     </tr>

@@ -1,16 +1,12 @@
-{{-- resources/views/admin/roles/edit.blade.php --}}
 @extends('admin.layouts.app')
 @section('title', 'Edit Role')
-@section('content')
 
+@section('content')
 <div class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0">
-          <i class="fas fa-pen mr-2 text-warning"></i>Edit Role
-          <small class="text-muted" style="font-size:.75rem;">— {{ $role->name }}</small>
-        </h1>
+        <h1 class="m-0"><i class="fas fa-pen mr-2 text-primary"></i>Edit Role</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -29,29 +25,26 @@
       @csrf
       @method('PUT')
 
-      {{-- Role Name --}}
-      <div class="card card-outline card-warning shadow-sm">
+      <div class="card card-outline card-primary shadow-sm">
         <div class="card-header">
           <h3 class="card-title"><i class="fas fa-tag mr-2"></i>Role Info</h3>
           <div class="card-tools">
-            <span class="badge badge-warning mr-2">
-              <i class="fas fa-shield-alt mr-1"></i>{{ $role->name }}
-            </span>
+            <span class="badge badge-primary mr-2"><i class="fas fa-shield-alt mr-1"></i>{{ $role->name }}</span>
             <a href="{{ route('roles.index') }}" class="btn btn-default btn-sm">
               <i class="fas fa-arrow-left mr-1"></i>Back
             </a>
           </div>
         </div>
         <div class="card-body">
+          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
+            <i class="fas fa-user-shield mr-1"></i> Basic Info
+          </p>
+
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                <label for="name" class="font-weight-bold">
-                  Role Name <span class="text-danger">*</span>
-                </label>
-                <input id="name" name="name" type="text"
-                       class="form-control @error('name') is-invalid @enderror"
-                       value="{{ old('name', $role->name) }}" required>
+                <label for="name" class="font-weight-bold">Role Name <span class="text-danger">*</span></label>
+                <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $role->name) }}" required>
                 @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>
@@ -59,8 +52,7 @@
         </div>
       </div>
 
-      {{-- Permissions --}}
-      <div class="card card-outline card-warning shadow-sm">
+      <div class="card card-outline card-primary shadow-sm">
         <div class="card-header">
           <h3 class="card-title">
             <i class="fas fa-key mr-2"></i>Permissions
@@ -68,7 +60,7 @@
             <span class="badge badge-success ml-1" id="assignedBadge">{{ count($assignedIds) }} assigned</span>
           </h3>
           <div class="card-tools">
-            <button type="button" class="btn btn-warning btn-sm mr-1" onclick="selectAll(true)">
+            <button type="button" class="btn btn-primary btn-sm mr-1" onclick="selectAll(true)">
               <i class="fas fa-check-double mr-1"></i>Select All
             </button>
             <button type="button" class="btn btn-default btn-sm" onclick="selectAll(false)">
@@ -90,11 +82,10 @@
                           {{ $group }}
                           <span class="badge badge-light ml-1">{{ $perms->count() }}</span>
                           @if($groupAssigned > 0)
-                            <span class="badge badge-success ml-1">{{ $groupAssigned }}✓</span>
+                            <span class="badge badge-success ml-1">{{ $groupAssigned }}+</span>
                           @endif
                         </span>
-                        <button type="button" class="btn btn-xs btn-outline-warning group-toggle-btn"
-                                onclick="toggleGroup(this)">
+                        <button type="button" class="btn btn-xs btn-outline-primary group-toggle-btn" onclick="toggleGroup(this)">
                           {{ $groupAssigned === $perms->count() ? 'None' : 'All' }}
                         </button>
                       </h6>
@@ -102,13 +93,8 @@
                     <div class="card-body p-2">
                       @foreach($perms as $perm)
                         <div class="icheck-primary mb-1">
-                          <input class="perm-chk" type="checkbox"
-                                 name="permissions[]" value="{{ $perm->id }}"
-                                 id="perm_{{ $perm->id }}"
-                                 {{ in_array($perm->id, old('permissions', $assignedIds)) ? 'checked' : '' }}>
-                          <label for="perm_{{ $perm->id }}" style="font-size:.85rem;">
-                            {{ $perm->name }}
-                          </label>
+                          <input class="perm-chk" type="checkbox" name="permissions[]" value="{{ $perm->id }}" id="perm_{{ $perm->id }}" {{ in_array($perm->id, old('permissions', $assignedIds)) ? 'checked' : '' }}>
+                          <label for="perm_{{ $perm->id }}" style="font-size:.85rem;">{{ $perm->name }}</label>
                         </div>
                       @endforeach
                     </div>
@@ -123,7 +109,7 @@
           @endif
         </div>
         <div class="card-footer">
-          <button type="submit" class="btn btn-warning">
+          <button type="submit" class="btn btn-primary">
             <i class="fas fa-save mr-1"></i>Save Changes
           </button>
           <a href="{{ route('roles.index') }}" class="btn btn-default ml-2">
@@ -131,7 +117,6 @@
           </a>
         </div>
       </div>
-
     </form>
   </div>
 </section>

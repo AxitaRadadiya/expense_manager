@@ -159,19 +159,19 @@ class ProjectController extends Controller
                 // $nestedData['status']     = ucfirst($project->status);
                 // $nestedData['amount']     = $project->amount ? number_format($project->amount, 2) : '';
 
-                $actions = '<div class="btn-group">';
+                $actions = '<div class="table-action-group">';
 
                 if (auth()->user()) {
-                    $actions .= '<a href="' . route('projects.show', $project->id) . '" class="btn-sm btn-outline-info mr-1" title="View"><i class="fa fa-eye"></i></a>';
-                    $actions .= '<a href="' . route('projects.edit', $project->id) . '" class="btn-sm btn-outline-primary" title="Edit"><i class="fa fa-edit"></i></a>';
+                    $actions .= '<a href="' . route('projects.show', $project->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                    $actions .= '<a href="' . route('projects.edit', $project->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
                 }
 
                 if (auth()->user()) {
                     $actions .= '
-                        <form action="' . route('projects.destroy', $project->id) . '" method="POST" class="deleteForm" style="display:inline-block">'
+                        <form action="' . route('projects.destroy', $project->id) . '" method="POST" class="table-action-form deleteForm">'
                         . csrf_field() .
                         '<input type="hidden" name="_method" value="DELETE">'
-                        . '<button type="submit" class="deleteButton border-0 bg-white text-danger ms-1">'
+                        . '<button type="submit" class="table-action-btn is-delete deleteButton">'
                         . '<i class="fa fa-trash"></i>'
                         . '</button>'
                         . '</form>';

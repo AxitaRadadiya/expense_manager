@@ -36,15 +36,7 @@
       </div>
       <div class="card-body">
 
-        @if($errors->any())
-          <div class="alert alert-danger alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <h5><i class="icon fas fa-ban"></i> Error</h5>
-            <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
-          </div>
-        @endif
-
-        <form action="{{ route('users.update', $user->id) }}" method="POST" autocomplete="off">
+        <form id="user-edit-form" action="{{ route('users.update', $user->id) }}" method="POST" autocomplete="off" novalidate>
           @csrf
           @method('PUT')
 
@@ -59,7 +51,8 @@
                 <label class="font-weight-bold">Full Name <span class="text-danger">*</span></label>
                 <input id="name" name="name" type="text"
                        class="form-control @error('name') is-invalid @enderror"
-                       value="{{ old('name', $user->name) }}" required>
+                       value="{{ old('name', $user->name) }}" required
+                       pattern="[A-Za-z ]+" title="Name can contain only letters and spaces.">
                 @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>
@@ -80,7 +73,8 @@
                 <div class="input-group">
                   <input id="mobile" name="mobile" type="text"
                          class="form-control @error('mobile') is-invalid @enderror"
-                         value="{{ old('mobile', $user->mobile) }}" maxlength="15">
+                         value="{{ old('mobile', $user->mobile) }}" maxlength="10"
+                         inputmode="numeric" pattern="\d{10}" title="Mobile number must contain exactly 10 digits.">
                   @error('mobile')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
               </div>
@@ -227,6 +221,179 @@ function togglePwSection() {
   sec.style.display = visible ? 'none' : 'block';
   caret.style.transform = visible ? 'rotate(0deg)' : 'rotate(180deg)';
 }
+(function () {
+  var form = document.getElementById('user-edit-form');
+  if (!form) return;
+
+  var nameInput = document.getElementById('name');
+  var mobileInput = document.getElementById('mobile');
+  var emailInput = document.getElementById('email');
+  var passwordInput = document.getElementById('password');
+  var confirmPasswordInput = document.getElementById('password_confirmation');
+  var amountInput = document.getElementById('amount');
+  var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var namePattern = /^[A-Za-z ]+$/;
+  var mobilePattern = /^\d{10}$/;
+  var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+  function getFeedbackElement(input) {
+    var container = input.closest('.input-group') || input;
+    var next = container.nextElementSibling;
+    if (next && next.classList.contains('invalid-feedback')) {
+      return next;
+    }
+
+    var feedback = document.createElement('span');
+    feedback.className = 'invalid-feedback';
+    container.insertAdjacentElement('afterend', feedback);
+    return feedback;
+  }
+
+  function setError(input, message) {
+    input.classList.add('is-invalid');
+    getFeedbackElement(input).textContent = message;
+  }
+
+  function clearError(input) {
+    input.classList.remove('is-invalid');
+    getFeedbackElement(input).textContent = '';
+  }
+
+  function validateName() {
+    var value = nameInput.value.trim();
+    if (!value) {
+      setError(nameInput, 'Name is required.');
+      return false;
+    }
+    if (!namePattern.test(value)) {
+      setError(nameInput, 'Name can contain only letters and spaces.');
+      return false;
+    }
+    clearError(nameInput);
+    return true;
+  }
+
+  function validateMobile() {
+    var value = mobileInput.value.trim();
+    if (!value) {
+      clearError(mobileInput);
+      return true;
+    }
+    if (!mobilePattern.test(value)) {
+      setError(mobileInput, 'Mobile number must be exactly 10 digits.');
+      return false;
+    }
+    clearError(mobileInput);
+    return true;
+  }
+
+  function validateEmail() {
+    var value = emailInput.value.trim();
+    if (!value) {
+      setError(emailInput, 'Email is required.');
+      return false;
+    }
+    if (!emailPattern.test(value)) {
+      setError(emailInput, 'Enter a valid email address.');
+      return false;
+    }
+    clearError(emailInput);
+    return true;
+  }
+
+  function validatePassword() {
+    var value = passwordInput.value;
+    if (!value) {
+      clearError(passwordInput);
+      return true;
+    }
+    if (!passwordPattern.test(value)) {
+      setError(passwordInput, 'Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.');
+      return false;
+    }
+    clearError(passwordInput);
+    return true;
+  }
+
+  function validateAmount() {
+    var value = amountInput.value.trim();
+    if (!value) {
+      clearError(amountInput);
+      return true;
+    }
+
+    if (isNaN(value) || Number(value) < 0) {
+      setError(amountInput, 'Opening amount must be 0 or greater.');
+      return false;
+    }
+
+    clearError(amountInput);
+    return true;
+  }
+
+  function validatePasswordConfirmation() {
+    if (!passwordInput.value && !confirmPasswordInput.value) {
+      clearError(confirmPasswordInput);
+      return true;
+    }
+    if (!confirmPasswordInput.value) {
+      setError(confirmPasswordInput, 'Please confirm the password.');
+      return false;
+    }
+    if (passwordInput.value !== confirmPasswordInput.value) {
+      setError(confirmPasswordInput, 'Password confirmation does not match.');
+      return false;
+    }
+    clearError(confirmPasswordInput);
+    return true;
+  }
+
+  nameInput.addEventListener('input', function () {
+    this.value = this.value.replace(/[^A-Za-z ]/g, '');
+    validateName();
+  });
+
+  mobileInput.addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    validateMobile();
+  });
+
+  emailInput.addEventListener('input', validateEmail);
+  amountInput.addEventListener('input', validateAmount);
+  passwordInput.addEventListener('input', function () {
+    if (this.value && document.getElementById('pw-section').style.display === 'none') {
+      togglePwSection();
+    }
+    validatePassword();
+    if (confirmPasswordInput.value) {
+      validatePasswordConfirmation();
+    }
+  });
+  confirmPasswordInput.addEventListener('input', function () {
+    if (this.value && document.getElementById('pw-section').style.display === 'none') {
+      togglePwSection();
+    }
+    validatePasswordConfirmation();
+  });
+
+  form.addEventListener('submit', function (event) {
+    var isValid = [
+      validateName(),
+      validateMobile(),
+      validateEmail(),
+      validateAmount(),
+      validatePassword(),
+      validatePasswordConfirmation()
+    ].every(Boolean);
+
+    if (!isValid) {
+      event.preventDefault();
+      if ((passwordInput.value || confirmPasswordInput.value) && document.getElementById('pw-section').style.display === 'none') {
+        togglePwSection();
+      }
+    }
+  });
+})();
 @error('password') togglePwSection(); @enderror
 </script>
 @endsection

@@ -95,6 +95,16 @@ class ExpenseController extends Controller
 
         $validated['users_id'] = auth()->id();
 
+        // Ensure authenticated user before doing any file upload or balance work.
+        $user = auth()->user();
+        if (! $user) {
+            return redirect()->back()->with('error', 'User must be authenticated')->withInput();
+        }
+
+        $expenseAmount = round((float) ($validated['amount'] ?? 0), 2);
+        $availableBalance = $this->balanceService->getCurrentBalance($user);
+        $hasInsufficientBalance = $expenseAmount > $availableBalance;
+
         if ($request->hasFile('bill')) {
             $billFile = $request->file('bill');
             $fileName = time() . '_' . $billFile->getClientOriginalName();
@@ -114,19 +124,23 @@ class ExpenseController extends Controller
         $validated['reference_number'] = $validated['reference_number'] ?? '';
         $validated['note']             = $validated['note']             ?? '';
 
-        // Ensure authenticated user
-        $user = auth()->user();
-        if (! $user) {
-            return redirect()->back()->withErrors(['auth' => 'User must be authenticated'])->withInput();
-        }
-
         try {
             $this->balanceService->createExpense($user, $validated);
         } catch (\Exception $e) {
+            if (! empty($validated['bill_path']) && Storage::disk('public')->exists($validated['bill_path'])) {
+                Storage::disk('public')->delete($validated['bill_path']);
+            }
+
             \Log::error('Expense balance flow failed: ' . $e->getMessage());
+
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['expense' => $e->getMessage() ?: 'Expense could not be saved.']);
+                ->with('error', $e->getMessage() ?: 'Expense could not be saved.');
+        }
+
+        if ($hasInsufficientBalance) {
+            return redirect()->route('expense.index')
+                ->with('warning', 'Expense created successfully, but the user had insufficient balance.');
         }
 
         return redirect()->route('expense.index')
@@ -325,26 +339,26 @@ class ExpenseController extends Controller
                              . '</span>';
 
                 // ── Action Buttons ────────────────────────────────────────────
-                $actions  = '<div class="btn-group">';
+                $actions  = '<div class="table-action-group">';
                 $actions .= '<a href="' . route('expense.show', $item->id) . '"
-                                class="btn-sm text-info" title="View">
+                                class="table-action-btn is-view" title="View">
                                 <i class="fa fa-eye"></i>
-                            </a>&nbsp;';
+                            </a>';
                 if ($canEditExpense) {
                     $actions .= '<a href="' . route('expense.edit', $item->id) . '"
-                                    class="btn-sm text-primary" title="Edit">
+                                    class="table-action-btn is-edit" title="Edit">
                                     <i class="fa fa-edit"></i>
-                                </a>&nbsp;';
+                                </a>';
                 }
                 $actions .= '
                     <form action="' . route('expense.destroy', $item->id) . '"
                         method="POST"
                         data-delete-type="expense"
-                        class="d-inline">
+                        class="table-action-form">
                         ' . csrf_field() . '
                         <input type="hidden" name="_method" value="DELETE">
                         <button type="button"
-                                class="deleteButton border-0 bg-white text-danger btn-sm"
+                                class="table-action-btn is-delete deleteButton"
                                 title="Delete">
                             <i class="fa fa-trash"></i>
                         </button>

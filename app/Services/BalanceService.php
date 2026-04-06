@@ -28,6 +28,8 @@ class BalanceService
 
     public function recordOpeningBalance(User $user, float $amount, ?int $actorId = null, ?string $note = null): void
     {
+        $amount = round($amount, 2);
+
         if ($amount == 0.0) {
             return;
         }
@@ -47,6 +49,9 @@ class BalanceService
 
     public function recordAdjustment(User $user, float $oldAmount, float $newAmount, ?int $actorId = null, ?string $note = null): void
     {
+        $oldAmount = round($oldAmount, 2);
+        $newAmount = round($newAmount, 2);
+
         if ($oldAmount === $newAmount) {
             return;
         }
@@ -82,13 +87,9 @@ class BalanceService
         return DB::transaction(function () use ($user, $data) {
             $user->refresh();
 
-            $balanceBefore = (float) ($user->amount ?? 0);
-            $expenseAmount = (float) ($data['amount'] ?? 0);
-            $balanceAfter = $balanceBefore - $expenseAmount;
-
-            if ($balanceAfter < 0) {
-                throw new \RuntimeException('Insufficient available amount for this expense.');
-            }
+            $balanceBefore = round((float) ($user->amount ?? 0), 2);
+            $expenseAmount = round((float) ($data['amount'] ?? 0), 2);
+            $balanceAfter = round($balanceBefore - $expenseAmount, 2);
 
             $expense = Expense::create([
                 ...$data,
@@ -126,15 +127,15 @@ class BalanceService
         return DB::transaction(function () use ($user, $data) {
             $user->refresh();
 
-            $balanceBefore = (float) ($user->amount ?? 0);
-            $creditAmount = (float) ($data['amount'] ?? 0);
+            $balanceBefore = round((float) ($user->amount ?? 0), 2);
+            $creditAmount = round((float) ($data['amount'] ?? 0), 2);
 
             $credit = Credit::create([
                 ...$data,
                 'users_id' => $user->id,
             ]);
 
-            $balanceAfter = $balanceBefore + $creditAmount;
+            $balanceAfter = round($balanceBefore + $creditAmount, 2);
 
             $user->update([
                 'amount' => $balanceAfter,
@@ -167,6 +168,10 @@ class BalanceService
         ?int $createdBy = null,
         ?string $note = null
     ): void {
+        $changeAmount = round($changeAmount, 2);
+        $balanceBefore = round($balanceBefore, 2);
+        $balanceAfter = round($balanceAfter, 2);
+
         UserBalanceHistory::create([
             'user_id' => $userId,
             'change_type' => $changeType,

@@ -14,7 +14,9 @@ use App\Models\UserBalanceHistory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Services\BalanceService;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -49,32 +51,65 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name'        => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
             'email'       => ['required', 'email', 'unique:users,email'],
-            'mobile'      => ['nullable', 'string', 'max:15'],
+            'mobile'      => ['nullable', 'regex:/^\d{10}$/'],
             'role_id'     => ['required', 'exists:roles,id'],
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
-            'password'    => ['required', 'string', 'min:8', 'confirmed'],
+            'password'    => ['required', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'mobile'   => $request->mobile,
-            'role_id'  => $request->role_id,
-            'status'   => $request->status,
-            'note'     => $request->note,
-            'amount'   => $request->amount,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $user->assignRole((int) $request->role_id);
-
-        $this->balanceService->recordOpeningBalance($user, (float) ($request->amount ?? 0), Auth::id());
-
         $loginUser = Auth::user();
+        $openingAmount = round((float) ($request->amount ?? 0), 2);
+        $hasInsufficientBalance = false;
+
+        $user = DB::transaction(function () use ($request, $loginUser, $openingAmount, &$hasInsufficientBalance) {
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'mobile'   => $request->mobile,
+                'role_id'  => $request->role_id,
+                'status'   => $request->status,
+                'note'     => $request->note,
+                'amount'   => $openingAmount,
+                'password' => Hash::make($request->password),
+            ]);
+
+            $user->assignRole((int) $request->role_id);
+
+            $this->balanceService->recordOpeningBalance(
+                $user,
+                $openingAmount,
+                Auth::id(),
+                $openingAmount > 0 ? 'Opening amount funded during user creation' : 'Opening balance set'
+            );
+
+            if ($loginUser && $openingAmount > 0) {
+                $loginUser->refresh();
+
+                $creatorOldAmount = round((float) ($loginUser->amount ?? 0), 2);
+                $creatorNewAmount = round($creatorOldAmount - $openingAmount, 2);
+
+                $hasInsufficientBalance = $openingAmount > $creatorOldAmount;
+
+                $loginUser->update([
+                    'amount' => $creatorNewAmount,
+                ]);
+
+                $this->balanceService->recordAdjustment(
+                    $loginUser,
+                    $creatorOldAmount,
+                    $creatorNewAmount,
+                    Auth::id(),
+                    'Opening amount allocated to user: ' . $user->name
+                );
+            }
+
+            return $user;
+        });
+
         Log::info('user.created', [
             'actor_id' => $loginUser->id,
             'actor_name' => $loginUser->name,
@@ -82,6 +117,11 @@ class UserController extends Controller
             'user_name' => $user->name,
             'properties' => $request->except(['_token', 'password', 'password_confirmation']),
         ]);
+
+        if ($hasInsufficientBalance) {
+            return redirect()->route('users.index')
+                ->with('warning', 'User created successfully, but your balance became negative after funding the opening amount.');
+        }
 
         return redirect()->route('users.index')
             ->withSuccess('New user added successfully.');
@@ -145,13 +185,13 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name'        => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
             'email'       => ['required', 'email', 'unique:users,email,' . $user->id],
-            'mobile'      => ['nullable', 'string', 'max:15'],
+            'mobile'      => ['nullable', 'regex:/^\d{10}$/'],
             'role_id'     => ['required', 'exists:roles,id'],
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
-            'password'    => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password'    => ['nullable', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
 
@@ -251,15 +291,17 @@ class UserController extends Controller
 
                 $viewUrl = route('users.show', $u->id);
                 $editUrl = route('users.edit', $u->id);
-                $deleteUrl = route('users.destroy', $u->id);
+                // $deleteUrl = route('users.destroy', $u->id);
 
-                $actionHtml  = '<a href="' . $viewUrl . '" class="btn btn-sm btn-info" title="View"><i class="fas fa-eye"></i></a> ';
-                $actionHtml .= '<a href="' . $editUrl . '" class="btn btn-sm btn-primary" title="Edit"><i class="fas fa-edit"></i></a> ';
-                $actionHtml .= '<form method="POST" action="' . $deleteUrl . '" style="display:inline-block;margin:0;padding:0;">';
-                $actionHtml .= '<input type="hidden" name="_token" value="' . csrf_token() . '">';
-                $actionHtml .= '<input type="hidden" name="_method" value="DELETE">';
-                $actionHtml .= '<button type="submit" class="btn btn-sm btn-danger deleteButton" title="Delete"><i class="fas fa-trash"></i></button>';
-                $actionHtml .= '</form>';
+                $actionHtml  = '<div class="table-action-group">';
+                $actionHtml .= '<a href="' . $viewUrl . '" class="table-action-btn is-view" title="View"><i class="fas fa-eye"></i></a>';
+                $actionHtml .= '<a href="' . $editUrl . '" class="table-action-btn is-edit" title="Edit"><i class="fas fa-edit"></i></a>';
+                // $actionHtml .= '<form method="POST" action="' . $deleteUrl . '" class="table-action-form">';
+                // $actionHtml .= '<input type="hidden" name="_token" value="' . csrf_token() . '">';
+                // $actionHtml .= '<input type="hidden" name="_method" value="DELETE">';
+                // $actionHtml .= '<button type="submit" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fas fa-trash"></i></button>';
+                // $actionHtml .= '</form>';
+                $actionHtml .= '</div>';
 
                 $avatarHtml = '<div class="user-name-cell">'
                     . '<img src="' . e($u->profile_image_url) . '" alt="' . e($u->name) . '" class="user-list-avatar">'

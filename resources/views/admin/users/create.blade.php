@@ -33,15 +33,7 @@
       </div>
       <div class="card-body">
 
-        @if($errors->any())
-          <div class="alert alert-danger alert-dismissible">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <h5><i class="icon fas fa-ban"></i> Error</h5>
-            <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
-          </div>
-        @endif
-
-        <form action="{{ route('users.store') }}" method="POST" autocomplete="off">
+        <form id="user-create-form" action="{{ route('users.store') }}" method="POST" autocomplete="off" novalidate>
           @csrf
 
           {{-- Basic Info --}}
@@ -55,7 +47,8 @@
                 <label class="font-weight-bold">Full Name <span class="text-danger">*</span></label>
                 <input id="name" name="name" type="text"
                        class="form-control @error('name') is-invalid @enderror"
-                       value="{{ old('name') }}" placeholder="e.g. John Doe" required>
+                       value="{{ old('name') }}" placeholder="e.g. John Doe" required
+                       pattern="[A-Za-z ]+" title="Name can contain only letters and spaces.">
                 @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>
@@ -66,20 +59,20 @@
                   <input id="email" name="email" type="email"
                          class="form-control @error('email') is-invalid @enderror"
                          value="{{ old('email') }}" placeholder="user@example.com" required>
-                  @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
+                @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label class="font-weight-bold">Mobile Number</label>
                 <div class="input-group">
-                  
                   <input id="mobile" name="mobile" type="text"
                          class="form-control @error('mobile') is-invalid @enderror"
-                         value="{{ old('mobile') }}" placeholder="+91 98765 43210" maxlength="15">
-                  @error('mobile')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                         value="{{ old('mobile') }}" placeholder="9876543210" maxlength="10"
+                         inputmode="numeric" pattern="\d{10}" title="Mobile number must contain exactly 10 digits.">
                 </div>
+                @error('mobile')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
               </div>
             </div>
             <div class="col-md-4">
@@ -112,12 +105,11 @@
               <div class="form-group">
                 <label class="font-weight-bold">Opening Balance</label>
                 <div class="input-group">
-                 
                   <input id="amount" name="amount" type="number" min="0" step="0.01"
                          class="form-control @error('amount') is-invalid @enderror"
                          value="{{ old('amount') }}" placeholder="0.00">
-                  @error('amount')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
+                @error('amount')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 <small class="text-muted d-block mt-1">Assign this user to projects from the project screen after creation.</small>
               </div>
             </div>
@@ -144,8 +136,8 @@
                       <i id="eye1" class="fas fa-eye"></i>
                     </button>
                   </div>
-                  @error('password')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
+                @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
               </div>
             </div>
             <div class="col-md-6">
@@ -153,7 +145,7 @@
                 <label class="font-weight-bold">Confirm Password <span class="text-danger">*</span></label>
                 <div class="input-group">
                   <input id="password_confirmation" name="password_confirmation" type="password"
-                         class="form-control" placeholder="Re-enter password" required>
+                         class="form-control @error('password_confirmation') is-invalid @enderror" placeholder="Re-enter password" required>
                   <div class="input-group-append">
                     <button type="button" class="btn btn-outline-secondary"
                             onclick="togglePw('password_confirmation','eye2')">
@@ -161,6 +153,7 @@
                     </button>
                   </div>
                 </div>
+                @error('password_confirmation')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
               </div>
             </div>
           </div>
@@ -211,5 +204,184 @@ function togglePw(inputId, iconId) {
     ico.classList.replace('fa-eye-slash', 'fa-eye');
   }
 }
+
+(function () {
+  var form = document.getElementById('user-create-form');
+  if (!form) return;
+
+  var nameInput = document.getElementById('name');
+  var mobileInput = document.getElementById('mobile');
+  var emailInput = document.getElementById('email');
+  var passwordInput = document.getElementById('password');
+  var confirmPasswordInput = document.getElementById('password_confirmation');
+  var amountInput = document.getElementById('amount');
+  var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var namePattern = /^[A-Za-z ]+$/;
+  var mobilePattern = /^\d{10}$/;
+  var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+  function getFeedbackElement(input) {
+    var formGroup = input.closest('.form-group');
+    if (!formGroup) {
+      return null;
+    }
+
+    var feedback = formGroup.querySelector('[data-error-for="' + input.id + '"]');
+    if (feedback) {
+      return feedback;
+    }
+
+    feedback = document.createElement('div');
+    feedback.className = 'invalid-feedback d-block';
+    feedback.setAttribute('data-error-for', input.id);
+
+    var inputGroup = input.closest('.input-group');
+    if (inputGroup) {
+      inputGroup.insertAdjacentElement('afterend', feedback);
+    } else {
+      input.insertAdjacentElement('afterend', feedback);
+    }
+
+    return feedback;
+  }
+
+  function setError(input, message) {
+    input.classList.add('is-invalid');
+    var feedback = getFeedbackElement(input);
+    if (feedback) {
+      feedback.textContent = message;
+      feedback.style.display = 'block';
+    }
+  }
+
+  function clearError(input) {
+    input.classList.remove('is-invalid');
+    var feedback = getFeedbackElement(input);
+    if (feedback) {
+      feedback.textContent = '';
+      feedback.style.display = 'none';
+    }
+  }
+
+  function validateName() {
+    var value = nameInput.value.trim();
+    if (!value) {
+      setError(nameInput, 'Name is required.');
+      return false;
+    }
+    if (!namePattern.test(value)) {
+      setError(nameInput, 'Name can contain only letters and spaces.');
+      return false;
+    }
+    clearError(nameInput);
+    return true;
+  }
+
+  function validateMobile() {
+    var value = mobileInput.value.trim();
+    if (!value) {
+      clearError(mobileInput);
+      return true;
+    }
+    if (!mobilePattern.test(value)) {
+      setError(mobileInput, 'Mobile number must be exactly 10 digits.');
+      return false;
+    }
+    clearError(mobileInput);
+    return true;
+  }
+
+  function validateEmail() {
+    var value = emailInput.value.trim();
+    if (!value) {
+      setError(emailInput, 'Email is required.');
+      return false;
+    }
+    if (!emailPattern.test(value)) {
+      setError(emailInput, 'Enter a valid email address.');
+      return false;
+    }
+    clearError(emailInput);
+    return true;
+  }
+
+  function validatePassword() {
+    var value = passwordInput.value;
+    if (!value) {
+      setError(passwordInput, 'Password is required.');
+      return false;
+    }
+    if (!passwordPattern.test(value)) {
+      setError(passwordInput, 'Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.');
+      return false;
+    }
+    clearError(passwordInput);
+    return true;
+  }
+
+  function validateAmount() {
+    var value = amountInput.value.trim();
+    if (!value) {
+      clearError(amountInput);
+      return true;
+    }
+
+    if (isNaN(value) || Number(value) < 0) {
+      setError(amountInput, 'Opening amount must be 0 or greater.');
+      return false;
+    }
+
+    clearError(amountInput);
+    return true;
+  }
+
+  function validatePasswordConfirmation() {
+    if (!confirmPasswordInput.value) {
+      setError(confirmPasswordInput, 'Please confirm the password.');
+      return false;
+    }
+    if (passwordInput.value !== confirmPasswordInput.value) {
+      setError(confirmPasswordInput, 'Password confirmation does not match.');
+      return false;
+    }
+    clearError(confirmPasswordInput);
+    return true;
+  }
+
+  nameInput.addEventListener('input', function () {
+    this.value = this.value.replace(/[^A-Za-z ]/g, '');
+    validateName();
+  });
+
+  mobileInput.addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    validateMobile();
+  });
+
+  emailInput.addEventListener('input', validateEmail);
+  amountInput.addEventListener('input', validateAmount);
+  passwordInput.addEventListener('input', function () {
+    validatePassword();
+    if (confirmPasswordInput.value) {
+      validatePasswordConfirmation();
+    }
+  });
+  confirmPasswordInput.addEventListener('input', validatePasswordConfirmation);
+
+  form.addEventListener('submit', function (event) {
+    var isValid = [
+      validateName(),
+      validateMobile(),
+      validateEmail(),
+      validateAmount(),
+      validatePassword(),
+      validatePasswordConfirmation()
+    ].every(Boolean);
+
+    if (!isValid) {
+      event.preventDefault();
+    }
+  });
+})();
 </script>
 @endsection
