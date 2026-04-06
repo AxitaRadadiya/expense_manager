@@ -8,7 +8,9 @@ use Auth;
 use App\Models\Role;
 use Illuminate\View\View;
 use App\Models\User;
+use App\Models\Transfer;
 use App\Models\Expense;
+use App\Models\UserBalanceHistory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -95,16 +97,16 @@ class UserController extends Controller
         $expenses = $expensesQuery->latest()->paginate(15);
 
         // Transfers (paginated) and totals
-        $transfersQuery = \App\Models\Transfer::where('user_id', $user->id);
+        $transfersQuery = Transfer::where('user_id', $user->id);
         $totalTransfers = (float) $transfersQuery->sum('amount');
-        $totalTransfersSent = (float) \App\Models\Transfer::where('created_by', $user->id)->sum('amount');
+        $totalTransfersSent = (float) Transfer::where('created_by', $user->id)->sum('amount');
         $transfers = $transfersQuery->latest()->paginate(15, ['*'], 'transfers_page');
 
         // Balance histories (paginated)
-        $balanceHistories = \App\Models\UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(15, ['*'], 'balances_page');
+        $balanceHistories = UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(15, ['*'], 'balances_page');
 
         $opening = (float) optional(
-            \App\Models\UserBalanceHistory::where('user_id', $user->id)
+            UserBalanceHistory::where('user_id', $user->id)
                 ->where('change_type', 'opening')
                 ->oldest()
                 ->first()

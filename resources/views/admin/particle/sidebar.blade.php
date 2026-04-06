@@ -104,36 +104,6 @@
       </li>
 
       @endif
-
-      {{-- ── Expenses (all users) ── --}}
-      <li class="nav-header">Finance</li>
-
-      <li class="nav-item">
-        <a href="{{ route('expense.index') }}"
-           class="nav-link {{ Request::routeIs('expense.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-receipt"></i>
-          <p>Expenses</p>
-        </a>
-      </li>
-
-      <!-- @if(auth()->user() && auth()->user()->hasRole(['super-admin', 'owner']))
-      <li class="nav-item">
-        <a href="{{ route('credit.index') }}"
-           class="nav-link {{ Request::routeIs('credit.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-coins"></i>
-          <p>Credits</p>
-        </a>
-      </li> -->
-
-      <li class="nav-item">
-        <a href="{{ route('transfer.index') }}"
-           class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-exchange-alt"></i>
-          <p>Transfers</p>
-        </a>
-      </li>
-      @endif
-
     </ul>
   </nav>
 </div>

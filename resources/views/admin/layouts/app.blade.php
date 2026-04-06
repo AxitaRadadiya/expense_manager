@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   @include('admin.particle.css')
+  @include('admin.particle.theme')
 
   <style>
     /* ═══════════════════════════════════════════════

@@ -2,67 +2,44 @@
 @section('title', 'Roles')
 
 @section('content')
+<div class="page-hero">
+  <div class="orb"></div>
+  <div class="container-fluid" style="position:relative;z-index:2;">
+    <h1><i class="fas fa-shield-alt mr-2" style="color:rgba(255,255,255,.85);font-size:1.1rem;"></i>Roles</h1>
+    <p>Review system roles and permission structures with the same shared card and table styling.</p>
+  </div>
+</div>
 
-{{-- Page Header --}}
-<div class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1 class="m-0">
-          <i class="fas fa-shield-alt mr-2 text-warning"></i>Roles
-        </h1>
+<div class="pull-card">
+  <div class="container-fluid" style="padding:0;">
+    @if(session('success'))
+      <div class="alert-success-custom mt-3">
+        <i class="fas fa-check-circle"></i> {{ session('success') }}
       </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-          <li class="breadcrumb-item active">Roles</li>
-        </ol>
+    @endif
+
+    <div class="main-card table-card">
+      <div class="main-card-head">
+        <div class="main-card-title">
+          <i class="fas fa-list"></i> All Roles
+        </div>
+        <div class="page-note">Shared layout now matches the users module.</div>
+      </div>
+
+      <div class="main-card-body">
+        <div class="table-responsive">
+          <table id="roleTable" class="table table-hover w-100">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Role Name</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-{{-- Content --}}
-<section class="content">
-  <div class="container-fluid">
-
-    @if(session('success'))
-      <div class="alert alert-success alert-dismissible fade show">
-        <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
-        <button type="button" class="close" data-dismiss="alert">
-          <span>&times;</span>
-        </button>
-      </div>
-    @endif
-
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="fas fa-list mr-2"></i>All Roles
-        </h3>
-        <div class="card-tools">
-         
-            <!-- <a href="{{ route('roles.create') }}" class="btn btn-primary btn-sm">
-              <i class="fas fa-plus mr-1"></i> New Role
-            </a> -->
-         
-        </div>
-      </div>
-
-      <div class="card-body">
-        <table id="roleTable" class="table table-bordered table-striped table-hover">
-          <thead>
-            <tr>
-              <th width="5%">#</th>
-              <th width="20%">Role Name</th>
-              <!-- <th width="10%">Actions</th> -->
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-</section>
 @endsection
