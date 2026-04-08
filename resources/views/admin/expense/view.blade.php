@@ -4,18 +4,6 @@
 @section('content')
 
 @php
-  $badgeClass = match($expense->status) {
-    'approved' => 'badge-success',
-    'rejected' => 'badge-danger',
-    default => 'badge-warning',
-  };
-
-  $icon = match($expense->status) {
-    'approved' => 'fa-check-circle',
-    'rejected' => 'fa-times-circle',
-    default => 'fa-clock',
-  };
-
   $billExt = $expense->bill_path ? strtolower(pathinfo($expense->bill_path, PATHINFO_EXTENSION)) : null;
 @endphp
 
@@ -173,58 +161,6 @@
               </div>
             </div>
 
-            @can('expense-approve')
-              @if($expense->status === 'pending')
-                <div class="card card-outline card-warning shadow-sm">
-                  <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-user-check mr-2"></i>Approval Action</h3>
-                  </div>
-                  <div class="card-body">
-                    <form action="{{ route('expense.approve', $expense->id) }}" method="POST" class="mb-3">
-                      @csrf
-                      @method('PATCH')
-                      <div class="form-group">
-                        <label for="approve_remark">Approval Remark <small class="text-muted">(optional)</small></label>
-                        <textarea class="form-control form-control-sm"
-                                  name="remark" id="approve_remark"
-                                  rows="2"
-                                  placeholder="Add a remark for approval..."></textarea>
-                      </div>
-                      <button type="submit" class="btn btn-success btn-block">
-                        <i class="fas fa-check-circle mr-1"></i>Approve Expense
-                      </button>
-                    </form>
-
-                    <hr class="my-3">
-
-                    <form action="{{ route('expense.reject', $expense->id) }}" method="POST">
-                      @csrf
-                      @method('PATCH')
-                      <div class="form-group">
-                        <label for="reject_remark">Rejection Reason <span class="text-danger">*</span></label>
-                        <textarea class="form-control form-control-sm @error('remark') is-invalid @enderror"
-                                  name="remark" id="reject_remark"
-                                  rows="2"
-                                  placeholder="Provide a reason for rejection..." required>{{ old('remark') }}</textarea>
-                        @error('remark')
-                          <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
-                      </div>
-                      <button type="submit" class="btn btn-danger btn-block">
-                        <i class="fas fa-times-circle mr-1"></i>Reject Expense
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              @endif
-
-              @if(in_array($expense->status, ['approved', 'rejected']) && $expense->remark)
-                <div class="callout callout-{{ $expense->status === 'approved' ? 'success' : 'danger' }}">
-                  <p class="text-muted font-weight-bold mb-1">{{ ucfirst($expense->status) }} Remark</p>
-                  <p class="mb-0">{{ $expense->remark }}</p>
-                </div>
-              @endif
-            @endcan
           </div>
 
         </div>

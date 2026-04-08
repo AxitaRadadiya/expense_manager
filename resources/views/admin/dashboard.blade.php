@@ -143,7 +143,7 @@
                       <th>#</th>
                       <th>User</th>
                       <th class="text-right">Total Debited</th>
-                      <th class="text-right">Count</th>
+                      <!-- <th class="text-right">Count</th> -->
                     </tr>
                   </thead>
                   <tbody>
@@ -156,7 +156,7 @@
                         <td class="text-right">
                           <span class="badge badge-danger">&#8377;{{ number_format((float) ($u->total_debited ?? 0), 2) }}</span>
                         </td>
-                        <td class="text-right text-muted">{{ $u->expenses_count }}</td>
+                        <!-- <td class="text-right text-muted">{{ $u->expenses_count }}</td> -->
                       </tr>
                     @empty
                       <tr>
@@ -169,7 +169,7 @@
                       <tr>
                         <td colspan="2" class="text-right font-weight-bold">Total</td>
                         <td class="text-right font-weight-bold text-danger">&#8377;{{ number_format((float) $userDebitedTotals->sum('total_debited'), 2) }}</td>
-                        <td class="text-right font-weight-bold">{{ $userDebitedTotals->sum('expenses_count') }}</td>
+                        <!-- <td class="text-right font-weight-bold">{{ $userDebitedTotals->sum('expenses_count') }}</td> -->
                       </tr>
                     </tfoot>
                   @endif
@@ -186,7 +186,7 @@
                       <th>#</th>
                       <th>Project</th>
                       <th class="text-right">Total Debited</th>
-                      <th class="text-right">Count</th>
+                      <!-- <th class="text-right">Count</th> -->
                     </tr>
                   </thead>
                   <tbody>
@@ -199,7 +199,7 @@
                         <td class="text-right">
                           <span class="badge badge-danger">&#8377;{{ number_format((float) ($p->total_debited ?? 0), 2) }}</span>
                         </td>
-                        <td class="text-right text-muted">{{ $p->expenses_count }}</td>
+                        <!-- <td class="text-right text-muted">{{ $p->expenses_count }}</td> -->
                       </tr>
                     @empty
                       <tr>
@@ -212,7 +212,7 @@
                       <tr>
                         <td colspan="2" class="text-right font-weight-bold">Total</td>
                         <td class="text-right font-weight-bold text-danger">&#8377;{{ number_format((float) $projectDebitedTotals->sum('total_debited'), 2) }}</td>
-                        <td class="text-right font-weight-bold">{{ $projectDebitedTotals->sum('expenses_count') }}</td>
+                        <!-- <td class="text-right font-weight-bold">{{ $projectDebitedTotals->sum('expenses_count') }}</td> -->
                       </tr>
                     </tfoot>
                   @endif
@@ -284,7 +284,7 @@
                     <th>#</th>
                     <th>Project</th>
                     <th class="text-right">Total Credit</th>
-                    <th class="text-right">Count</th>
+                    <!-- <th class="text-right">Count</th> -->
                   </tr>
                 </thead>
                 <tbody>
@@ -297,7 +297,7 @@
                       <td class="text-right">
                         <span class="badge badge-success">&#8377;{{ number_format((float) ($credit->total_credited ?? 0), 2) }}</span>
                       </td>
-                      <td class="text-right text-muted">{{ $credit->credits_count }}</td>
+                      <!-- <td class="text-right text-muted">{{ $credit->credits_count }}</td> -->
                     </tr>
                   @empty
                     <tr>

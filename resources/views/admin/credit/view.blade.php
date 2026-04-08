@@ -38,7 +38,7 @@
           <div class="col-md-6 mb-3">
             <div class="border rounded p-3 bg-light h-100">
               <small class="text-muted d-block mb-1">Project</small>
-              <div class="font-weight-bold">{{ $credit->project->name ?? '-' }}</div>
+              <div class="font-weight-bold">{{ optional($credit->project)->name ?? '-' }}</div>
             </div>
           </div>
           <div class="col-md-6 mb-3">
@@ -56,7 +56,7 @@
           <div class="col-md-6 mb-3">
             <div class="border rounded p-3 bg-light h-100">
               <small class="text-muted d-block mb-1">Created By</small>
-              <div class="font-weight-bold">{{ $credit->creator->name ?? '-' }}</div>
+              <div class="font-weight-bold">{{ optional($credit->user)->name ?? '-' }}</div>
             </div>
           </div>
           <div class="col-md-6 mb-3">
@@ -65,6 +65,24 @@
               <div class="font-weight-bold">{{ $credit->created_at ? $credit->created_at->format('d M, Y h:i A') : '-' }}</div>
             </div>
           </div>
+          <div class="col-md-6 mb-3">
+            <div class="border rounded p-3 bg-light h-100">
+              <small class="text-muted d-block mb-1">Payment Mode</small>
+              <div class="font-weight-bold text-capitalize">{{ $credit->payment_mode ?: '-' }}</div>
+            </div>
+          </div>
+          <!-- <div class="col-md-6 mb-3">
+            <div class="border rounded p-3 bg-light h-100">
+              <small class="text-muted d-block mb-1">Bill</small>
+              <div class="font-weight-bold">
+                @if($credit->bill_path)
+                  <a href="{{ asset('storage/' . $credit->bill_path) }}" target="_blank">{{ $credit->bill_original_name ?: 'View Uploaded Bill' }}</a>
+                @else
+                  -
+                @endif
+              </div>
+            </div>
+          </div> -->
           <div class="col-12 mb-3">
             <div class="border rounded p-3">
               <small class="text-muted d-block mb-2">Description</small>

@@ -12,12 +12,6 @@
 
 <div class="pull-card">
   <div class="container-fluid" style="padding:0;">
-    @if(session('success'))
-      <div class="alert-success-custom mt-3">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
-      </div>
-    @endif
-
     <div class="main-card table-card">
       <div class="main-card-head">
         <div class="main-card-title">
@@ -33,6 +27,7 @@
               <tr>
                 <th>#</th>
                 <th>Role Name</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody></tbody>

@@ -159,14 +159,21 @@ class ProjectController extends Controller
                 // $nestedData['status']     = ucfirst($project->status);
                 // $nestedData['amount']     = $project->amount ? number_format($project->amount, 2) : '';
 
+                $auth = auth()->user();
+                $canViewProject = $auth?->can('project-view') ?? false;
+                $canEditProject = $auth?->can('project-edit') ?? false;
+                $canDeleteProject = $auth?->can('project-delete') ?? false;
+
                 $actions = '<div class="table-action-group">';
 
-                if (auth()->user()) {
+                if ($canViewProject) {
                     $actions .= '<a href="' . route('projects.show', $project->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                }
+                if ($canEditProject) {
                     $actions .= '<a href="' . route('projects.edit', $project->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
                 }
 
-                if (auth()->user()) {
+                if ($canDeleteProject) {
                     $actions .= '
                         <form action="' . route('projects.destroy', $project->id) . '" method="POST" class="table-action-form deleteForm">'
                         . csrf_field() .

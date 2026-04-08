@@ -44,7 +44,7 @@
             <div class="col-md-4">
               <div class="form-group">
                 <label for="name" class="font-weight-bold">Role Name <span class="text-danger">*</span></label>
-                <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $role->name) }}" required>
+                <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $role->name) }}" required readonly>
                 @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>

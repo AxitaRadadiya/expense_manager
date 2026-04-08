@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('projects_id')->constrained()->cascadeOnDelete();
             $table->foreignId('users_id')->constrained()->cascadeOnDelete();
             $table->date('credit_date');
-            $table->string('category');
+            $table->string('category')->nullable();
             $table->string('sub_category')->nullable();
             $table->decimal('amount', 12, 2);
             $table->text('description')->nullable();

@@ -6,19 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\Project;
 use App\Models\User;
-use App\Models\UserBalanceHistory;
 use App\Models\Transfer;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use App\Services\BalanceService;
+use App\Services\ExpenseService;
+use App\Services\FileUploadService;
 
 class ExpenseController extends Controller
 {
-    public function __construct(protected BalanceService $balanceService)
-    {
+    public function __construct(
+        protected BalanceService $balanceService,
+        protected ExpenseService $expenseService,
+        protected FileUploadService $fileUploadService
+    ) {
     }
 
     public function index(): View
@@ -63,7 +68,7 @@ class ExpenseController extends Controller
             [
                 'projects_id'  => 'required|exists:projects,id',
                 'expense_date'     => 'required|date|after_or_equal:today',
-                'amount'       => 'required|numeric|min:0',
+                'amount'       => 'required|numeric|min:0.01',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
 
@@ -83,7 +88,7 @@ class ExpenseController extends Controller
 
                 'amount.required'            => 'Please enter the amount.',
                 'amount.numeric'             => 'The amount must be a valid number.',
-                'amount.min'                 => 'The amount must be at least 0.',
+                'amount.min'                 => 'The amount must be greater than 0.',
 
                 'bill.file'             => 'The bill must be a valid file.',
                 'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
@@ -107,11 +112,9 @@ class ExpenseController extends Controller
 
         if ($request->hasFile('bill')) {
             $billFile = $request->file('bill');
-            $fileName = time() . '_' . $billFile->getClientOriginalName();
+            $billPath = $this->fileUploadService->storeFile($billFile, 'expense/bill');
 
-            $billFile->storeAs('expense/bill', $fileName, 'public');
-
-            $validated['bill_path']          = 'expense/bill/' . $fileName;
+            $validated['bill_path'] = $billPath;
             $validated['bill_original_name'] = $billFile->getClientOriginalName();
         }
 
@@ -125,10 +128,10 @@ class ExpenseController extends Controller
         $validated['note']             = $validated['note']             ?? '';
 
         try {
-            $this->balanceService->createExpense($user, $validated);
+            $this->expenseService->createExpense($user, $validated);
         } catch (\Exception $e) {
-            if (! empty($validated['bill_path']) && Storage::disk('public')->exists($validated['bill_path'])) {
-                Storage::disk('public')->delete($validated['bill_path']);
+            if (! empty($validated['bill_path'])) {
+                $this->fileUploadService->deleteFile($validated['bill_path']);
             }
 
             \Log::error('Expense balance flow failed: ' . $e->getMessage());
@@ -185,7 +188,7 @@ class ExpenseController extends Controller
                         }
                     },
                 ],
-                'amount'       => 'required|numeric|min:0',
+                'amount'       => 'required|numeric|min:0.01',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
                 'payment_mode'     => 'required|in:cash,online,cheque',
@@ -196,13 +199,11 @@ class ExpenseController extends Controller
             [
                 'projects_id.required'         => 'Please select a project.',
                 'projects_id.exists'           => 'The selected project is invalid.',
-
                 'expense_date.required'        => 'Please enter the expense date.',
                 'expense_date.date'            => 'The expense date must be a valid date.',
-
                 'amount.required'              => 'Please enter the amount.',
                 'amount.numeric'               => 'The amount must be a valid number.',
-                'amount.min'                   => 'The amount must be at least 0.',
+                'amount.min'                   => 'The amount must be greater than 0.',
                 'bill.file'             => 'The bill must be a valid file.',
                 'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
                 'bill.max'              => 'The bill file size must not exceed 2MB.',
@@ -215,16 +216,12 @@ class ExpenseController extends Controller
         if ($request->hasFile('bill')) {
 
             // Delete old bill file if exists
-            if ($expense->bill_path && Storage::disk('public')->exists($expense->bill_path)) {
-                Storage::disk('public')->delete($expense->bill_path);
+            if ($expense->bill_path) {
+                $this->fileUploadService->deleteFile($expense->bill_path);
             }
 
             $billFile = $request->file('bill');
-            $fileName = time() . '_' . $billFile->getClientOriginalName();
-
-            $billFile->storeAs('expense/bill', $fileName, 'public');
-
-            $validated['bill_path']          = 'expense/bill/' . $fileName;
+            $validated['bill_path'] = $this->fileUploadService->storeFile($billFile, 'expense/bill');
             $validated['bill_original_name'] = $billFile->getClientOriginalName();
 
         } else {
@@ -244,6 +241,44 @@ class ExpenseController extends Controller
 
         return redirect()->route('expense.index')
             ->with('success', 'Expense updated successfully.');
+    }
+
+    public function approve(Request $request, $id): RedirectResponse
+    {
+        Gate::authorize('expense-approve');
+
+        $expense = Expense::findOrFail($id);
+
+        $validated = $request->validate([
+            'remark' => 'nullable|string|max:1000',
+        ]);
+
+        $expense->update([
+            'status' => 'approved',
+            'remark' => $validated['remark'] ?? '',
+        ]);
+
+        return redirect()->route('expense.show', $expense->id)
+            ->with('success', 'Expense approved successfully.');
+    }
+
+    public function reject(Request $request, $id): RedirectResponse
+    {
+        Gate::authorize('expense-approve');
+
+        $expense = Expense::findOrFail($id);
+
+        $validated = $request->validate([
+            'remark' => 'required|string|max:1000',
+        ]);
+
+        $expense->update([
+            'status' => 'rejected',
+            'remark' => $validated['remark'],
+        ]);
+
+        return redirect()->route('expense.show', $expense->id)
+            ->with('success', 'Expense rejected successfully.');
     }
 
     public function destroy($id): RedirectResponse
@@ -275,7 +310,9 @@ class ExpenseController extends Controller
         ];
 
         $auth = auth()->user();
-        $canEditExpense = $auth && method_exists($auth, 'hasRole') && $auth->hasRole('super-admin');
+        $canViewExpense = $auth?->can('expense-view') ?? false;
+        $canEditExpense = $auth?->can('expense-edit') ?? false;
+        $canDeleteExpense = $auth?->can('expense-delete') ?? false;
 
         // Base query respects permissions: super-admin sees all, others only their own
         $baseQuery = Expense::query();
@@ -340,29 +377,33 @@ class ExpenseController extends Controller
 
                 // ── Action Buttons ────────────────────────────────────────────
                 $actions  = '<div class="table-action-group">';
-                $actions .= '<a href="' . route('expense.show', $item->id) . '"
-                                class="table-action-btn is-view" title="View">
-                                <i class="fa fa-eye"></i>
-                            </a>';
+                if ($canViewExpense) {
+                    $actions .= '<a href="' . route('expense.show', $item->id) . '"
+                                    class="table-action-btn is-view" title="View">
+                                    <i class="fa fa-eye"></i>
+                                </a>';
+                }
                 if ($canEditExpense) {
                     $actions .= '<a href="' . route('expense.edit', $item->id) . '"
                                     class="table-action-btn is-edit" title="Edit">
                                     <i class="fa fa-edit"></i>
                                 </a>';
                 }
-                $actions .= '
-                    <form action="' . route('expense.destroy', $item->id) . '"
-                        method="POST"
-                        data-delete-type="expense"
-                        class="table-action-form">
-                        ' . csrf_field() . '
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button type="button"
-                                class="table-action-btn is-delete deleteButton"
-                                title="Delete">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </form>';
+                if ($canDeleteExpense) {
+                    $actions .= '
+                        <form action="' . route('expense.destroy', $item->id) . '"
+                            method="POST"
+                            data-delete-type="expense"
+                            class="table-action-form">
+                            ' . csrf_field() . '
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="button"
+                                    class="table-action-btn is-delete deleteButton"
+                                    title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </form>';
+                }
                 $actions .= '</div>';
 
                 $data[] = [

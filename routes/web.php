@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TransferController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Admin\AdminController;
@@ -51,10 +52,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('projects', ProjectController::class);
     // Expenses
     Route::get('expense-list', [ExpenseController::class, 'list'])->name('expense.list');
+    Route::patch('expense/{expense}/approve', [ExpenseController::class, 'approve'])->name('expense.approve');
+    Route::patch('expense/{expense}/reject', [ExpenseController::class, 'reject'])->name('expense.reject');
     Route::resource('expense', ExpenseController::class);
     // Credits
     Route::get('credit-list', [CreditController::class, 'list'])->name('credit.list');
-    Route::resource('credit', CreditController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+    Route::resource('credit', CreditController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/download', [ReportController::class, 'download'])->name('reports.download');
+    Route::get('reports/timeline-list', [ReportController::class, 'timelineList'])->name('reports.timeline-list');
    
     Route::get('category-list', [CategoryController::class, 'list'])->name('category.list');
     Route::resource('category', CategoryController::class);

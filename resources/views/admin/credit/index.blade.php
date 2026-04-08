@@ -32,7 +32,6 @@
                 <th>Credit Date</th>
                 <th>Amount</th>
                 <th>Created By</th>
-                <th>Note</th>
                 <th>Actions</th>
               </tr>
             </thead>

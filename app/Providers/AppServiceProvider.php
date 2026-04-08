@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\Events\Login;               // ✅ added
-use Illuminate\Auth\Events\Logout;              // ✅ added
-use Illuminate\Support\Facades\Event;           // ✅ added
+use App\Models\User;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,8 +24,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // ✅ Log Login / Logout events automatically
-        Event::listen(Login::class,  [\App\Listeners\LogAuthActivity::class, 'handleLogin']);
+        Event::listen(Login::class, [\App\Listeners\LogAuthActivity::class, 'handleLogin']);
         Event::listen(Logout::class, [\App\Listeners\LogAuthActivity::class, 'handleLogout']);
+
+        Gate::before(function (?User $user, string $ability) {
+            if ($user && $user->hasPermission($ability)) {
+                return true;
+            }
+
+            return null;
+        });
     }
 }

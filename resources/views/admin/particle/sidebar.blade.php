@@ -11,7 +11,6 @@
   @php
     $authUser = auth()->user();
     $isSupervisor = $authUser && $authUser->hasRole('superviour');
-    $canManageExpenses = $authUser && $authUser->hasRole(['super-admin', 'owner', 'superviour']);
   @endphp
 
   <nav class="mt-1">
@@ -32,7 +31,7 @@
       <li class="nav-header">System</li>
       @endif
 
-      @if($canManageExpenses)
+      @if($authUser && $authUser->can('expense-view'))
       <li class="nav-item">
         <a href="{{ route('expense.index') }}"
           class="nav-link {{ Request::routeIs('expense.*') ? 'active' : '' }}">
@@ -40,8 +39,9 @@
           <p>Expenses</p>
         </a>
       </li>
+      @endif
 
-      @if(! $isSupervisor)
+      @if($authUser && $authUser->can('credit-view'))
       <li class="nav-item">
         <a href="{{ route('credit.index') }}"
           class="nav-link {{ Request::routeIs('credit.*') ? 'active' : '' }}">
@@ -49,18 +49,29 @@
           <p>Credits</p>
         </a>
       </li>
-
-      <li class="nav-item">
-        <a href="{{ route('transfer.index') }}"
-          class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-exchange-alt"></i>
-          <p>Transfers</p>
-        </a>
-      </li>
-      @endif
       @endif
 
       @if($authUser && $authUser->hasRole('super-admin'))
+      <li class="nav-item">
+        <a href="{{ route('reports.index') }}"
+          class="nav-link {{ Request::routeIs('reports.*') ? 'active' : '' }}">
+          <i class="nav-icon fas fa-chart-bar"></i>
+          <p>Reports</p>
+        </a>
+      </li>
+      @endif
+
+      @if($authUser && $authUser->can('credit-view') && ! $isSupervisor)
+        <li class="nav-item">
+          <a href="{{ route('transfer.index') }}"
+            class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-exchange-alt"></i>
+            <p>Transfers</p>
+          </a>
+        </li>
+      @endif
+
+      @if($authUser && $authUser->can('user-view'))
       <li class="nav-item">
         <a href="{{ route('users.index') }}"
           class="nav-link {{ Request::routeIs('users.*') ? 'active' : '' }}">
@@ -68,7 +79,9 @@
           <p>Users</p>
         </a>
       </li>
+      @endif
 
+      @if($authUser && $authUser->hasRole('super-admin'))
       <li class="nav-item">
         <a href="{{ route('category.index') }}"
           class="nav-link {{ Request::routeIs('category.*') ? 'active' : '' }}">
@@ -76,7 +89,9 @@
           <p>Categories</p>
         </a>
       </li>
+      @endif
 
+      @if($authUser && $authUser->can('project-view'))
       <li class="nav-item">
         <a href="{{ route('projects.index') }}"
           class="nav-link {{ Request::routeIs('projects.*') ? 'active' : '' }}">
@@ -84,7 +99,9 @@
           <p>Projects</p>
         </a>
       </li>
+      @endif
 
+      @if($authUser && $authUser->can('role-view'))
       <li class="nav-item {{ Request::routeIs('roles.*','category.*','projects.*') ? 'menu-open' : '' }}">
         <a href="#" class="nav-link {{ Request::routeIs('roles.*','category.*','projects.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-sliders-h"></i>
@@ -103,7 +120,9 @@
           </li>
         </ul>
       </li>
+      @endif
 
+      @if($authUser && $authUser->hasRole('super-admin'))
       <li class="nav-item">
         <a href="{{ route('activity-logs.index') }}"
           class="nav-link {{ Request::routeIs('activity-logs.*') ? 'active' : '' }}">

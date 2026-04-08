@@ -287,6 +287,10 @@ class UserController extends Controller
 
             $data = [];
 
+            $auth = auth()->user();
+            $canViewUser = $auth?->can('user-view') ?? false;
+            $canEditUser = $auth?->can('user-edit') ?? false;
+
             foreach ($users as $i => $u) {
 
                 $viewUrl = route('users.show', $u->id);
@@ -294,8 +298,12 @@ class UserController extends Controller
                 // $deleteUrl = route('users.destroy', $u->id);
 
                 $actionHtml  = '<div class="table-action-group">';
-                $actionHtml .= '<a href="' . $viewUrl . '" class="table-action-btn is-view" title="View"><i class="fas fa-eye"></i></a>';
-                $actionHtml .= '<a href="' . $editUrl . '" class="table-action-btn is-edit" title="Edit"><i class="fas fa-edit"></i></a>';
+                if ($canViewUser) {
+                    $actionHtml .= '<a href="' . $viewUrl . '" class="table-action-btn is-view" title="View"><i class="fas fa-eye"></i></a>';
+                }
+                if ($canEditUser) {
+                    $actionHtml .= '<a href="' . $editUrl . '" class="table-action-btn is-edit" title="Edit"><i class="fas fa-edit"></i></a>';
+                }
                 // $actionHtml .= '<form method="POST" action="' . $deleteUrl . '" class="table-action-form">';
                 // $actionHtml .= '<input type="hidden" name="_token" value="' . csrf_token() . '">';
                 // $actionHtml .= '<input type="hidden" name="_method" value="DELETE">';

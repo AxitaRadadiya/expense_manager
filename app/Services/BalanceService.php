@@ -71,14 +71,57 @@ class BalanceService
 
     public function createTransfer(User $sender, User $recipient, array $data): Transfer
     {
-        return DB::transaction(function () use ($recipient, $data) {
-            return Transfer::create([
+        return DB::transaction(function () use ($sender, $recipient, $data) {
+            $sender->refresh();
+            $recipient->refresh();
+
+            $transferAmount = round((float) ($data['amount'] ?? 0), 2);
+            $senderBalanceBefore = round((float) ($sender->amount ?? 0), 2);
+            $recipientBalanceBefore = round((float) ($recipient->amount ?? 0), 2);
+            $senderBalanceAfter = round($senderBalanceBefore - $transferAmount, 2);
+            $recipientBalanceAfter = round($recipientBalanceBefore + $transferAmount, 2);
+
+            $transfer = Transfer::create([
                 'user_id' => $recipient->id,
-                'created_by' => auth()->id(),
+                'created_by' => $sender->id,
                 'start_date' => $data['start_date'] ?? null,
-                'amount' => (float) $data['amount'],
+                'amount' => $transferAmount,
                 'note' => $data['note'] ?? null,
             ]);
+
+            $sender->update([
+                'amount' => $senderBalanceAfter,
+            ]);
+
+            $recipient->update([
+                'amount' => $recipientBalanceAfter,
+            ]);
+
+            $this->createHistory(
+                userId: $sender->id,
+                changeType: 'transfer',
+                changeAmount: -$transferAmount,
+                balanceBefore: $senderBalanceBefore,
+                balanceAfter: $senderBalanceAfter,
+                referenceType: 'transfer',
+                referenceId: $transfer->id,
+                createdBy: $sender->id,
+                note: $data['note'] ?? ('Transfer sent to ' . $recipient->name)
+            );
+
+            $this->createHistory(
+                userId: $recipient->id,
+                changeType: 'transfer',
+                changeAmount: $transferAmount,
+                balanceBefore: $recipientBalanceBefore,
+                balanceAfter: $recipientBalanceAfter,
+                referenceType: 'transfer',
+                referenceId: $transfer->id,
+                createdBy: $sender->id,
+                note: $data['note'] ?? ('Transfer received from ' . $sender->name)
+            );
+
+            return $transfer;
         });
     }
 

@@ -3,17 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Expense;
 use App\Models\Transfer;
 use App\Models\User;
-use App\Models\UserBalanceHistory;
-use App\Services\BalanceService;
+use App\Services\TransferService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class TransferController extends Controller
 {
-    public function __construct(protected BalanceService $balanceService)
+    public function __construct(protected TransferService $transferService)
     {
         $this->middleware('auth');
     }
@@ -22,13 +19,13 @@ class TransferController extends Controller
     {
         $auth = auth()->user();
 
-        if (! $auth || ! (method_exists($auth, 'hasRole') && $auth->hasRole(['super-admin', 'owner']))) {
+        if (! $auth) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized to view transfers.');
         }
 
-        $transfers = Transfer::with(['user', 'creator'])->latest()->get();
+        $canViewAllTransfers = method_exists($auth, 'hasRole') && $auth->hasRole('super-admin');
 
-        return view('admin.transfer.index', compact('transfers'));
+        return view('admin.transfer.index', compact('canViewAllTransfers'));
     }
 
     public function create()
@@ -93,7 +90,7 @@ class TransferController extends Controller
         }
 
         $recipient = User::findOrFail($data['user_id']);
-        $this->balanceService->createTransfer($sender, $recipient, $data);
+        $this->transferService->createTransfer($sender, $recipient, $data);
 
         return redirect()->route('transfer.index')
             ->with('success', 'Transfer saved successfully.');
@@ -103,7 +100,7 @@ class TransferController extends Controller
     {
         $auth = auth()->user();
 
-        if (! $auth || ! (method_exists($auth, 'hasRole') && $auth->hasRole(['super-admin', 'owner']))) {
+        if (! $auth) {
             return response()->json([
                 'draw' => intval($request->input('draw', 1)),
                 'recordsTotal' => 0,
@@ -113,16 +110,13 @@ class TransferController extends Controller
         }
 
         $query = Transfer::with('user', 'creator');
+        $canViewAllTransfers = method_exists($auth, 'hasRole') && $auth->hasRole('super-admin');
 
-        if ($auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            $assignedProjectIds = $auth->assignedProjectIds();
-
-            $query->whereHas('user', function ($q) use ($assignedProjectIds) {
-                $q->whereHas('projects', function ($projectQuery) use ($assignedProjectIds) {
-                    $projectQuery->whereIn('projects.id', $assignedProjectIds);
-                });
-            });
+        if (! $canViewAllTransfers) {
+            $query->where('created_by', $auth->id);
         }
+
+        $totalData = (clone $query)->count();
 
         if (! empty($request->input('search.value'))) {
             $search = $request->input('search.value');
@@ -145,7 +139,6 @@ class TransferController extends Controller
             $query->latest();
         }
 
-        $totalData = Transfer::count();
         $totalFiltered = $query->count();
 
         $transfers = $query

@@ -79,8 +79,8 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="amount" class="font-weight-bold">Amount (Rs) <span class="text-danger">*</span></label>
-                <input type="number" class="form-control @error('amount') is-invalid @enderror" name="amount" id="amount" value="{{ old('amount', $expense->amount) }}" min="0" step="0.01" placeholder="0.00" required>
-                @error('amount')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                <input type="number" class="form-control @error('amount') is-invalid @enderror" name="amount" id="amount" value="{{ old('amount', $expense->amount) }}" min="0.01" step="0.01" placeholder="0.00" required>
+                @error('amount')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
               </div>
             </div>
 
@@ -176,6 +176,64 @@
 @push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    var amountInput = document.getElementById('amount');
+    var form = amountInput ? amountInput.form : null;
+
+    function getFeedbackElement(input) {
+      var sibling = input.nextElementSibling;
+      if (sibling && sibling.classList.contains('invalid-feedback')) {
+        return sibling;
+      }
+
+      var feedback = document.createElement('span');
+      feedback.className = 'invalid-feedback';
+      input.insertAdjacentElement('afterend', feedback);
+
+      return feedback;
+    }
+
+    function setError(input, message) {
+      input.classList.add('is-invalid');
+      getFeedbackElement(input).textContent = message;
+    }
+
+    function clearError(input) {
+      input.classList.remove('is-invalid');
+      getFeedbackElement(input).textContent = '';
+    }
+
+    function validateAmount() {
+      if (!amountInput) {
+        return true;
+      }
+
+      var value = amountInput.value.trim();
+      if (!value) {
+        clearError(amountInput);
+        return true;
+      }
+
+      if (isNaN(value) || Number(value) <= 0) {
+        setError(amountInput, 'Amount must be greater than 0.');
+        return false;
+      }
+
+      clearError(amountInput);
+      return true;
+    }
+
+    if (amountInput) {
+      amountInput.addEventListener('input', validateAmount);
+    }
+
+    if (form) {
+      form.addEventListener('submit', function (event) {
+        if (!validateAmount()) {
+          event.preventDefault();
+        }
+      });
+    }
+
     document.getElementById('bill').addEventListener('change', function () {
       var fileName = this.files[0] ? this.files[0].name : (this.getAttribute('data-placeholder') || 'Choose file...');
       this.nextElementSibling.textContent = fileName;

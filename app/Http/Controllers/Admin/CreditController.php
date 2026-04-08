@@ -6,17 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Credit;
 use App\Models\Project;
-use App\Services\BalanceService;
+use App\Models\UserBalanceHistory;
+use App\Services\CreditService;
+use App\Services\FileUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CreditController extends Controller
 {
-    public function __construct(protected BalanceService $balanceService)
-    {
+    public function __construct(
+        protected CreditService $creditService,
+        protected FileUploadService $fileUploadService
+    ) {
         $this->middleware('auth');
     }
 
@@ -24,16 +27,11 @@ class CreditController extends Controller
     {
         $auth = auth()->user();
 
-        if (! $this->canManageCredits($auth)) {
+        if (! $this->creditService->canManageCredits($auth)) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized to view credits.');
         }
 
-        $credits = Credit::with(['project', 'user'])
-            ->when($auth->hasRole('owner') && ! $auth->hasRole('super-admin'), function ($query) use ($auth) {
-                $query->whereIn('projects_id', $auth->assignedProjectIds());
-            })
-            ->latest()
-            ->get();
+        $credits = $this->creditService->getFilteredCredits($auth);
 
         return view('admin.credit.index', compact('credits'));
     }
@@ -42,11 +40,11 @@ class CreditController extends Controller
     {
         $auth = auth()->user();
 
-        if (! $this->canManageCredits($auth)) {
+        if (! $this->creditService->canManageCredits($auth)) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized to add credit.');
         }
 
-        $projects = $this->allowedProjects($auth);
+        $projects = $this->creditService->getAllowedProjects($auth);
         $categories = Category::orderBy('name')->get();
 
         return view('admin.credit.create', compact('projects', 'categories'));
@@ -56,14 +54,14 @@ class CreditController extends Controller
     {
         $auth = auth()->user();
 
-        if (! $this->canManageCredits($auth)) {
+        if (! $this->creditService->canManageCredits($auth)) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized to add credit.');
         }
 
         $data = $request->validate([
             'projects_id' => 'required|exists:projects,id',
             'credit_date' => 'required|date|after_or_equal:today',
-            'category' => 'required|string|max:255',
+            'category' => 'nullable|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'payment_mode' => 'nullable|in:cash,online,cheque',
@@ -75,14 +73,12 @@ class CreditController extends Controller
             'projects_id.exists' => 'The selected project is invalid.',
             'credit_date.required' => 'Please enter the credit date.',
             'credit_date.after_or_equal' => 'The credit date cannot be a past date.',
-            'category.required' => 'Please select a credit category.',
             'amount.required' => 'Please enter the amount.',
             'amount.min' => 'The amount must be greater than 0.',
         ]);
 
-        $allowedProjectIds = $this->allowedProjects($auth)->pluck('id')->map(fn ($id) => (int) $id)->all();
-
-        if (! in_array((int) $data['projects_id'], $allowedProjectIds, true)) {
+        // Validate project access
+        if (! $this->creditService->canAccessProject($auth, (int) $data['projects_id'])) {
             return redirect()->back()->withInput()->withErrors([
                 'projects_id' => 'You can only add credit for your assigned project.',
             ]);
@@ -90,9 +86,7 @@ class CreditController extends Controller
 
         if ($request->hasFile('bill')) {
             $billFile = $request->file('bill');
-            $fileName = time() . '_' . $billFile->getClientOriginalName();
-            $billFile->storeAs('credit/bill', $fileName, 'public');
-            $data['bill_path'] = 'credit/bill/' . $fileName;
+            $data['bill_path'] = $this->fileUploadService->storeFile($billFile, 'credit/bill');
             $data['bill_original_name'] = $billFile->getClientOriginalName();
         }
 
@@ -102,7 +96,7 @@ class CreditController extends Controller
         $data['note'] = $data['note'] ?? '';
         $data['status'] = $data['status'] ?? 'pending';
 
-        $this->balanceService->createCredit($auth, $data);
+        $this->creditService->createCredit($auth, $data);
 
         return redirect()->route('credit.index')->with('success', 'Credit created successfully.');
     }
@@ -111,7 +105,7 @@ class CreditController extends Controller
     {
         $auth = auth()->user();
 
-        if (! $this->canAccessCredit($auth, $credit)) {
+        if (! $this->creditService->canAccessCredit($auth, $credit)) {
             return redirect()->route('credit.index')->with('error', 'Unauthorized to view this credit.');
         }
 
@@ -124,12 +118,12 @@ class CreditController extends Controller
     {
         $auth = auth()->user();
 
-        if (! $this->canAccessCredit($auth, $credit)) {
+        if (! $this->creditService->canAccessCredit($auth, $credit)) {
             return redirect()->route('credit.index')->with('error', 'Unauthorized to edit this credit.');
         }
 
         $credit->load(['project', 'user']);
-        $projects = $this->allowedProjects($auth);
+        $projects = $this->creditService->getAllowedProjects($auth);
         $categories = Category::orderBy('name')->get();
 
         return view('admin.credit.edit', compact('credit', 'projects', 'categories'));
@@ -139,7 +133,7 @@ class CreditController extends Controller
     {
         $auth = auth()->user();
 
-        if (! $this->canAccessCredit($auth, $credit)) {
+        if (! $this->creditService->canAccessCredit($auth, $credit)) {
             return redirect()->route('credit.index')->with('error', 'Unauthorized to edit this credit.');
         }
 
@@ -159,7 +153,7 @@ class CreditController extends Controller
                     }
                 },
             ],
-            'category' => 'required|string|max:255',
+            'category' => 'nullable|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'bill' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'payment_mode' => 'nullable|in:cash,online,cheque',
@@ -170,28 +164,24 @@ class CreditController extends Controller
             'projects_id.required' => 'Please select a project.',
             'projects_id.exists' => 'The selected project is invalid.',
             'credit_date.required' => 'Please enter the credit date.',
-            'category.required' => 'Please select a credit category.',
             'amount.required' => 'Please enter the amount.',
             'amount.min' => 'The amount must be greater than 0.',
         ]);
 
-        $allowedProjectIds = $this->allowedProjects($auth)->pluck('id')->map(fn ($id) => (int) $id)->all();
-
-        if (! in_array((int) $data['projects_id'], $allowedProjectIds, true)) {
+        // Validate project access
+        if (! $this->creditService->canAccessProject($auth, (int) $data['projects_id'])) {
             return redirect()->back()->withInput()->withErrors([
                 'projects_id' => 'You can only update credit for your assigned project.',
             ]);
         }
 
         if ($request->hasFile('bill')) {
-            if ($credit->bill_path && Storage::disk('public')->exists($credit->bill_path)) {
-                Storage::disk('public')->delete($credit->bill_path);
+            if ($credit->bill_path) {
+                $this->fileUploadService->deleteFile($credit->bill_path);
             }
 
             $billFile = $request->file('bill');
-            $fileName = time() . '_' . $billFile->getClientOriginalName();
-            $billFile->storeAs('credit/bill', $fileName, 'public');
-            $data['bill_path'] = 'credit/bill/' . $fileName;
+            $data['bill_path'] = $this->fileUploadService->storeFile($billFile, 'credit/bill');
             $data['bill_original_name'] = $billFile->getClientOriginalName();
         }
 
@@ -204,11 +194,54 @@ class CreditController extends Controller
         return redirect()->route('credit.index')->with('success', 'Credit updated successfully.');
     }
 
+    public function destroy(Credit $credit): RedirectResponse
+    {
+        $auth = auth()->user();
+
+        if (! $this->creditService->canAccessCredit($auth, $credit)) {
+            return redirect()->route('credit.index')->with('error', 'Unauthorized to delete this credit.');
+        }
+
+        DB::transaction(function () use ($credit, $auth) {
+            $credit->loadMissing('user');
+
+            if ($credit->user) {
+                $balanceBefore = round((float) ($credit->user->amount ?? 0), 2);
+                $creditAmount = round((float) ($credit->amount ?? 0), 2);
+                $balanceAfter = round($balanceBefore - $creditAmount, 2);
+
+                $credit->user->update([
+                    'amount' => $balanceAfter,
+                ]);
+
+                UserBalanceHistory::create([
+                    'user_id' => $credit->user->id,
+                    'change_type' => 'credit_deleted',
+                    'change_amount' => -$creditAmount,
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $balanceAfter,
+                    'reference_type' => 'credit',
+                    'reference_id' => $credit->id,
+                    'created_by' => $auth?->id,
+                    'note' => 'Credit deleted',
+                ]);
+            }
+
+            $credit->delete();
+        });
+
+        if ($credit->bill_path) {
+            $this->fileUploadService->deleteFile($credit->bill_path);
+        }
+
+        return redirect()->route('credit.index')->with('success', 'Credit deleted successfully.');
+    }
+
     public function list(Request $request)
     {
         $auth = auth()->user();
 
-        if (! $this->canManageCredits($auth)) {
+        if (! $this->creditService->canManageCredits($auth)) {
             return response()->json([
                 'draw' => intval($request->input('draw', 1)),
                 'recordsTotal' => 0,
@@ -219,8 +252,8 @@ class CreditController extends Controller
 
         $baseQuery = Credit::with(['project', 'user']);
 
-        if ($auth->hasRole('owner') && ! $auth->hasRole('super-admin')) {
-            $baseQuery->whereIn('projects_id', $auth->assignedProjectIds());
+        if (! $auth->hasRole('super-admin')) {
+            $baseQuery->where('users_id', $auth->id);
         }
 
         $totalData = (clone $baseQuery)->count();
@@ -258,15 +291,36 @@ class CreditController extends Controller
             ->get();
 
         $start = (int) $request->input('start', 0);
-        $data = $credits->map(function ($credit, $i) use ($start) {
+        $canViewCredit = $auth?->can('credit-view') ?? false;
+        $canEditCredit = $auth?->can('credit-edit') ?? false;
+        $canDeleteCredit = $auth?->can('credit-delete') ?? false;
+
+        $data = $credits->map(function ($credit, $i) use ($start, $canViewCredit, $canEditCredit, $canDeleteCredit) {
+            $actions = '<div class="table-action-group">';
+
+            if ($canViewCredit) {
+                $actions .= '<a href="' . route('credit.show', $credit->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+            }
+
+            if ($canEditCredit) {
+                $actions .= '<a href="' . route('credit.edit', $credit->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
+            }
+
+            if ($canDeleteCredit) {
+                $actions .= '<form action="' . route('credit.destroy', $credit->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE"><button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
+            }
+
+            $actions .= '</div>';
+
             return [
                 'id' => $start + $i + 1,
                 'project' => e(optional($credit->project)->name ?? '-'),
                 'credit_date' => optional($credit->credit_date)?->format('d M Y') ?? '-',
                 'amount' => '<span class="text-success font-weight-bold">Rs. ' . number_format((float) $credit->amount, 2) . '</span>',
                 'created_by' => e(optional($credit->user)->name ?? '-'),
-                'note' => e(filled($credit->category) ? $credit->category : '-'),
-                'action' => '<div class="table-action-group"><a href="' . route('credit.show', $credit->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a><a href="' . route('credit.edit', $credit->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a></div>',
+                'category' => e(filled($credit->category) ? $credit->category : '-'),
+                'note' => e(filled($credit->note) ? $credit->note : '-'),
+                'action' => $actions,
             ];
         });
 
@@ -276,36 +330,5 @@ class CreditController extends Controller
             'recordsFiltered' => $totalFiltered,
             'data' => $data,
         ]);
-    }
-
-    protected function canManageCredits($user): bool
-    {
-        return (bool) ($user && method_exists($user, 'hasRole') && $user->hasRole(['super-admin', 'owner']));
-    }
-
-    protected function canAccessCredit($user, Credit $credit): bool
-    {
-        if (! $this->canManageCredits($user)) {
-            return false;
-        }
-
-        if ($user->hasRole('super-admin')) {
-            return true;
-        }
-
-        return in_array((int) $credit->projects_id, $user->assignedProjectIds(), true);
-    }
-
-    protected function allowedProjects($user): Collection
-    {
-        if (! $user) {
-            return collect();
-        }
-
-        if ($user->hasRole('super-admin')) {
-            return Project::orderBy('name')->get();
-        }
-
-        return Project::whereIn('id', $user->assignedProjectIds())->orderBy('name')->get();
     }
 }

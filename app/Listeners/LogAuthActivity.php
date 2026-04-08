@@ -15,14 +15,13 @@ class LogAuthActivity
     {
         // Auth::user() may not be set yet at this point,
         // so we use the event's user directly.
-        \App\Models\ActivityLog::create([
-            'user_id'     => $event->user->id,
-            'user_name'   => $event->user->name,
-            'action'      => 'login',
-            'description' => "User [{$event->user->name}] logged in.",
-            'ip_address'  => request()->ip(),
-            'user_agent'  => request()->userAgent(),
-        ]);
+        ActivityLogService::log(
+            'login',
+            "User [{$event->user->name}] logged in.",
+            null,
+            [],
+            []
+        );
     }
 
     /**
@@ -32,13 +31,12 @@ class LogAuthActivity
     {
         if (! $event->user) return;
 
-        \App\Models\ActivityLog::create([
-            'user_id'     => $event->user->id,
-            'user_name'   => $event->user->name,
-            'action'      => 'logout',
-            'description' => "User [{$event->user->name}] logged out.",
-            'ip_address'  => request()->ip(),
-            'user_agent'  => request()->userAgent(),
-        ]);
+        ActivityLogService::log(
+            'logout',
+            "User [{$event->user->name}] logged out.",
+            null,
+            [],
+            []
+        );
     }
 }

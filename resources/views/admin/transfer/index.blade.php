@@ -15,7 +15,7 @@
     <div class="main-card table-card">
       <div class="main-card-head">
         <div class="main-card-title">
-          <i class="fas fa-list"></i> All Transfers
+          <i class="fas fa-list"></i> {{ ($canViewAllTransfers ?? false) ? 'All Transfers' : 'My Transfers' }}
         </div>
         <a href="{{ route('transfer.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> New Transfer
