@@ -1,21 +1,6 @@
 @extends('admin.layouts.app')
 @section('title', 'Reports')
 
-@php
-  $selectedProject = old('projects_id', $filters['projects_id'] ?? '');
-  $selectedUser = old('users_id', $filters['users_id'] ?? '');
-  $fromDate = old('from_date', $filters['from_date'] ?? '');
-  $toDate = old('to_date', $filters['to_date'] ?? '');
-  $selectedType = old('entry_type', $filters['entry_type'] ?? 'all');
-  $downloadQuery = array_filter([
-    'projects_id' => $selectedProject,
-    'users_id' => $selectedUser,
-    'from_date' => $fromDate,
-    'to_date' => $toDate,
-    'entry_type' => $selectedType,
-  ], fn ($value) => filled($value) && $value !== 'all');
-@endphp
-
 @section('content')
 <div class="page-hero">
   <div class="orb"></div>
@@ -50,7 +35,7 @@
                 <select name="projects_id" id="projects_id" class="form-control">
                   <option value="">All Projects</option>
                   @foreach($projects as $project)
-                    <option value="{{ $project->id }}" {{ (string) $selectedProject === (string) $project->id ? 'selected' : '' }}>
+                    <option value="{{ $project->id }}" {{ (string) ($filters['projects_id'] ?? '') === (string) $project->id ? 'selected' : '' }}>
                       {{ $project->name }}
                     </option>
                   @endforeach
@@ -64,7 +49,7 @@
                 <select name="users_id" id="users_id" class="form-control">
                   <option value="">All Users</option>
                   @foreach($users as $user)
-                    <option value="{{ $user->id }}" {{ (string) $selectedUser === (string) $user->id ? 'selected' : '' }}>
+                    <option value="{{ $user->id }}" {{ (string) ($filters['users_id'] ?? '') === (string) $user->id ? 'selected' : '' }}>
                       {{ $user->name }}
                     </option>
                   @endforeach
@@ -75,14 +60,14 @@
             <div class="col-lg-3 col-md-6">
               <div class="form-group">
                 <label for="from_date" class="font-weight-bold">From Date</label>
-                <input type="date" name="from_date" id="from_date" class="form-control" value="{{ $fromDate }}">
+                <input type="date" name="from_date" id="from_date" class="form-control" value="{{ $filters['from_date'] ?? '' }}">
               </div>
             </div>
 
             <div class="col-lg-3 col-md-6">
               <div class="form-group">
                 <label for="to_date" class="font-weight-bold">To Date</label>
-                <input type="date" name="to_date" id="to_date" class="form-control" value="{{ $toDate }}">
+                <input type="date" name="to_date" id="to_date" class="form-control" value="{{ $filters['to_date'] ?? '' }}">
               </div>
             </div>
 
@@ -90,10 +75,10 @@
               <div class="form-group">
                 <label for="entry_type" class="font-weight-bold">Timeline Type</label>
                 <select name="entry_type" id="entry_type" class="form-control">
-                  <option value="all" {{ $selectedType === 'all' ? 'selected' : '' }}>All</option>
-                  <option value="expense" {{ $selectedType === 'expense' ? 'selected' : '' }}>Expense</option>
-                  <option value="credit" {{ $selectedType === 'credit' ? 'selected' : '' }}>Credit</option>
-                  <option value="transfer" {{ $selectedType === 'transfer' ? 'selected' : '' }}>Transfer</option>
+                  <option value="all" {{ ($filters['entry_type'] ?? 'all') === 'all' ? 'selected' : '' }}>All</option>
+                  <option value="expense" {{ ($filters['entry_type'] ?? 'all') === 'expense' ? 'selected' : '' }}>Expense</option>
+                  <option value="credit" {{ ($filters['entry_type'] ?? 'all') === 'credit' ? 'selected' : '' }}>Credit</option>
+                  <option value="transfer" {{ ($filters['entry_type'] ?? 'all') === 'transfer' ? 'selected' : '' }}>Transfer</option>
                 </select>
               </div>
             </div>
@@ -205,11 +190,11 @@
             id="ReportTimelineTable"
             class="table table-hover report-table w-100"
             data-url="{{ route('reports.timeline-list') }}"
-            data-projects-id="{{ $selectedProject }}"
-            data-users-id="{{ $selectedUser }}"
-            data-from-date="{{ $fromDate }}"
-            data-to-date="{{ $toDate }}"
-            data-entry-type="{{ $selectedType }}"
+            data-projects-id="{{ $filters['projects_id'] ?? '' }}"
+            data-users-id="{{ $filters['users_id'] ?? '' }}"
+            data-from-date="{{ $filters['from_date'] ?? '' }}"
+            data-to-date="{{ $filters['to_date'] ?? '' }}"
+            data-entry-type="{{ $filters['entry_type'] ?? 'all' }}"
           >
             <thead>
               <tr>
