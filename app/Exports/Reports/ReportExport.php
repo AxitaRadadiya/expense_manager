@@ -156,7 +156,7 @@ class ReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
 			$rows[] = [
 				$i++,
-				optional($item->timeline_at)?->format('Y-m-d') ?? '-',
+				optional($item->timeline_at)?->format('d-m-Y') ?? '-',
 				$item->project_name ?? '-',
 				$item->user_name ?? '-',
 				ucfirst($item->type),

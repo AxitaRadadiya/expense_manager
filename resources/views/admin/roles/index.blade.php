@@ -17,7 +17,7 @@
         <div class="main-card-title">
           <i class="fas fa-list"></i> All Roles
         </div>
-        <div class="page-note">Shared layout now matches the users module.</div>
+  
       </div>
 
       <div class="main-card-body">

@@ -109,7 +109,7 @@
                     @endif
                   </td>
                   <td class="text-nowrap">
-                    <div class="font-weight-bold">{{ $log->created_at->format('d M Y') }}</div>
+                    <div class="font-weight-bold">{{ $log->created_at->format('d-m-Y') }}</div>
                     <div class="page-note">{{ $log->created_at->format('h:i A') }}</div>
                   </td>
                   <td>

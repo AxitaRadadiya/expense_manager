@@ -122,7 +122,7 @@ class ReportController extends Controller
                     || str_contains(mb_strtolower((string) $item->project_name), $needle)
                     || str_contains(mb_strtolower((string) $item->user_name), $needle)
                     || str_contains(mb_strtolower((string) $item->amount), $needle)
-                    || str_contains(mb_strtolower((string) optional($item->timeline_at)?->format('d M Y h:i A')), $needle);
+                    || str_contains(mb_strtolower((string) optional($item->timeline_at)?->format('d-m-Y h:i A')), $needle);
             })->values();
         }
 
@@ -145,7 +145,7 @@ class ReportController extends Controller
             return [
                 'id' => $start + $index + 1,
                 'type' => '<span class="timeline-badge ' . $badgeClass . '">' . e($item->label) . '</span>',
-                'date' => optional($item->timeline_at)?->format('d M Y') ?? '-',
+                'date' => optional($item->timeline_at)?->format('d-m-Y') ?? '-',
                 'time' => optional($item->timeline_at)?->format('h:i A') ?? '-',
                 'project' => e($item->project_name),
                 'user' => e($item->user_name),

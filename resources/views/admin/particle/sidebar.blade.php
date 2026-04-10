@@ -102,8 +102,8 @@
       @endif
 
       @if($authUser && $authUser->can('role-view'))
-      <li class="nav-item {{ Request::routeIs('roles.*','category.*','projects.*') ? 'menu-open' : '' }}">
-        <a href="#" class="nav-link {{ Request::routeIs('roles.*','category.*','projects.*') ? 'active' : '' }}">
+      <li class="nav-item {{ Request::routeIs('roles.*') ? 'menu-open' : '' }}">
+        <a href="#" class="nav-link {{ Request::routeIs('roles.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-sliders-h"></i>
           <p>
             Settings

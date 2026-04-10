@@ -15,7 +15,7 @@
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item active">
-            <i class="far fa-calendar-alt mr-1"></i>{{ date('l, d M Y') }}
+            <i class="far fa-calendar-alt mr-1"></i>{{ date('l, d-m-Y') }}
           </li>
         </ol>
       </div>
@@ -238,7 +238,7 @@
                     @forelse($debitedList as $d)
                       <tr>
                         <td class="text-muted text-nowrap">
-                          {{ $d->expense_date ? \Carbon\Carbon::parse($d->expense_date)->format('d M Y') : '-' }}
+                          {{ $d->expense_date ? \Carbon\Carbon::parse($d->expense_date)->format('d-m-Y') : '-' }}
                         </td>
                         <td>
                           <span class="badge badge-info">{{ $d->project->name ?? '-' }}</span>

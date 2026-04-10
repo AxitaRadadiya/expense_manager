@@ -63,13 +63,13 @@
               <div class="col-md-6 mb-3">
                 <div class="border rounded p-3 h-100 bg-white">
                   <div class="text-muted small mb-1">Start Date</div>
-                  <div class="font-weight-bold">{{ optional($project->start_date)->format('d M Y') ?? '-' }}</div>
+                  <div class="font-weight-bold">{{ optional($project->start_date)->format('d-m-Y') ?? '-' }}</div>
                 </div>
               </div>
               <div class="col-md-6 mb-3">
                 <div class="border rounded p-3 h-100 bg-white">
                   <div class="text-muted small mb-1">End Date</div>
-                  <div class="font-weight-bold">{{ optional($project->end_date)->format('d M Y') ?? '-' }}</div>
+                  <div class="font-weight-bold">{{ optional($project->end_date)->format('d-m-Y') ?? '-' }}</div>
                 </div>
               </div>
               <div class="col-md-6 mb-3">

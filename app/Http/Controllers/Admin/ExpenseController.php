@@ -410,7 +410,7 @@ class ExpenseController extends Controller
                     'id'           => $i,
                     'project'      => optional($item->project)->name ?? '—',
                     'user'         => optional($item->user)->name    ?? '—',
-                    'expense_date' => \Carbon\Carbon::parse($item->expense_date)->format('d M, Y'),
+                    'expense_date' => \Carbon\Carbon::parse($item->expense_date)->format('d-m-Y'),
                     'amount'       => '₹ ' . number_format((float) $item->amount, 2),
                     'payment_mode' => $item->payment_mode
                                     ? ucfirst(str_replace('_', ' ', $item->payment_mode))

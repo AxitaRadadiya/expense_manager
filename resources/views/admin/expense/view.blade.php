@@ -59,7 +59,7 @@
               <div class="col-md-6 mb-3">
                 <div class="border rounded h-100 p-3 bg-light">
                   <small class="text-muted d-block mb-1">Expense Date</small>
-                  <div class="font-weight-bold">{{ \Carbon\Carbon::parse($expense->expense_date)->format('d M, Y') }}</div>
+                  <div class="font-weight-bold">{{ \Carbon\Carbon::parse($expense->expense_date)->format('d-m-Y') }}</div>
                 </div>
               </div>
 
@@ -94,7 +94,7 @@
               <div class="col-md-6 mb-3">
                 <div class="border rounded h-100 p-3 bg-light">
                   <small class="text-muted d-block mb-1">Created On</small>
-                  <div class="font-weight-bold">{{ $expense->created_at ? $expense->created_at->format('d M, Y h:i A') : '-' }}</div>
+                  <div class="font-weight-bold">{{ $expense->created_at ? $expense->created_at->format('d-m-Y h:i A') : '-' }}</div>
                 </div>
               </div>
 
