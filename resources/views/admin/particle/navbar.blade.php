@@ -18,11 +18,10 @@
              alt="{{ auth()->user()->name }}"
              style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
       </span>
-      <span class="d-none d-md-inline"
-            style="font-size:.83rem;font-weight:600;color:#fff;">
+      <span class="d-none d-md-inline">
         {{ ucfirst(Auth()->user()->name) }}
       </span>
-      <i class="fas fa-caret-down ml-1" style="font-size:10px;opacity:.7;color:#fff;"></i>
+      <i class="fas fa-caret-down ml-1" style="font-size:10px;opacity:.7;color:#000;"></i>
     </a>
     <div class="dropdown-menu dropdown-menu-right" style="min-width:185px;">
       <span class="dropdown-header">

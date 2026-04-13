@@ -46,7 +46,7 @@
 
     body {
       font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
+      background: #F4FAFA !important;
       color: var(--text-dark);
     }
 
@@ -58,7 +58,7 @@
 
     /* ════════════════ NAVBAR ════════════════════ */
     .main-header.navbar {
-      background: linear-gradient(135deg, var(--nb-from) 0%, var(--nb-to) 100%) !important;
+      background: #FFFFFFB2 !important;
       border-bottom: 2px solid rgba(0,181,181,.4) !important;
       box-shadow: 0 3px 20px rgba(0,141,141,.3);
       min-height: var(--nb-h);
@@ -69,14 +69,14 @@
     .main-header .nav-link,
     .navbar-light .navbar-nav .nav-link,
     .navbar-dark  .navbar-nav .nav-link {
-      color: rgba(255,255,255,.85) !important;
+      color: #000!important;
       border-radius: 7px;
       margin: 0 2px;
       transition: background .2s, color .2s;
     }
     .main-header .nav-link:hover {
       background: rgba(255,255,255,.15) !important;
-      color: #fff !important;
+      color: #000 !important;
     }
 
     /* Navbar dropdown */
