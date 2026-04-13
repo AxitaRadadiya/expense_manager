@@ -32,7 +32,7 @@
       <div class="main-card-body">
         <div class="table-responsive">
           <table id="userTable" class="table table-hover w-100">
-            <thead>
+            <thead class="thead">
               <tr>
                 <th>#</th>
                 <th>Name</th>

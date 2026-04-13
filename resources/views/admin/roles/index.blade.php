@@ -23,7 +23,7 @@
       <div class="main-card-body">
         <div class="table-responsive">
           <table id="roleTable" class="table table-hover w-100">
-            <thead>
+            <thead class="thead">
               <tr>
                 <th>#</th>
                 <th>Role Name</th>

@@ -25,7 +25,7 @@
       <div class="main-card-body">
         <div class="table-responsive">
           <table id="ExpenseTable" class="table table-hover w-100">
-            <thead>
+            <thead class="thead">
               <tr>
                 <th>Sr No.</th>
                 <th>Project</th>

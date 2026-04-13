@@ -118,7 +118,7 @@
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-sm table-hover table-bordered mb-0">
-                <thead class="thead-dark">
+                <thead class="thead">
                   <tr>
                     <th>#</th>
                     <th>Date</th>
@@ -170,7 +170,7 @@
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-sm table-hover table-bordered mb-0">
-                <thead class="thead-dark">
+                <thead class="thead">
                   <tr>
                     <th>#</th><th>Date</th>
                     <th class="text-right">Amount</th>
@@ -209,7 +209,7 @@
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-sm table-hover table-bordered mb-0">
-                <thead class="thead-dark">
+                <thead class="thead">
                   <tr>
                     <th>#</th><th>Date</th><th>Type</th>
                     <th class="text-right">Change</th>

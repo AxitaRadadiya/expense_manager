@@ -107,7 +107,7 @@
           <div class="main-card-body p-0">
             <div class="table-responsive">
               <table class="table table-hover report-table mb-0">
-                <thead>
+                <thead class="thead">
                   <tr>
                     <th>Project</th>
                     <th>Expense</th>
@@ -147,7 +147,7 @@
           <div class="main-card-body p-0">
             <div class="table-responsive">
               <table class="table table-hover report-table mb-0">
-                <thead>
+                <thead class="thead">
                   <tr>
                     <th>User</th>
                     <th>Expense</th>
@@ -196,7 +196,7 @@
             data-to-date="{{ $filters['to_date'] ?? '' }}"
             data-entry-type="{{ $filters['entry_type'] ?? 'all' }}"
           >
-            <thead>
+            <thead class="thead">
               <tr>
                 <th>Sr No.</th>
                 <th>Type</th>

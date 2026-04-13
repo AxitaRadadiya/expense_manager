@@ -12,16 +12,15 @@
 
   <!-- User dropdown -->
   <li class="nav-item dropdown ml-1">
-    <a class="nav-link navbar-user-pill" data-toggle="dropdown" href="#">
+    <a class="navbar-user-pill" data-toggle="dropdown" href="#">
       <span class="user-avatar">
         <img src="{{ auth()->user()->profile_image_url }}"
-             alt="{{ auth()->user()->name }}"
-             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+             alt="{{ auth()->user()->name }}">
       </span>
       <span class="d-none d-md-inline">
         {{ ucfirst(Auth()->user()->name) }}
       </span>
-      <i class="fas fa-caret-down ml-1" style="font-size:10px;opacity:.7;color:#000;"></i>
+      <i class="fas fa-caret-down" style="font-size:10px;opacity:.7;color:#000;"></i>
     </a>
     <div class="dropdown-menu dropdown-menu-right" style="min-width:185px;">
       <span class="dropdown-header">
@@ -50,7 +49,7 @@
   </li>
 
   <!-- Fullscreen -->
-  <li class="nav-item ml-1">
+  <li class="nav-item ml-2">
     <a class="nav-link" data-widget="fullscreen" href="#" role="button" title="Fullscreen"
        style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:7px;">
       <i class="fas fa-expand-arrows-alt" style="font-size:.82rem;"></i>
