@@ -1,0 +1,10 @@
+.main-header{
+    background: #F4FAFA !important;
+}
+.sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #339D9D !important;
+    color: #fff !important;
+}
+.main-sidebar{
+    background: #E6F4F4 !important;
+}

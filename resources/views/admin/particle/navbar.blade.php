@@ -65,7 +65,7 @@
          onclick="event.preventDefault();this.closest('form').submit();"
          title="Logout"
          style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;
-                border-radius:7px;color:rgba(255,255,255,.85) !important;
+                border-radius:7px;
                 border:1px solid rgba(255,255,255,.25);">
         <i class="fas fa-power-off" style="font-size:.82rem;"></i>
       </a>
