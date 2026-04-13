@@ -18,7 +18,7 @@ class RoleController extends Controller
    
     public function roleList(Request $request)
     {
-        $columns = [0 => 'id', 1 => 'name'];
+        $columns = [0 => 'id', 1 => 'name', 2 => 'id'];
 
         $totalData = Role::count();
         $limit     = (int) $request->input('length', 10);
@@ -72,10 +72,17 @@ class RoleController extends Controller
             //                  </form>';
             // }
 
+            $canEditRole = (auth()->user()?->can('role-edit') ?? false)
+                && in_array($role->name, ['owner', 'superviour'], true);
+            $actions = $canEditRole
+                ? '<a href="' . route('roles.edit', $role->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>'
+                : '<span class="text-muted">-</span>';
+
             $data[] = [
                 'id'          => $start + $i + 1,
                 'name'        => '<strong>' . e($role->name) . '</strong>',
                 'permissions' => $permHtml,
+                'action'      => $actions,
                 // 'action'      => $actions ?: '<span class="text-muted">—</span>',
             ];
         }

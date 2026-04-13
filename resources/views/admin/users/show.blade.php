@@ -51,7 +51,7 @@
                 <span class="float-right text-right" style="max-width:60%;">{{ $user->assignedProjectNames() ?: '—' }}</span>
               </li>
               <li class="list-group-item">
-                <b><i class="fas fa-rupee-sign mr-1 text-primary"></i>Opening Balance</b>
+                <b><i class="fas fa-rupee-sign mr-1 text-primary"></i>Direct Balance</b>
                 <span class="float-right text-success font-weight-bold">
                   ₹{{ number_format((float)($user->amount ?? 0), 2) }}
                 </span>
@@ -82,7 +82,7 @@
             <div class="info-box shadow-sm">
               <span class="info-box-icon bg-success"><i class="fas fa-exchange-alt"></i></span>
               <div class="info-box-content">
-                <span class="info-box-text">Total Transfers</span>
+                <span class="info-box-text">Transfer Balance</span>
                 <span class="info-box-number" style="font-size:1rem;">₹{{ number_format($totalTransfers ?? 0, 2) }}</span>
               </div>
             </div>
@@ -133,7 +133,7 @@
                   @forelse($expenses as $i => $exp)
                     <tr>
                       <td class="text-muted">{{ $expenses->firstItem() + $i }}</td>
-                      <td class="text-nowrap">{{ optional($exp->expense_date)->format('d M Y') ?? '—' }}</td>
+                      <td class="text-nowrap">{{ optional($exp->expense_date)->format('d-m-Y') ?? '—' }}</td>
                       <td><span class="badge badge-info">{{ optional($exp->project)->name ?? '—' }}</span></td>
                       <td class="text-right"><span class="badge badge-danger">₹{{ number_format((float)$exp->amount, 2) }}</span></td>
                       <td class="text-muted" style="font-size:.82rem;">{{ \Illuminate\Support\Str::limit($exp->description ?? '—', 60) }}</td>
@@ -181,7 +181,7 @@
                   @forelse($transfers as $i => $t)
                     <tr>
                       <td class="text-muted">{{ $transfers->firstItem() + $i }}</td>
-                      <td class="text-nowrap">{{ optional($t->start_date)->format('d M Y') ?? '—' }}</td>
+                      <td class="text-nowrap">{{ optional($t->start_date)->format('d-m-Y') ?? '—' }}</td>
                       <td class="text-right"><span class="badge badge-success">₹{{ number_format((float)$t->amount, 2) }}</span></td>
                       <td>{{ optional($t->creator)->name ?? '—' }}</td>
                       <td class="text-muted" style="font-size:.82rem;">{{ \Illuminate\Support\Str::limit($t->note ?? '—', 60) }}</td>
@@ -222,7 +222,7 @@
                   @forelse($balanceHistories as $i => $b)
                     <tr>
                       <td class="text-muted">{{ $balanceHistories->firstItem() + $i }}</td>
-                      <td class="text-nowrap" style="font-size:.82rem;">{{ optional($b->created_at)->format('d M Y H:i') ?? '—' }}</td>
+                      <td class="text-nowrap" style="font-size:.82rem;">{{ optional($b->created_at)->format('d-m-Y H:i') ?? '—' }}</td>
                       <td><span class="badge badge-secondary">{{ ucfirst($b->change_type ?? '—') }}</span></td>
                       <td class="text-right">
                         <span class="badge {{ $b->change_amount >= 0 ? 'badge-success' : 'badge-danger' }}">

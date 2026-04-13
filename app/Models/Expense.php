@@ -29,6 +29,11 @@ class Expense extends Model
 
     // ── Relationships ─────────────────────────────
 
+    protected $casts = [
+        'expense_date' => 'date',
+        'amount' => 'decimal:2',
+    ];
+
     public function project()
     {
         return $this->belongsTo(Project::class, 'projects_id');

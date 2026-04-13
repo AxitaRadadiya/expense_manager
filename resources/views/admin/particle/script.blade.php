@@ -68,6 +68,15 @@ $(document).ready(function () {
 
     $('.select2').select2();
 
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        newestOnTop: true,
+        positionClass: 'toast-top-right',
+        timeOut: 5000,
+        extendedTimeOut: 1500
+    };
+
     // Date range pickers
     $('.single_date').daterangepicker({
         singleDatePicker: true,
@@ -100,6 +109,12 @@ $(document).ready(function () {
     @if (session('warning'))
         Toast.fire({ icon: 'warning', title: '{{ session('warning') }}' })
     @endif
+    @if ($errors->any())
+        const validationErrors = @json($errors->all());
+        validationErrors.forEach(function (message) {
+            toastr.error(message, 'Validation Error');
+        });
+    @endif
 
     $(document).on('click', '.deleteButton', function (event) {
         event.preventDefault();
@@ -119,9 +134,9 @@ $(document).ready(function () {
     $('#roleTable').DataTable({
         paging: true, lengthChange: false, searching: true, ordering: true, info: true,
         autoWidth: false, responsive: true, processing: true, serverSide: true,
-        order: [0, 'desc'],
+        order: [0, 'asc'],
         ajax: { url: '{{ route('roles.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'roles.list' } },
-        columns: [{ data: 'id' }, { data: 'name' }],
+        columns: [{ data: 'id' }, { data: 'name' }, { data: 'action' }],
         aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
     });
 
@@ -170,7 +185,7 @@ $(document).ready(function () {
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
             ajax: { url: '{{ route('projects.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'projects.list' } },
-            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'action' } ],
+            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'users_count' }, { data: 'action' } ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
         });
     }
@@ -270,7 +285,7 @@ $(document).ready(function () {
             $('#categoryForm').submit();
         });
         
-        function load_transfer() {
+    function load_transfer() {
         $('#TransferTable').DataTable({
             processing: true,
             serverSide: true,
@@ -292,6 +307,68 @@ $(document).ready(function () {
         });
     }
     load_transfer();
+
+    function load_report_timeline() {
+        var $reportTable = $('#ReportTimelineTable');
+
+        if (! $reportTable.length) {
+            return;
+        }
+
+        $reportTable.DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            autoWidth: false,
+            order: [[2, 'desc']],
+            ajax: {
+                url: $reportTable.data('url'),
+                type: 'GET',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    projects_id: $reportTable.data('projects-id'),
+                    users_id: $reportTable.data('users-id'),
+                    from_date: $reportTable.data('from-date'),
+                    to_date: $reportTable.data('to-date'),
+                    entry_type: $reportTable.data('entry-type')
+                }
+            },
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'type', name: 'type', orderable: false, searchable: false },
+                { data: 'date', name: 'date' },
+                { data: 'time', name: 'time' },
+                { data: 'project', name: 'project', orderable: false },
+                { data: 'user', name: 'user', orderable: false },
+                { data: 'amount', name: 'amount', orderable: false, searchable: false }
+            ]
+        });
+    }
+    load_report_timeline();
+
+    function load_credit() {
+        $('#CreditTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: true,
+            autoWidth: false,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("credit.list") }}',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'project', name: 'project', orderable: false },
+                { data: 'credit_date', name: 'credit_date' },
+                { data: 'amount', name: 'amount' },
+                { data: 'created_by', name: 'created_by', orderable: false },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ]
+        });
+    }
+    load_credit();
 
 
 });

@@ -6,16 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\Project;
 use App\Models\User;
-use App\Models\UserBalanceHistory;
 use App\Models\Transfer;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use App\Services\BalanceService;
+use App\Services\ExpenseService;
+use App\Services\FileUploadService;
 
 class ExpenseController extends Controller
 {
+    public function __construct(
+        protected BalanceService $balanceService,
+        protected ExpenseService $expenseService,
+        protected FileUploadService $fileUploadService
+    ) {
+    }
+
     public function index(): View
     {
         $auth = auth()->user();
@@ -57,15 +67,15 @@ class ExpenseController extends Controller
         $validated = $request->validate(
             [
                 'projects_id'  => 'required|exists:projects,id',
-                'expense_date'     => 'required|date|before_or_equal:today',
-                'amount'       => 'required|numeric|min:0',
+                'expense_date'     => 'required|date|after_or_equal:today',
+                'amount'       => 'required|numeric|min:0.01',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
 
                 'payment_mode' => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
-                'note'             => 'required|string',
+                'note'             => 'nullable|string',
                 'status'           => 'nullable',
             ],
             [
@@ -74,30 +84,37 @@ class ExpenseController extends Controller
 
                 'expense_date.required'      => 'Please enter the expense date.',
                 'expense_date.date'          => 'The expense date must be a valid date.',
-                'expense_date.before_or_equal' => 'The expense date cannot be a future date.',
+                'expense_date.after_or_equal' => 'The expense date cannot be a past date.',
 
                 'amount.required'            => 'Please enter the amount.',
                 'amount.numeric'             => 'The amount must be a valid number.',
-                'amount.min'                 => 'The amount must be at least 0.',
+                'amount.min'                 => 'The amount must be greater than 0.',
 
                 'bill.file'             => 'The bill must be a valid file.',
                 'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
                 'bill.max'              => 'The bill file size must not exceed 2MB.',
                 'category.required'     => 'Please select an expense category.',
-                'note.required'         => 'Please enter a note.',
 
             ]
         );
 
         $validated['users_id'] = auth()->id();
 
+        // Ensure authenticated user before doing any file upload or balance work.
+        $user = auth()->user();
+        if (! $user) {
+            return redirect()->back()->with('error', 'User must be authenticated')->withInput();
+        }
+
+        $expenseAmount = round((float) ($validated['amount'] ?? 0), 2);
+        $availableBalance = $this->balanceService->getCurrentBalance($user);
+        $hasInsufficientBalance = $expenseAmount > $availableBalance;
+
         if ($request->hasFile('bill')) {
             $billFile = $request->file('bill');
-            $fileName = time() . '_' . $billFile->getClientOriginalName();
+            $billPath = $this->fileUploadService->storeFile($billFile, 'expense/bill');
 
-            $billFile->storeAs('expense/bill', $fileName, 'public');
-
-            $validated['bill_path']          = 'expense/bill/' . $fileName;
+            $validated['bill_path'] = $billPath;
             $validated['bill_original_name'] = $billFile->getClientOriginalName();
         }
 
@@ -108,89 +125,29 @@ class ExpenseController extends Controller
         // Ensure nullable string columns never pass null to a NOT NULL DB column
         $validated['description']      = $validated['description']      ?? '';
         $validated['reference_number'] = $validated['reference_number'] ?? '';
-
-        // Ensure authenticated user
-        $user = auth()->user();
-        if (! $user) {
-            return redirect()->back()->withErrors(['auth' => 'User must be authenticated'])->withInput();
-        }
-
-        $amount = (float) $validated['amount'];
-
-        // Available balance = opening balance + received transfers - sent transfers - expenses.
-        $transferInTotal = (float) Transfer::where('user_id', $user->id)->sum('amount');
-        $transferOutTotal = (float) Transfer::where('created_by', $user->id)->sum('amount');
-        $spentTotal = (float) Expense::where('users_id', $user->id)->sum('amount');
-        $available = (float) ($user->amount ?? 0) + $transferInTotal - $transferOutTotal - $spentTotal;
-
-        $warningMessage = null;
-        if ($available < $amount) {
-            $warningMessage = 'Expense saved, but your balance was insufficient for this amount.';
-        }
-
-        // Create expense only after availability check
-        $expense = Expense::create($validated);
+        $validated['note']             = $validated['note']             ?? '';
 
         try {
-            $remaining = $amount;
-
-            $transfers = Transfer::where('user_id', $user->id)
-                ->where('amount', '>', 0)
-                ->orderBy('start_date', 'asc')
-                ->orderBy('id', 'asc')
-                ->get();
-
-            foreach ($transfers as $transfer) {
-                if ($remaining <= 0) break;
-
-                $tBefore = (float) $transfer->amount;
-                $deduct = min($tBefore, $remaining);
-                $tAfter = $tBefore - $deduct;
-
-                $transfer->amount = $tAfter;
-                $transfer->save();
-
-                UserBalanceHistory::create([
-                    'user_id'        => $user->id,
-                    'change_type'    => 'transfer_debit',
-                    'change_amount'  => -abs($deduct),
-                    'balance_before' => $tBefore,
-                    'balance_after'  => $tAfter,
-                    'reference_type' => 'transfer',
-                    'reference_id'   => $transfer->id,
-                    'created_by'     => auth()->id(),
-                    'note'           => 'Debited by expense #' . $expense->id,
-                ]);
-
-                $remaining -= $deduct;
-            }
-
-            // If any remaining amount, deduct from user's opening balance
-            if ($remaining > 0) {
-                $before = (float) ($user->amount ?? 0);
-                $after  = $before - $remaining;
-                $user->amount = $after;
-                $user->save();
-
-                UserBalanceHistory::create([
-                    'user_id'        => $user->id,
-                    'change_type'    => 'expense',
-                    'change_amount'  => -abs($remaining),
-                    'balance_before' => $before,
-                    'balance_after'  => $after,
-                    'reference_type' => 'expense',
-                    'reference_id'   => $expense->id,
-                    'created_by'     => auth()->id(),
-                    'note'           => 'Expense recorded via web',
-                ]);
-            }
+            $this->expenseService->createExpense($user, $validated);
         } catch (\Exception $e) {
-            \Log::error('Balance history write failed: ' . $e->getMessage());
+            if (! empty($validated['bill_path'])) {
+                $this->fileUploadService->deleteFile($validated['bill_path']);
+            }
+
+            \Log::error('Expense balance flow failed: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage() ?: 'Expense could not be saved.');
+        }
+
+        if ($hasInsufficientBalance) {
+            return redirect()->route('expense.index')
+                ->with('warning', 'Expense created successfully, but the user had insufficient balance.');
         }
 
         return redirect()->route('expense.index')
-            ->with('success', 'Expense created successfully.')
-            ->with('warning', $warningMessage);
+            ->with('success', 'Expense created successfully.');
     }
 
     public function show($id): View
@@ -217,32 +174,41 @@ class ExpenseController extends Controller
         $validated = $request->validate(
             [
                 'projects_id'  => 'required|exists:projects,id',
-                'expense_date'     => 'required|date|before_or_equal:today',
-                'amount'       => 'required|numeric|min:0',
+                'expense_date'     => [
+                    'required',
+                    'date',
+                    function ($attribute, $value, $fail) use ($expense) {
+                        $selectedDate = \Carbon\Carbon::parse($value)->toDateString();
+                        $today = now()->toDateString();
+                        $originalDate = optional($expense->expense_date)?->toDateString()
+                            ?? \Carbon\Carbon::parse($expense->expense_date)->toDateString();
+
+                        if ($selectedDate < $today && $selectedDate !== $originalDate) {
+                            $fail('The expense date cannot be a past date.');
+                        }
+                    },
+                ],
+                'amount'       => 'required|numeric|min:0.01',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
                 'payment_mode'     => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
-                'note'             => 'required|string',
+                'note'             => 'nullable|string',
             ],
             [
                 'projects_id.required'         => 'Please select a project.',
                 'projects_id.exists'           => 'The selected project is invalid.',
-
                 'expense_date.required'        => 'Please enter the expense date.',
                 'expense_date.date'            => 'The expense date must be a valid date.',
-                'expense_date.before_or_equal' => 'The expense date cannot be a future date.',
-
                 'amount.required'              => 'Please enter the amount.',
                 'amount.numeric'               => 'The amount must be a valid number.',
-                'amount.min'                   => 'The amount must be at least 0.',
+                'amount.min'                   => 'The amount must be greater than 0.',
                 'bill.file'             => 'The bill must be a valid file.',
                 'bill.mimes'            => 'Only PDF, JPG, and PNG files are allowed.',
                 'bill.max'              => 'The bill file size must not exceed 2MB.',
                 'category.required'     => 'Please select an expense category.',
                 'payment_mode.required' => 'Please select a payment mode.',
-                'note.required'         => 'Please enter a note.',
 
             ]
         );
@@ -250,16 +216,12 @@ class ExpenseController extends Controller
         if ($request->hasFile('bill')) {
 
             // Delete old bill file if exists
-            if ($expense->bill_path && Storage::disk('public')->exists($expense->bill_path)) {
-                Storage::disk('public')->delete($expense->bill_path);
+            if ($expense->bill_path) {
+                $this->fileUploadService->deleteFile($expense->bill_path);
             }
 
             $billFile = $request->file('bill');
-            $fileName = time() . '_' . $billFile->getClientOriginalName();
-
-            $billFile->storeAs('expense/bill', $fileName, 'public');
-
-            $validated['bill_path']          = 'expense/bill/' . $fileName;
+            $validated['bill_path'] = $this->fileUploadService->storeFile($billFile, 'expense/bill');
             $validated['bill_original_name'] = $billFile->getClientOriginalName();
 
         } else {
@@ -273,11 +235,50 @@ class ExpenseController extends Controller
         // Ensure nullable string columns never pass null to a NOT NULL DB column
         $validated['description']      = $validated['description']      ?? '';
         $validated['reference_number'] = $validated['reference_number'] ?? '';
+        $validated['note']             = $validated['note']             ?? '';
 
         $expense->update($validated);
 
         return redirect()->route('expense.index')
             ->with('success', 'Expense updated successfully.');
+    }
+
+    public function approve(Request $request, $id): RedirectResponse
+    {
+        Gate::authorize('expense-approve');
+
+        $expense = Expense::findOrFail($id);
+
+        $validated = $request->validate([
+            'remark' => 'nullable|string|max:1000',
+        ]);
+
+        $expense->update([
+            'status' => 'approved',
+            'remark' => $validated['remark'] ?? '',
+        ]);
+
+        return redirect()->route('expense.show', $expense->id)
+            ->with('success', 'Expense approved successfully.');
+    }
+
+    public function reject(Request $request, $id): RedirectResponse
+    {
+        Gate::authorize('expense-approve');
+
+        $expense = Expense::findOrFail($id);
+
+        $validated = $request->validate([
+            'remark' => 'required|string|max:1000',
+        ]);
+
+        $expense->update([
+            'status' => 'rejected',
+            'remark' => $validated['remark'],
+        ]);
+
+        return redirect()->route('expense.show', $expense->id)
+            ->with('success', 'Expense rejected successfully.');
     }
 
     public function destroy($id): RedirectResponse
@@ -309,6 +310,9 @@ class ExpenseController extends Controller
         ];
 
         $auth = auth()->user();
+        $canViewExpense = $auth?->can('expense-view') ?? false;
+        $canEditExpense = $auth?->can('expense-edit') ?? false;
+        $canDeleteExpense = $auth?->can('expense-delete') ?? false;
 
         // Base query respects permissions: super-admin sees all, others only their own
         $baseQuery = Expense::query();
@@ -372,35 +376,41 @@ class ExpenseController extends Controller
                              . '</span>';
 
                 // ── Action Buttons ────────────────────────────────────────────
-                $actions  = '<div class="btn-group">';
-                $actions .= '<a href="' . route('expense.show', $item->id) . '"
-                                class="btn-sm text-info" title="View">
-                                <i class="fa fa-eye"></i>
-                            </a>&nbsp;';
-                $actions .= '<a href="' . route('expense.edit', $item->id) . '"
-                                class="btn-sm text-primary" title="Edit">
-                                <i class="fa fa-edit"></i>
-                            </a>&nbsp;';
-                $actions .= '
-                    <form action="' . route('expense.destroy', $item->id) . '"
-                        method="POST"
-                        data-delete-type="expense"
-                        class="d-inline">
-                        ' . csrf_field() . '
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button type="button"
-                                class="deleteButton border-0 bg-white text-danger btn-sm"
-                                title="Delete">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </form>';
+                $actions  = '<div class="table-action-group">';
+                if ($canViewExpense) {
+                    $actions .= '<a href="' . route('expense.show', $item->id) . '"
+                                    class="table-action-btn is-view" title="View">
+                                    <i class="fa fa-eye"></i>
+                                </a>';
+                }
+                if ($canEditExpense) {
+                    $actions .= '<a href="' . route('expense.edit', $item->id) . '"
+                                    class="table-action-btn is-edit" title="Edit">
+                                    <i class="fa fa-edit"></i>
+                                </a>';
+                }
+                if ($canDeleteExpense) {
+                    $actions .= '
+                        <form action="' . route('expense.destroy', $item->id) . '"
+                            method="POST"
+                            data-delete-type="expense"
+                            class="table-action-form">
+                            ' . csrf_field() . '
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="button"
+                                    class="table-action-btn is-delete deleteButton"
+                                    title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </form>';
+                }
                 $actions .= '</div>';
 
                 $data[] = [
                     'id'           => $i,
                     'project'      => optional($item->project)->name ?? '—',
                     'user'         => optional($item->user)->name    ?? '—',
-                    'expense_date' => \Carbon\Carbon::parse($item->expense_date)->format('d M, Y'),
+                    'expense_date' => \Carbon\Carbon::parse($item->expense_date)->format('d-m-Y'),
                     'amount'       => '₹ ' . number_format((float) $item->amount, 2),
                     'payment_mode' => $item->payment_mode
                                     ? ucfirst(str_replace('_', ' ', $item->payment_mode))

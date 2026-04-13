@@ -6,19 +6,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth;
 use App\Models\Role;
-use App\Models\Project;
 use Illuminate\View\View;
 use App\Models\User;
+use App\Models\Transfer;
 use App\Models\Expense;
+use App\Models\UserBalanceHistory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
-use App\Models\UserBalanceHistory;
 use Illuminate\Support\Facades\DB;
+use App\Services\BalanceService;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
-    public function __construct()
+    public function __construct(protected BalanceService $balanceService)
     {
         $this->middleware('auth');
     }
@@ -40,7 +42,6 @@ class UserController extends Controller
     {
         return view('admin.users.create', [
             'roles' => Role::orderBy('name')->get(),
-            'projects' => Project::orderBy('name')->get(),
         ]);
     }
 
@@ -50,56 +51,65 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name'        => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
             'email'       => ['required', 'email', 'unique:users,email'],
-            'mobile'      => ['nullable', 'string', 'max:15'],
+            'mobile'      => ['nullable', 'regex:/^\d{10}$/'],
             'role_id'     => ['required', 'exists:roles,id'],
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
-            'password'    => ['required', 'string', 'min:8', 'confirmed'],
-            'project_ids' => ['nullable', 'array'],
-            'project_ids.*' => ['integer', 'exists:projects,id'],
+            'password'    => ['required', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $projectIds = collect($request->input('project_ids', []))
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
-
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'mobile'   => $request->mobile,
-            'role_id'  => $request->role_id,
-            'status'   => $request->status,
-            'note'     => $request->note,
-            'amount'     => $request->amount,
-            'project_id' => $projectIds[0] ?? null,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $user->assignRole((int) $request->role_id);
-        $user->projects()->sync($projectIds);
-
-        // If an opening amount was provided, record opening balance history
-        if (! empty($request->amount) && (float)$request->amount != 0) {
-            UserBalanceHistory::create([
-                'user_id' => $user->id,
-                'change_type' => 'opening',
-                'change_amount' => $request->amount,
-                'balance_before' => 0,
-                'balance_after' => $request->amount,
-                'reference_type' => 'user',
-                'reference_id' => $user->id,
-                'created_by' => Auth::id(),
-                'note' => 'Opening balance set',
-            ]);
-        }
-
         $loginUser = Auth::user();
+        $openingAmount = round((float) ($request->amount ?? 0), 2);
+        $hasInsufficientBalance = false;
+
+        $user = DB::transaction(function () use ($request, $loginUser, $openingAmount, &$hasInsufficientBalance) {
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'mobile'   => $request->mobile,
+                'role_id'  => $request->role_id,
+                'status'   => $request->status,
+                'note'     => $request->note,
+                'amount'   => $openingAmount,
+                'password' => Hash::make($request->password),
+            ]);
+
+            $user->assignRole((int) $request->role_id);
+
+            $this->balanceService->recordOpeningBalance(
+                $user,
+                $openingAmount,
+                Auth::id(),
+                $openingAmount > 0 ? 'Opening amount funded during user creation' : 'Opening balance set'
+            );
+
+            if ($loginUser && $openingAmount > 0) {
+                $loginUser->refresh();
+
+                $creatorOldAmount = round((float) ($loginUser->amount ?? 0), 2);
+                $creatorNewAmount = round($creatorOldAmount - $openingAmount, 2);
+
+                $hasInsufficientBalance = $openingAmount > $creatorOldAmount;
+
+                $loginUser->update([
+                    'amount' => $creatorNewAmount,
+                ]);
+
+                $this->balanceService->recordAdjustment(
+                    $loginUser,
+                    $creatorOldAmount,
+                    $creatorNewAmount,
+                    Auth::id(),
+                    'Opening amount allocated to user: ' . $user->name
+                );
+            }
+
+            return $user;
+        });
+
         Log::info('user.created', [
             'actor_id' => $loginUser->id,
             'actor_name' => $loginUser->name,
@@ -107,6 +117,11 @@ class UserController extends Controller
             'user_name' => $user->name,
             'properties' => $request->except(['_token', 'password', 'password_confirmation']),
         ]);
+
+        if ($hasInsufficientBalance) {
+            return redirect()->route('users.index')
+                ->with('warning', 'User created successfully, but your balance became negative after funding the opening amount.');
+        }
 
         return redirect()->route('users.index')
             ->withSuccess('New user added successfully.');
@@ -122,19 +137,23 @@ class UserController extends Controller
         $expenses = $expensesQuery->latest()->paginate(15);
 
         // Transfers (paginated) and totals
-        $transfersQuery = \App\Models\Transfer::where('user_id', $user->id);
+        $transfersQuery = Transfer::where('user_id', $user->id);
         $totalTransfers = (float) $transfersQuery->sum('amount');
-        $totalTransfersSent = (float) \App\Models\Transfer::where('created_by', $user->id)->sum('amount');
+        $totalTransfersSent = (float) Transfer::where('created_by', $user->id)->sum('amount');
         $transfers = $transfersQuery->latest()->paginate(15, ['*'], 'transfers_page');
 
         // Balance histories (paginated)
-        $balanceHistories = \App\Models\UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(15, ['*'], 'balances_page');
+        $balanceHistories = UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(15, ['*'], 'balances_page');
 
-        // Opening balance from user.amount
-        $opening = (float) $user->amount;
-
-        // Current balance calculation: opening + received transfers - sent transfers - debited
-        $currentBalance = $opening + $totalTransfers - $totalTransfersSent - $totalDebited;
+        $opening = (float) optional(
+            UserBalanceHistory::where('user_id', $user->id)
+                ->where('change_type', 'opening')
+                ->oldest()
+                ->first()
+        )->change_amount;
+        $directBalance = (float) ($user->amount ?? 0);
+        $transferBalance = 0.0;
+        $currentBalance = $directBalance;
 
         return view('admin.users.show', [
             'user' => $user,
@@ -142,8 +161,11 @@ class UserController extends Controller
             'totalDebited' => $totalDebited,
             'transfers' => $transfers,
             'totalTransfers' => $totalTransfers,
+            'totalTransfersSent' => $totalTransfersSent,
             'balanceHistories' => $balanceHistories,
             'opening' => $opening,
+            'directBalance' => $directBalance,
+            'transferBalance' => $transferBalance,
             'currentBalance' => $currentBalance,
         ]);
     }
@@ -155,7 +177,6 @@ class UserController extends Controller
         return view('admin.users.edit', [
             'user'  => $user,
             'roles' => Role::orderBy('name')->get(),
-            'projects' => Project::orderBy('name')->get(),
         ]);
     }
 
@@ -164,24 +185,15 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name'        => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
             'email'       => ['required', 'email', 'unique:users,email,' . $user->id],
-            'mobile'      => ['nullable', 'string', 'max:15'],
+            'mobile'      => ['nullable', 'regex:/^\d{10}$/'],
             'role_id'     => ['required', 'exists:roles,id'],
             'status'      => ['required', 'in:0,1'],
             'note'        => ['nullable', 'string', 'max:1000'],
-            'password'    => ['nullable', 'string', 'min:8', 'confirmed'],
-            'project_ids' => ['nullable', 'array'],
-            'project_ids.*' => ['integer', 'exists:projects,id'],
+            'password'    => ['nullable', Password::min(8)->mixedCase()->numbers()->symbols(), 'confirmed'],
             'amount'      => ['nullable', 'numeric', 'min:0'],
         ]);
-
-        $projectIds = collect($request->input('project_ids', []))
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
 
         $data = [
             'name'    => $request->name,
@@ -190,8 +202,7 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'status'  => $request->status,
             'note'    => $request->note,
-            'project_id' => $projectIds[0] ?? null,
-            'amount'     => $request->amount,
+            'amount'  => $request->amount,
         ];
 
         if ($request->filled('password')) {
@@ -199,11 +210,8 @@ class UserController extends Controller
         }
 
         $original = $user->getOriginal();
-        $originalProjects = $user->projects()->pluck('projects.id')->map(fn ($id) => (int) $id)->all();
-
         $user->update($data);
         $user->assignRole((int) $request->role_id);
-        $user->projects()->sync($projectIds);
 
         $changes = [];
         foreach ($data as $field => $newVal) {
@@ -213,27 +221,10 @@ class UserController extends Controller
             }
         }
 
-        if ($originalProjects !== $projectIds) {
-            $changes['projects'] = ['old' => $originalProjects, 'new' => $projectIds];
-        }
-
         // amount change: store balance history
         $oldAmount = isset($original['amount']) ? (float)$original['amount'] : 0.0;
         $newAmount = (float)$user->amount;
-        if ($oldAmount !== $newAmount) {
-            $diff = $newAmount - $oldAmount;
-            UserBalanceHistory::create([
-                'user_id' => $user->id,
-                'change_type' => 'adjustment',
-                'change_amount' => $diff,
-                'balance_before' => $oldAmount,
-                'balance_after' => $newAmount,
-                'reference_type' => 'user',
-                'reference_id' => $user->id,
-                'created_by' => Auth::id(),
-                'note' => 'Admin updated balance',
-            ]);
-        }
+        $this->balanceService->recordAdjustment($user, $oldAmount, $newAmount, Auth::id());
 
         $loginUser = Auth::user();
         if (!empty($changes)) {
@@ -296,19 +287,29 @@ class UserController extends Controller
 
             $data = [];
 
+            $auth = auth()->user();
+            $canViewUser = $auth?->can('user-view') ?? false;
+            $canEditUser = $auth?->can('user-edit') ?? false;
+
             foreach ($users as $i => $u) {
 
                 $viewUrl = route('users.show', $u->id);
                 $editUrl = route('users.edit', $u->id);
-                $deleteUrl = route('users.destroy', $u->id);
+                // $deleteUrl = route('users.destroy', $u->id);
 
-                $actionHtml  = '<a href="' . $viewUrl . '" class="btn btn-sm btn-info" title="View"><i class="fas fa-eye"></i></a> ';
-                $actionHtml .= '<a href="' . $editUrl . '" class="btn btn-sm btn-primary" title="Edit"><i class="fas fa-edit"></i></a> ';
-                $actionHtml .= '<form method="POST" action="' . $deleteUrl . '" style="display:inline-block;margin:0;padding:0;">';
-                $actionHtml .= '<input type="hidden" name="_token" value="' . csrf_token() . '">';
-                $actionHtml .= '<input type="hidden" name="_method" value="DELETE">';
-                $actionHtml .= '<button type="submit" class="btn btn-sm btn-danger deleteButton" title="Delete"><i class="fas fa-trash"></i></button>';
-                $actionHtml .= '</form>';
+                $actionHtml  = '<div class="table-action-group">';
+                if ($canViewUser) {
+                    $actionHtml .= '<a href="' . $viewUrl . '" class="table-action-btn is-view" title="View"><i class="fas fa-eye"></i></a>';
+                }
+                if ($canEditUser) {
+                    $actionHtml .= '<a href="' . $editUrl . '" class="table-action-btn is-edit" title="Edit"><i class="fas fa-edit"></i></a>';
+                }
+                // $actionHtml .= '<form method="POST" action="' . $deleteUrl . '" class="table-action-form">';
+                // $actionHtml .= '<input type="hidden" name="_token" value="' . csrf_token() . '">';
+                // $actionHtml .= '<input type="hidden" name="_method" value="DELETE">';
+                // $actionHtml .= '<button type="submit" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fas fa-trash"></i></button>';
+                // $actionHtml .= '</form>';
+                $actionHtml .= '</div>';
 
                 $avatarHtml = '<div class="user-name-cell">'
                     . '<img src="' . e($u->profile_image_url) . '" alt="' . e($u->name) . '" class="user-list-avatar">'

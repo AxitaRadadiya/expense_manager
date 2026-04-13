@@ -84,7 +84,7 @@
               <span class="info-box-icon bg-warning"><i class="fas fa-clock"></i></span>
               <div class="info-box-content">
                 <span class="info-box-text font-weight-bold">Date &amp; Time</span>
-                <span class="info-box-number" style="font-size:1rem;">{{ $log->created_at->format('d M Y, h:i A') }}</span>
+                <span class="info-box-number" style="font-size:1rem;">{{ $log->created_at->format('d-m-Y, h:i A') }}</span>
                 <span class="progress-description text-muted">{{ $log->created_at->diffForHumans() }}</span>
               </div>
             </div>

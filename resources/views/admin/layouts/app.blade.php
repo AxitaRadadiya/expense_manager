@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Expense Manager</title>
+  <title>Shubham Construction</title>
   <link rel="icon" type="image/x-icon" href="#">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   @include('admin.particle.css')
+  @include('admin.particle.theme')
 
   <style>
     /* ═══════════════════════════════════════════════
@@ -135,11 +136,10 @@
       color: var(--text-dark) !important;
       padding: .78rem .95rem;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: .9rem;
       min-height: 68px;
       width: 100%;
-      white-space: nowrap;
       overflow: hidden;
     }
     .brand-link .brand-image {
@@ -158,7 +158,16 @@
       font-size: 1rem;
       font-weight: 700;
       color: var(--pri-dk);
-      white-space: nowrap;
+      line-height: 1.25;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      flex: 1 1 auto;
+      min-width: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .sidebar {
@@ -384,12 +393,6 @@
           opacity: 0;
           transition: opacity .2s ease;
           pointer-events: none;
-        }
-        body.sidebar-collapse .main-sidebar:hover .brand-link .brand-text,
-        body.sidebar-collapse .main-sidebar:hover .sidebar .nav-link p,
-        body.sidebar-collapse .main-sidebar:hover .sidebar .nav-header {
-          opacity: 1;
-          pointer-events: auto;
         }
       }
       @media (min-width: 768px) {
@@ -781,7 +784,7 @@
   </nav>
 
   <!-- Main Sidebar -->
-  <aside class="main-sidebar sidebar-light-primary elevation-4">
+  <aside class="main-sidebar sidebar-light-primary sidebar-no-expand elevation-4">
     @include('admin.particle.sidebar')
   </aside>
 

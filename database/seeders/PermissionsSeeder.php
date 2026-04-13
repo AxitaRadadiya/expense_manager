@@ -2,37 +2,72 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Permission;
+use Illuminate\Database\Seeder;
 
 class PermissionsSeeder extends Seeder
 {
+    protected const PERMISSION_GROUPS = [
+        'Project' => [
+            'project-create',
+            'project-view',
+            'project-edit',
+            'project-delete',
+        ],
+        'Expense' => [
+            'expense-create',
+            'expense-view',
+            'expense-edit',
+            'expense-delete',
+        ],
+        'Credit' => [
+            'credit-create',
+            'credit-view',
+            'credit-edit',
+            'credit-delete',
+        ],
+        'User' => [
+            'user-create',
+            'user-view',
+            'user-edit',
+            'user-delete',
+        ],
+        'Role' => [
+            'role-create',
+            'role-view',
+            'role-edit',
+            'role-delete',
+        ],
+        'Permission' => [
+            'permission-create',
+            'permission-view',
+            'permission-edit',
+            'permission-delete',
+        ],
+    ];
+
     /**
      * Run the database seeds.
      */
-    public function run()
+    public function run(): void
     {
-        // Only create permissions for the four resources the user requested
-        $resources = ['project', 'expense', 'user', 'role'];
-        $actions = ['create', 'view', 'edit', 'delete'];
+        $permissionNames = $this->permissionNames();
 
-        $records = [];
-        foreach ($resources as $r) {
-            foreach ($actions as $a) {
-                $records[] = "{$r}-{$a}";
-            }
-        }
+        Permission::whereNotIn('name', $permissionNames)->delete();
 
-        // Create or update requested permissions (by name)
-        foreach ($records as $name) {
+        foreach ($permissionNames as $permissionName) {
             Permission::updateOrCreate(
-                ['name' => $name],
-                ['name' => $name]
+                ['name' => $permissionName],
+                ['name' => $permissionName]
             );
         }
+    }
 
-        // Remove any permissions not in the allowed list
-        Permission::whereNotIn('name', $records)->delete();
+    protected function permissionNames(): array
+    {
+        return collect(self::PERMISSION_GROUPS)
+            ->flatten()
+            ->values()
+            ->all();
     }
 }

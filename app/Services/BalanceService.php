@@ -1,0 +1,230 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Credit;
+use App\Models\Expense;
+use App\Models\Transfer;
+use App\Models\User;
+use App\Models\UserBalanceHistory;
+use Illuminate\Support\Facades\DB;
+
+class BalanceService
+{
+    public function getDirectBalance(User $user): float
+    {
+        return (float) ($user->amount ?? 0);
+    }
+
+    public function getTransferBalance(User $user): float
+    {
+        return 0.0;
+    }
+
+    public function getCurrentBalance(User $user): float
+    {
+        return $this->getDirectBalance($user);
+    }
+
+    public function recordOpeningBalance(User $user, float $amount, ?int $actorId = null, ?string $note = null): void
+    {
+        $amount = round($amount, 2);
+
+        if ($amount == 0.0) {
+            return;
+        }
+
+        UserBalanceHistory::create([
+            'user_id' => $user->id,
+            'change_type' => 'opening',
+            'change_amount' => $amount,
+            'balance_before' => 0,
+            'balance_after' => $amount,
+            'reference_type' => 'user',
+            'reference_id' => $user->id,
+            'created_by' => $actorId,
+            'note' => $note ?? 'Opening balance set',
+        ]);
+    }
+
+    public function recordAdjustment(User $user, float $oldAmount, float $newAmount, ?int $actorId = null, ?string $note = null): void
+    {
+        $oldAmount = round($oldAmount, 2);
+        $newAmount = round($newAmount, 2);
+
+        if ($oldAmount === $newAmount) {
+            return;
+        }
+
+        UserBalanceHistory::create([
+            'user_id' => $user->id,
+            'change_type' => 'adjustment',
+            'change_amount' => $newAmount - $oldAmount,
+            'balance_before' => $oldAmount,
+            'balance_after' => $newAmount,
+            'reference_type' => 'user',
+            'reference_id' => $user->id,
+            'created_by' => $actorId,
+            'note' => $note ?? 'Admin updated balance',
+        ]);
+    }
+
+    public function createTransfer(User $sender, User $recipient, array $data): Transfer
+    {
+        return DB::transaction(function () use ($sender, $recipient, $data) {
+            $sender->refresh();
+            $recipient->refresh();
+
+            $transferAmount = round((float) ($data['amount'] ?? 0), 2);
+            $senderBalanceBefore = round((float) ($sender->amount ?? 0), 2);
+            $recipientBalanceBefore = round((float) ($recipient->amount ?? 0), 2);
+            $senderBalanceAfter = round($senderBalanceBefore - $transferAmount, 2);
+            $recipientBalanceAfter = round($recipientBalanceBefore + $transferAmount, 2);
+
+            $transfer = Transfer::create([
+                'user_id' => $recipient->id,
+                'created_by' => $sender->id,
+                'start_date' => $data['start_date'] ?? null,
+                'amount' => $transferAmount,
+                'note' => $data['note'] ?? null,
+            ]);
+
+            $sender->update([
+                'amount' => $senderBalanceAfter,
+            ]);
+
+            $recipient->update([
+                'amount' => $recipientBalanceAfter,
+            ]);
+
+            $this->createHistory(
+                userId: $sender->id,
+                changeType: 'transfer',
+                changeAmount: -$transferAmount,
+                balanceBefore: $senderBalanceBefore,
+                balanceAfter: $senderBalanceAfter,
+                referenceType: 'transfer',
+                referenceId: $transfer->id,
+                createdBy: $sender->id,
+                note: $data['note'] ?? ('Transfer sent to ' . $recipient->name)
+            );
+
+            $this->createHistory(
+                userId: $recipient->id,
+                changeType: 'transfer',
+                changeAmount: $transferAmount,
+                balanceBefore: $recipientBalanceBefore,
+                balanceAfter: $recipientBalanceAfter,
+                referenceType: 'transfer',
+                referenceId: $transfer->id,
+                createdBy: $sender->id,
+                note: $data['note'] ?? ('Transfer received from ' . $sender->name)
+            );
+
+            return $transfer;
+        });
+    }
+
+    public function createExpense(User $user, array $data): Expense
+    {
+        return DB::transaction(function () use ($user, $data) {
+            $user->refresh();
+
+            $balanceBefore = round((float) ($user->amount ?? 0), 2);
+            $expenseAmount = round((float) ($data['amount'] ?? 0), 2);
+            $balanceAfter = round($balanceBefore - $expenseAmount, 2);
+
+            $expense = Expense::create([
+                ...$data,
+                'users_id' => $user->id,
+                'bill_path' => $data['bill_path'] ?? '',
+                'bill_original_name' => $data['bill_original_name'] ?? '',
+                'sub_category' => $data['sub_category'] ?? null,
+                'payment_mode' => $data['payment_mode'] ?? null,
+                'reference_number' => $data['reference_number'] ?? null,
+                'status' => $data['status'] ?? 'pending',
+            ]);
+
+            $user->update([
+                'amount' => $balanceAfter,
+            ]);
+
+            $this->createHistory(
+                userId: $user->id,
+                changeType: 'expense',
+                changeAmount: -$expenseAmount,
+                balanceBefore: $balanceBefore,
+                balanceAfter: $balanceAfter,
+                referenceType: 'expense',
+                referenceId: $expense->id,
+                createdBy: auth()->id(),
+                note: $data['note'] ?? 'Expense added'
+            );
+
+            return $expense;
+        });
+    }
+
+    public function createCredit(User $user, array $data): Credit
+    {
+        return DB::transaction(function () use ($user, $data) {
+            $user->refresh();
+
+            $balanceBefore = round((float) ($user->amount ?? 0), 2);
+            $creditAmount = round((float) ($data['amount'] ?? 0), 2);
+
+            $credit = Credit::create([
+                ...$data,
+                'users_id' => $user->id,
+            ]);
+
+            $balanceAfter = round($balanceBefore + $creditAmount, 2);
+
+            $user->update([
+                'amount' => $balanceAfter,
+            ]);
+
+            $this->createHistory(
+                userId: $user->id,
+                changeType: 'credit',
+                changeAmount: $creditAmount,
+                balanceBefore: $balanceBefore,
+                balanceAfter: $balanceAfter,
+                referenceType: 'credit',
+                referenceId: $credit->id,
+                createdBy: auth()->id(),
+                note: $data['note'] ?? 'Credit added'
+            );
+
+            return $credit;
+        });
+    }
+
+    protected function createHistory(
+        int $userId,
+        string $changeType,
+        float $changeAmount,
+        float $balanceBefore,
+        float $balanceAfter,
+        ?string $referenceType = null,
+        ?int $referenceId = null,
+        ?int $createdBy = null,
+        ?string $note = null
+    ): void {
+        $changeAmount = round($changeAmount, 2);
+        $balanceBefore = round($balanceBefore, 2);
+        $balanceAfter = round($balanceAfter, 2);
+
+        UserBalanceHistory::create([
+            'user_id' => $userId,
+            'change_type' => $changeType,
+            'change_amount' => $changeAmount,
+            'balance_before' => $balanceBefore,
+            'balance_after' => $balanceAfter,
+            'reference_type' => $referenceType,
+            'reference_id' => $referenceId,
+            'created_by' => $createdBy,
+            'note' => $note,
+        ]);
+    }
+}

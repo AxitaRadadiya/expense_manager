@@ -2,151 +2,134 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\View\View;
-use Illuminate\Support\Facades\DB;
-use App\Models\Role;
-use Illuminate\Http\RedirectResponse;
-use App\Models\Permission;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Permission;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class PermissionController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
-        // Permission checks handled via local role/permission models; remove Spatie middleware dependency.
     }
 
     public function index(): View
     {
         return view('admin.permissions.index', [
-            'permissions' => Permission::orderBy('id','DESC')->paginate(15)
+            'permissions' => Permission::orderByDesc('id')->paginate(15),
         ]);
     }
 
     public function create(): View
     {
         return view('admin.permissions.create', [
-            'permissions' => Permission::get()
+            'permissions' => Permission::orderBy('name')->get(),
         ]);
     }
-
 
     public function store(Request $request): RedirectResponse
     {
-        $this->validate(request(), [
-            'name' => 'required|unique:permissions'
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:permissions,name'],
         ]);
-        $permissions = Permission::create(['name' => $request->name]);
+
+        Permission::create($validated);
+
         return redirect()->route('permissions.index')
-                ->withSuccess('New Permission is added successfully.');
+            ->withSuccess('New Permission is added successfully.');
     }
 
-
-    public function edit(string $id)
+    public function edit(string $id): View
     {
         $permission = Permission::findOrFail($id);
+
         return view('admin.permissions.edit', compact('permission'));
     }
 
-
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): RedirectResponse
     {
-        $this->validate(request(), [
-            'name' => 'required|unique:permissions,name,'.$id
-        ]);
         $permission = Permission::findOrFail($id);
-        $permission->name = $request->name;
-        $permission->save();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:permissions,name,' . $permission->id],
+        ]);
+
+        $permission->update($validated);
+
         return redirect()->route('permissions.index')
-                ->withSuccess('Permission is updated successfully.');
+            ->withSuccess('Permission is updated successfully.');
     }
 
-
-    public function destroy(string $id)
+    public function destroy(string $id): RedirectResponse
     {
         $permission = Permission::findOrFail($id);
         $permission->delete();
-        return redirect()->route('permissions.index')
-                ->withSuccess('Permission is deleted successfully.');
 
+        return redirect()->route('permissions.index')
+            ->withSuccess('Permission is deleted successfully.');
     }
 
     public function permissionsList(Request $request)
     {
-        $columns = array( 
-            0 =>'id', 
-            1 =>'name',
-            2 =>'action'          
-        );  
-        $totalData = Permission::count();            
-        $totalFiltered = $totalData;
-        $limit = $request->input('length');
-        $start = $request->input('start');
-        $order = $columns[$request->input('order.0.column')];
-        $dir = $request->input('order.0.dir');
-        
-        $search = $request->input('search.value');
-        if(empty($search))
-        {   
-            $institutes = Permission::offset($start)
-                        ->limit($limit)
-                        ->orderBy($order,$dir)
-                        ->get();
-        }else{
-            $institutes = Permission::where('name', 'like', "%{$search}%")
-                        ->offset($start)
-                        ->limit($limit)
-                        ->orderBy($order,$dir)
-                        ->get();
+        $columns = [
+            0 => 'id',
+            1 => 'name',
+            2 => 'id',
+        ];
+
+        $limit = (int) $request->input('length', 10);
+        $start = (int) $request->input('start', 0);
+        $order = $columns[$request->input('order.0.column')] ?? 'id';
+        $dir = $request->input('order.0.dir') === 'asc' ? 'asc' : 'desc';
+        $search = trim((string) $request->input('search.value', ''));
+
+        $query = Permission::query();
+
+        if ($search !== '') {
+            $query->where('name', 'like', "%{$search}%");
         }
 
+        $totalData = Permission::count();
+        $totalFiltered = $query->count();
 
-        $data = array();
-        if(!empty($institutes))
-        {
-            $i = 1;
-            foreach ($institutes as $key=>$institute)
-            {
-               
-                $nestedData['id'] = $i;
-                $nestedData['name'] = $institute->name;
-                  
-                $i++;
-                 
-                $nestedDataEdit = '';
-                $nestedDataDelete = '';
-                
-                if (auth()->user()->can('permissions-edit')) {                
-                    $nestedDataEdit = '<a href="'.route('permissions.edit',$institute->id).'" class="btn btn-success btn-sm"><i class="fa fa-edit"></i></a> &nbsp;';
-               }
+        $permissions = (clone $query)
+            ->offset($start)
+            ->limit($limit)
+            ->orderBy($order, $dir)
+            ->get();
 
-               if (auth()->user()->can('permissions-delete')) { 
-    
-                $nestedDataDelete = '<form action="' . route('permissions.destroy', $institute->id) . '" method="POST" class="deleteForm d-inline">
-                                ' . csrf_field() . '
-                                <input type="hidden" name="_method" value="DELETE">
-                                <button type="submit" class="btn btn-danger btn-sm deleteButton">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </form>
-                            &nbsp;';
-                }
-               
-                $nestedData['action'] ="$nestedDataEdit"."$nestedDataDelete";
-                
-                $data[] = $nestedData;
+        $canEditPermission = auth()->user()?->can('permission-edit') ?? false;
+        $canDeletePermission = auth()->user()?->can('permission-delete') ?? false;
+
+        $data = $permissions->map(function (Permission $permission, int $index) use ($start, $canEditPermission, $canDeletePermission) {
+            $actions = [];
+
+            if ($canEditPermission) {
+                $actions[] = '<a href="' . route('permissions.edit', $permission->id) . '" class="btn btn-success btn-sm"><i class="fa fa-edit"></i></a>';
             }
- 
-        }
-        //print_r($data);die;
-        $json_data = array(
-        "draw"            => intval($request->input('draw')),  
-        "recordsTotal"    => intval($totalData),  
-        "recordsFiltered" => intval($totalFiltered), 
-        "data"            => $data
-        );            
-        echo json_encode($json_data);
+
+            if ($canDeletePermission) {
+                $actions[] = '<form action="' . route('permissions.destroy', $permission->id) . '" method="POST" class="deleteForm d-inline">'
+                    . csrf_field()
+                    . '<input type="hidden" name="_method" value="DELETE">'
+                    . '<button type="submit" class="btn btn-danger btn-sm deleteButton"><i class="fa fa-trash"></i></button>'
+                    . '</form>';
+            }
+
+            return [
+                'id' => $start + $index + 1,
+                'name' => $permission->name,
+                'action' => implode('&nbsp;', $actions),
+            ];
+        })->all();
+
+        return response()->json([
+            'draw' => (int) $request->input('draw'),
+            'recordsTotal' => $totalData,
+            'recordsFiltered' => $totalFiltered,
+            'data' => $data,
+        ]);
     }
 }
