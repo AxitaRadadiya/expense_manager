@@ -154,7 +154,7 @@ class TransferController extends Controller
                     $date = $transfer->start_date instanceof \Carbon\Carbon
                         ? $transfer->start_date
                         : \Carbon\Carbon::parse($transfer->start_date);
-                    $formattedDate = $date->format('d M Y');
+                    $formattedDate = $date->format('d-m-Y');
                 } catch (\Exception $e) {
                     $formattedDate = '-';
                 }

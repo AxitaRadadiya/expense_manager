@@ -153,8 +153,8 @@ class ProjectController extends Controller
                 $nestedData               = [];
                 $nestedData['id']         = $project->id;
                 $nestedData['name']       = $project->name;
-                $nestedData['start_date'] = $project->start_date ? $project->start_date->format('Y-m-d') : '';
-                $nestedData['end_date']   = $project->end_date ? $project->end_date->format('Y-m-d') : '';
+                $nestedData['start_date'] = $project->start_date ? $project->start_date->format('d-m-Y') : '';
+                $nestedData['end_date']   = $project->end_date ? $project->end_date->format('d-m-Y') : '';
                 $nestedData['users_count'] = (int) $project->users_count;
                 // $nestedData['status']     = ucfirst($project->status);
                 // $nestedData['amount']     = $project->amount ? number_format($project->amount, 2) : '';

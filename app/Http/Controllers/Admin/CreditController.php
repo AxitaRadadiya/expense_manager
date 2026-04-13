@@ -315,7 +315,7 @@ class CreditController extends Controller
             return [
                 'id' => $start + $i + 1,
                 'project' => e(optional($credit->project)->name ?? '-'),
-                'credit_date' => optional($credit->credit_date)?->format('d M Y') ?? '-',
+                'credit_date' => optional($credit->credit_date)?->format('d-m-Y') ?? '-',
                 'amount' => '<span class="text-success font-weight-bold">Rs. ' . number_format((float) $credit->amount, 2) . '</span>',
                 'created_by' => e(optional($credit->user)->name ?? '-'),
                 'category' => e(filled($credit->category) ? $credit->category : '-'),

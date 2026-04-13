@@ -44,7 +44,7 @@
           <div class="col-md-6 mb-3">
             <div class="border rounded p-3 bg-light h-100">
               <small class="text-muted d-block mb-1">Credit Date</small>
-              <div class="font-weight-bold">{{ optional($credit->credit_date)->format('d M, Y') ?? '-' }}</div>
+              <div class="font-weight-bold">{{ optional($credit->credit_date)->format('d-m-Y') ?? '-' }}</div>
             </div>
           </div>
           <div class="col-md-6 mb-3">
@@ -62,7 +62,7 @@
           <div class="col-md-6 mb-3">
             <div class="border rounded p-3 bg-light h-100">
               <small class="text-muted d-block mb-1">Created On</small>
-              <div class="font-weight-bold">{{ $credit->created_at ? $credit->created_at->format('d M, Y h:i A') : '-' }}</div>
+              <div class="font-weight-bold">{{ $credit->created_at ? $credit->created_at->format('d-m-Y h:i A') : '-' }}</div>
             </div>
           </div>
           <div class="col-md-6 mb-3">
