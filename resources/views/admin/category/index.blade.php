@@ -2,12 +2,20 @@
 @section('title', 'Categories')
 
 @section('content')
-<div class="page-hero">
-  <div class="orb"></div>
-  <div class="container-fluid" style="position:relative;z-index:2;">
-    <h1><i class="fas fa-tags mr-2" style="color:rgba(255,255,255,.85);font-size:1.1rem;"></i>Categories</h1>
-    <p>Keep expense and credit categories tidy with the same shared list experience used across every model.</p>
-  </div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Categories</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active">Projects</li>
+                </ol>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="pull-card">
