@@ -164,7 +164,10 @@ class ProjectController extends Controller
                 $canEditProject = $auth?->can('project-edit') ?? false;
                 $canDeleteProject = $auth?->can('project-delete') ?? false;
 
-                $actions = '<div class="table-action-group">';
+                $actions = '<div class="btn-group">';
+                $actions .= '
+                            <i class="fas fa-ellipsis-v" data-toggle="dropdown" style="cursor:pointer;"></i>
+                            <div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
 
                 if ($canViewProject) {
                     $actions .= '<a href="' . route('projects.show', $project->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
@@ -184,7 +187,7 @@ class ProjectController extends Controller
                         . '</form>';
                 }
 
-                $actions .= '</div>';
+                $actions .= '</div></div>';
 
                 $nestedData['action'] = $actions;
                 $data[] = $nestedData;

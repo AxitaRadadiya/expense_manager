@@ -2,15 +2,13 @@
 @section('title', 'Reports')
 
 @section('content')
-<div class="page-hero">
-  <div class="orb"></div>
-  <div class="container-fluid" style="position:relative;z-index:2;">
+<div class="content-header">
+  <div class="container-fluid">
     <div class="d-flex flex-wrap justify-content-between align-items-start" style="gap:1rem;">
-      <div>
-        <h1><i class="fas fa-chart-line mr-2" style="color:rgba(255,255,255,.85);font-size:1.1rem;"></i>Reports</h1>
-        <p>Project and user summary with separate expense, credit, and timeline tables.</p>
+      <div class="row mt-3">
+        <h1><i class="mr-2 text-teal"></i>Reports</h1>
       </div>
-      <a href="{{ route('reports.download', $downloadQuery) }}" class="btn-create">
+      <a href="{{ route('reports.download', $downloadQuery) }}" class="btn-create mt-3">
         <i class="fas fa-download"></i> Download Excel
       </a>
     </div>
@@ -20,10 +18,8 @@
 <div class="pull-card">
   <div class="container-fluid" style="padding:0;">
     <div class="main-card mb-4">
-      <div class="main-card-head">
-        <div class="main-card-title">
-          <i class="fas fa-filter"></i> Filters
-        </div>
+      <div class="main-card-title">
+        <i class="fas fa-filter"></i> Filters
       </div>
 
       <div class="main-card-body">
@@ -35,9 +31,9 @@
                 <select name="projects_id" id="projects_id" class="form-control">
                   <option value="">All Projects</option>
                   @foreach($projects as $project)
-                    <option value="{{ $project->id }}" {{ (string) ($filters['projects_id'] ?? '') === (string) $project->id ? 'selected' : '' }}>
-                      {{ $project->name }}
-                    </option>
+                  <option value="{{ $project->id }}" {{ (string) ($filters['projects_id'] ?? '') === (string) $project->id ? 'selected' : '' }}>
+                    {{ $project->name }}
+                  </option>
                   @endforeach
                 </select>
               </div>
@@ -49,9 +45,9 @@
                 <select name="users_id" id="users_id" class="form-control">
                   <option value="">All Users</option>
                   @foreach($users as $user)
-                    <option value="{{ $user->id }}" {{ (string) ($filters['users_id'] ?? '') === (string) $user->id ? 'selected' : '' }}>
-                      {{ $user->name }}
-                    </option>
+                  <option value="{{ $user->id }}" {{ (string) ($filters['users_id'] ?? '') === (string) $user->id ? 'selected' : '' }}>
+                    {{ $user->name }}
+                  </option>
                   @endforeach
                 </select>
               </div>
@@ -99,10 +95,8 @@
     <div class="row">
       <div class="col-xl-6 mb-4">
         <div class="main-card h-100">
-          <div class="main-card-head">
-            <div class="main-card-title">
-              <i class="fas fa-folder-open"></i> Project Report
-            </div>
+          <div class="main-card-title">
+            <i class="fas fa-folder-open"></i> Project Report
           </div>
           <div class="main-card-body p-0">
             <div class="table-responsive">
@@ -117,18 +111,18 @@
                 </thead>
                 <tbody>
                   @forelse($projectSummary as $item)
-                    <tr>
-                      <td>{{ $item->project_name }}</td>
-                      <td class="text-danger font-weight-bold">Rs. {{ number_format((float) $item->total_expense, 2) }}</td>
-                      <td class="text-success font-weight-bold">Rs. {{ number_format((float) $item->total_credit, 2) }}</td>
-                      <td class="font-weight-bold {{ $item->current_balance >= 0 ? 'text-info' : 'text-warning' }}">
-                        Rs. {{ number_format((float) $item->current_balance, 2) }}
-                      </td>
-                    </tr>
+                  <tr>
+                    <td>{{ $item->project_name }}</td>
+                    <td class="text-danger font-weight-bold">Rs. {{ number_format((float) $item->total_expense, 2) }}</td>
+                    <td class="text-success font-weight-bold">Rs. {{ number_format((float) $item->total_credit, 2) }}</td>
+                    <td class="font-weight-bold {{ $item->current_balance >= 0 ? 'text-info' : 'text-warning' }}">
+                      Rs. {{ number_format((float) $item->current_balance, 2) }}
+                    </td>
+                  </tr>
                   @empty
-                    <tr>
-                      <td colspan="4" class="empty-table">No project data found.</td>
-                    </tr>
+                  <tr>
+                    <td colspan="4" class="empty-table">No project data found.</td>
+                  </tr>
                   @endforelse
                 </tbody>
               </table>
@@ -139,10 +133,8 @@
 
       <div class="col-xl-6 mb-4">
         <div class="main-card h-100">
-          <div class="main-card-head">
-            <div class="main-card-title">
-              <i class="fas fa-users"></i> User Report
-            </div>
+          <div class="main-card-title">
+            <i class="fas fa-users"></i> User Report
           </div>
           <div class="main-card-body p-0">
             <div class="table-responsive">
@@ -157,18 +149,18 @@
                 </thead>
                 <tbody>
                   @forelse($userSummary as $item)
-                    <tr>
-                      <td>{{ $item->user_name }}</td>
-                      <td class="text-danger font-weight-bold">Rs. {{ number_format((float) $item->total_expense, 2) }}</td>
-                      <td class="text-success font-weight-bold">Rs. {{ number_format((float) $item->total_credit, 2) }}</td>
-                      <td class="font-weight-bold {{ $item->current_balance >= 0 ? 'text-info' : 'text-warning' }}">
-                        Rs. {{ number_format((float) $item->current_balance, 2) }}
-                      </td>
-                    </tr>
+                  <tr>
+                    <td>{{ $item->user_name }}</td>
+                    <td class="text-danger font-weight-bold">Rs. {{ number_format((float) $item->total_expense, 2) }}</td>
+                    <td class="text-success font-weight-bold">Rs. {{ number_format((float) $item->total_credit, 2) }}</td>
+                    <td class="font-weight-bold {{ $item->current_balance >= 0 ? 'text-info' : 'text-warning' }}">
+                      Rs. {{ number_format((float) $item->current_balance, 2) }}
+                    </td>
+                  </tr>
                   @empty
-                    <tr>
-                      <td colspan="4" class="empty-table">No user data found.</td>
-                    </tr>
+                  <tr>
+                    <td colspan="4" class="empty-table">No user data found.</td>
+                  </tr>
                   @endforelse
                 </tbody>
               </table>
@@ -179,10 +171,8 @@
     </div>
 
     <div class="main-card">
-      <div class="main-card-head">
-        <div class="main-card-title">
-          <i class="fas fa-stream"></i> Timeline Table
-        </div>
+      <div class="main-card-title">
+        <i class="fas fa-stream"></i> Timeline Table
       </div>
       <div class="main-card-body">
         <div class="table-responsive">
@@ -194,8 +184,7 @@
             data-users-id="{{ $filters['users_id'] ?? '' }}"
             data-from-date="{{ $filters['from_date'] ?? '' }}"
             data-to-date="{{ $filters['to_date'] ?? '' }}"
-            data-entry-type="{{ $filters['entry_type'] ?? 'all' }}"
-          >
+            data-entry-type="{{ $filters['entry_type'] ?? 'all' }}">
             <thead class="thead">
               <tr>
                 <th>Sr No.</th>

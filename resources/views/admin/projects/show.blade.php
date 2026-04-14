@@ -48,10 +48,10 @@
           </div>
 
           <div class="d-flex">
-            <a href="{{ route('projects.index') }}" class="btn btn-default btn-sm mr-2">
+            <a href="{{ route('projects.index') }}" class="btn-cancel mr-2">
               <i class="fas fa-arrow-left mr-1"></i>Back
             </a>
-            <a href="{{ route('projects.edit', $project) }}" class="btn btn-primary btn-sm">
+            <a href="{{ route('projects.edit', $project) }}" class="btn-submit">
               <i class="fas fa-edit mr-1"></i>Edit
             </a>
           </div>

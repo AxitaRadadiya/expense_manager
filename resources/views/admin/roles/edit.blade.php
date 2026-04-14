@@ -3,10 +3,10 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid">
+  <div class="container-fluid-80">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0"><i class="fas fa-pen mr-2 text-primary"></i>Edit Role</h1>
+        <h1 class="m-0"><i class="mr-2 text-primary"></i>Edit Role</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -20,7 +20,7 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid">
+  <div class="container-fluid-80">
     <form action="{{ route('roles.update', $role->id) }}" method="POST">
       @csrf
       @method('PUT')
@@ -30,7 +30,7 @@
           <h3 class="card-title"><i class="fas fa-tag mr-2"></i>Role Info</h3>
           <div class="card-tools">
             <span class="badge badge-primary mr-2"><i class="fas fa-shield-alt mr-1"></i>{{ $role->name }}</span>
-            <a href="{{ route('roles.index') }}" class="btn btn-default btn-sm">
+            <a href="{{ route('roles.index') }}" class="btn-cancel">
               <i class="fas fa-arrow-left mr-1"></i>Back
             </a>
           </div>
@@ -60,10 +60,10 @@
             <span class="badge badge-success ml-1" id="assignedBadge">{{ count($assignedIds) }} assigned</span>
           </h3>
           <div class="card-tools">
-            <button type="button" class="btn btn-primary btn-sm mr-1" onclick="selectAll(true)">
+            <button type="button" class="btn-submit mr-1" onclick="selectAll(true)">
               <i class="fas fa-check-double mr-1"></i>Select All
             </button>
-            <button type="button" class="btn btn-default btn-sm" onclick="selectAll(false)">
+            <button type="button" class="btn-cancel" onclick="selectAll(false)">
               <i class="fas fa-times mr-1"></i>Clear All
             </button>
           </div>
@@ -85,7 +85,7 @@
                             <span class="badge badge-success ml-1">{{ $groupAssigned }}+</span>
                           @endif
                         </span>
-                        <button type="button" class="btn btn-xs btn-outline-primary group-toggle-btn" onclick="toggleGroup(this)">
+                        <button type="button" class="btn btn-xs btn-outline-primary group-toggle-btn ml-1" onclick="toggleGroup(this)">
                           {{ $groupAssigned === $perms->count() ? 'None' : 'All' }}
                         </button>
                       </h6>
@@ -109,10 +109,10 @@
           @endif
         </div>
         <div class="card-footer">
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn-submit">
             <i class="fas fa-save mr-1"></i>Save Changes
           </button>
-          <a href="{{ route('roles.index') }}" class="btn btn-default ml-2">
+          <a href="{{ route('roles.index') }}" class="btn-cancel ml-2">
             <i class="fas fa-times mr-1"></i>Cancel
           </a>
         </div>

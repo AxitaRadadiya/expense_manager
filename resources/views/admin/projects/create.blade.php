@@ -3,10 +3,10 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid">
+  <div class="container-fluid-80">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0"><i class="fas fa-plus-circle mr-2 text-primary"></i>Create Project</h1>
+        <h1 class="m-0"><i class="mr-2 text-primary"></i>Create Project</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -20,12 +20,12 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid">
+  <div class="container-fluid-80">
     <div class="card card-outline card-primary shadow-sm">
       <div class="card-header">
         <h3 class="card-title"><i class="fas fa-folder-plus mr-2"></i>Project Details</h3>
         <div class="card-tools">
-          <a href="{{ route('projects.index') }}" class="btn btn-default btn-sm">
+          <a href="{{ route('projects.index') }}" class="btn-cancel">
             <i class="fas fa-arrow-left mr-1"></i>Back
           </a>
         </div>
@@ -91,8 +91,8 @@
           </div>
       </div>
       <div class="card-footer">
-        <button class="btn btn-primary"><i class="fas fa-save mr-1"></i>Create Project</button>
-        <a href="{{ route('projects.index') }}" class="btn btn-default ml-2">
+        <button class="btn-submit"><i class="fas fa-save mr-1"></i>Create Project</button>
+        <a href="{{ route('projects.index') }}" class="btn-cancel ml-2">
           <i class="fas fa-times mr-1"></i>Cancel
         </a>
       </div>

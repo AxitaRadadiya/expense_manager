@@ -2,28 +2,24 @@
 @section('title', 'Users')
 
 @section('content')
-<div class="page-hero">
-  <div class="orb"></div>
-  <div class="container-fluid" style="position:relative;z-index:2;">
-    <h1><i class="fas fa-users mr-2" style="color:rgba(255,255,255,.85);font-size:1.1rem;"></i>Users</h1>
-    <p>Manage all system users, roles and access.</p>
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mt-3">
+      <h1><i class="mr-2 text-teal"></i>Users</h1>
+    </div>
   </div>
 </div>
 
 <div class="pull-card">
   <div class="container-fluid" style="padding:0;">
     @if(session('success'))
-      <div class="alert-success-custom mt-3">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
-      </div>
+    <div class="alert-success-custom mt-3">
+      <i class="fas fa-check-circle"></i> {{ session('success') }}
+    </div>
     @endif
 
     <div class="main-card table-card">
       <div class="main-card-head">
-        <div class="main-card-title">
-          <i class="fas fa-list"></i> All Users
-          <span class="count-badge">{{ $users->total() }}</span>
-        </div>
         <a href="{{ route('users.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> New User
         </a>

@@ -296,7 +296,10 @@ class CreditController extends Controller
         $canDeleteCredit = $auth?->can('credit-delete') ?? false;
 
         $data = $credits->map(function ($credit, $i) use ($start, $canViewCredit, $canEditCredit, $canDeleteCredit) {
-            $actions = '<div class="table-action-group">';
+            $actions = '<div class="btn-group">';
+            $actions .= '
+                            <i class="fas fa-ellipsis-v" data-toggle="dropdown" style="cursor:pointer;"></i>
+                            <div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
 
             if ($canViewCredit) {
                 $actions .= '<a href="' . route('credit.show', $credit->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
@@ -310,7 +313,7 @@ class CreditController extends Controller
                 $actions .= '<form action="' . route('credit.destroy', $credit->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE"><button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
             }
 
-            $actions .= '</div>';
+            $actions .= '</div></div>';
 
             return [
                 'id' => $start + $i + 1,

@@ -9,7 +9,7 @@
     <div class="row mb-2">
       <div class="col-sm-6">
         <h1 class="m-0">
-          <i class="fas fa-search mr-2 text-teal"></i>Activity Detail
+          <i class="mr-2 text-teal"></i>Activity Detail
         </h1>
       </div>
       <div class="col-sm-6">
@@ -33,7 +33,7 @@
           <i class="fas fa-info-circle mr-2"></i>Log Summary
         </h3>
         <div class="card-tools">
-          <a href="{{ route('activity-logs.index') }}" class="btn btn-default btn-sm">
+          <a href="{{ route('activity-logs.index') }}" class="btn-cancel">
             <i class="fas fa-arrow-left mr-1"></i>Back
           </a>
         </div>

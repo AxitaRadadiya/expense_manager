@@ -11,7 +11,7 @@
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0"><i class="fas fa-file-invoice mr-2 text-teal"></i>Expense Details</h1>
+        <h1 class="m-0"><i class="mr-2 text-teal"></i>Expense Details</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -34,11 +34,11 @@
         </h3>
         <div class="card-tools d-flex align-items-center" style="gap:.5rem;">
           @if(auth()->check() && method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin'))
-            <a href="{{ route('expense.edit', $expense->id) }}" class="btn btn-info btn-sm">
+            <a href="{{ route('expense.edit', $expense->id) }}" class="btn-submit">
               <i class="fas fa-edit mr-1"></i>Edit
             </a>
           @endif
-          <a href="{{ route('expense.index') }}" class="btn btn-default btn-sm">
+          <a href="{{ route('expense.index') }}" class="btn-cancel">
             <i class="fas fa-arrow-left mr-1"></i>Back
           </a>
         </div>

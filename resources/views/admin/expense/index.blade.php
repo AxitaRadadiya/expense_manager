@@ -2,11 +2,11 @@
 @section('title', 'Expenses')
 
 @section('content')
-<div class="page-hero">
-  <div class="orb"></div>
-  <div class="container-fluid" style="position:relative;z-index:2;">
-    <h1><i class="fas fa-receipt mr-2" style="color:rgba(255,255,255,.85);font-size:1.1rem;"></i>Expenses</h1>
-    <p>Track project spending, payment modes, and debited entries in one place.</p>
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mt-3">
+        <h1><i class="mr-2 text-teal"></i>Expenses</h1>
+    </div>
   </div>
 </div>
 
@@ -14,9 +14,6 @@
   <div class="container-fluid" style="padding:0;">
     <div class="main-card table-card">
       <div class="main-card-head">
-        <div class="main-card-title">
-          <i class="fas fa-list"></i> All Expenses
-        </div>
         <a href="{{ route('expense.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> Add Expense
         </a>

@@ -376,7 +376,10 @@ class ExpenseController extends Controller
                              . '</span>';
 
                 // ── Action Buttons ────────────────────────────────────────────
-                $actions  = '<div class="table-action-group">';
+                $actions  = '<div class="btn-group">';
+                $actions .= '
+                            <i class="fas fa-ellipsis-v" data-toggle="dropdown" style="cursor:pointer;"></i>
+                            <div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
                 if ($canViewExpense) {
                     $actions .= '<a href="' . route('expense.show', $item->id) . '"
                                     class="table-action-btn is-view" title="View">
@@ -404,7 +407,7 @@ class ExpenseController extends Controller
                             </button>
                         </form>';
                 }
-                $actions .= '</div>';
+                $actions .= '</div></div>';
 
                 $data[] = [
                     'id'           => $i,
