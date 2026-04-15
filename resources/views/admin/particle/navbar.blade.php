@@ -24,16 +24,16 @@
     </a>
     <div class="dropdown-menu dropdown-menu-right" style="min-width:185px;">
       <span class="dropdown-header">
-        <i class="fas fa-user-circle mr-1" style="color:#008d8d;"></i>
+        <i class="fas fa-user-circle mr-1" style="color:#339D9D;"></i>
         {{ ucfirst(Auth()->user()->name) }}
       </span>
 
       <div class="dropdown-divider"></div>
-      <a href="{{ route('admin.profile.edit') }}" class="dropdown-item">
-        <i class="fas fa-user-circle mr-2" style="color:#008d8d;"></i> My Profile
+      <a href="{{ route('admin.profile.edit') }}" class="dropdown-item" style="margin: 4px 0px;">
+        <i class="fas fa-user-circle mr-2" style="color:#339D9D;"></i> My Profile
       </a>
-       <a href="{{ route('admin.profile.password') }}" class="dropdown-item">
-        <i class="fas fa-user-circle mr-2" style="color:#008d8d;"></i> Change Password
+       <a href="{{ route('admin.profile.password') }}" class="dropdown-item" style="margin: 4px 0px;">
+        <i class="fas fa-user-circle mr-2" style="color:#339D9D;"></i> Change Password
       </a>
       
       <!-- <div class="dropdown-divider"></div>

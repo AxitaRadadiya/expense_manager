@@ -235,7 +235,7 @@ $(document).ready(function () {
                     { data: 'action', orderable: false, searchable: false }
                 ],
                 aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
-            language: { paginate: { previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>" } },
+            language: { paginate: { previous: "Previous", next: "Next" } },
             drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
             });
 

@@ -112,7 +112,7 @@
           <div class="card-header">
             <h3 class="card-title">
               <i class="fas fa-receipt mr-2"></i>Debited (Expenses)
-              <span class="badge badge-danger ml-1">{{ $expenses->total() }}</span>
+              <span class="badge badge-info ml-1">{{ $expenses->total() }}</span>
             </h3>
           </div>
           <div class="card-body p-0">
@@ -164,7 +164,7 @@
           <div class="card-header">
             <h3 class="card-title">
               <i class="fas fa-exchange-alt mr-2"></i>Transfers
-              <span class="badge badge-success ml-1">{{ $transfers->total() }}</span>
+              <span class="badge badge-info ml-1">{{ $transfers->total() }}</span>
             </h3>
           </div>
           <div class="card-body p-0">

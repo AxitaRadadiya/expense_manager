@@ -240,3 +240,16 @@ table.dataTable thead th {
     color: #fff !important;
     border-color: #339D9D !important;
 }
+.bg-light {
+    background-color: #F4FAFA !important;
+}
+.bill-upload {
+    background-color: #F4FAFA !important;
+    border-radius: 0 0 12px 12px;
+}
+.rounded {
+    border-radius: 12px !important;
+}
+.card-footer {
+    background-color: transparent !important;
+}
