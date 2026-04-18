@@ -41,7 +41,9 @@ class UserController extends Controller
     public function create(): View
     {
         return view('admin.users.create', [
-            'roles' => Role::orderBy('name')->get(),
+            'roles' => Role::where('id', '!=', 5)
+                            ->orderBy('name')
+                            ->get(),
         ]);
     }
 
@@ -176,7 +178,9 @@ class UserController extends Controller
 
         return view('admin.users.edit', [
             'user'  => $user,
-            'roles' => Role::orderBy('name')->get(),
+            'roles' => Role::where('id', '!=', 5)
+                            ->orderBy('name')
+                            ->get(),
         ]);
     }
 
@@ -280,7 +284,8 @@ class UserController extends Controller
             $totalFiltered = $query->count();
         }
 
-        $users = $query->offset($start)
+        $users = $query->where('role_id', '!=', 5)
+            ->offset($start)
             ->limit($limit)
             ->orderBy('id', 'desc')
             ->get();

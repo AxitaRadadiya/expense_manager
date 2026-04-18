@@ -15,6 +15,10 @@ class Expense extends Model
         'projects_id',
         'users_id',
         'expense_date',
+        'vendor_id',
+        'start_date',
+        'end_date',
+        'total_labour',
         'category',
         'sub_category',
         'amount',
@@ -32,6 +36,9 @@ class Expense extends Model
     protected $casts = [
         'expense_date' => 'date',
         'amount' => 'decimal:2',
+        'total_labour' => 'decimal:2',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function project()
@@ -42,5 +49,10 @@ class Expense extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'users_id');
+    }
+
+    public function vendor()
+    {
+        return $this->belongsTo(User::class, 'vendor_id');
     }
 }

@@ -70,6 +70,28 @@ $billExt = $expense->bill_path ? strtolower(pathinfo($expense->bill_path, PATHIN
                   <div class="font-weight-bold">{{ $expense->category ?: '-' }}</div>
                 </div>
 
+                @if(optional($expense->category) === 'Labour')
+                <div class="col-md-6 mb-3">
+                  <small class="text-muted d-block mb-1">Vendor</small>
+                  <div class="font-weight-bold">{{ $expense->vendor->name ?? '-' }}</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <small class="text-muted d-block mb-1">Start Date</small>
+                  <div class="font-weight-bold">{{ $expense->start_date ? \Carbon\Carbon::parse($expense->start_date)->format('d-m-Y') : '-' }}</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <small class="text-muted d-block mb-1">End Date</small>
+                  <div class="font-weight-bold">{{ $expense->end_date ? \Carbon\Carbon::parse($expense->end_date)->format('d-m-Y') : '-' }}</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <small class="text-muted d-block mb-1">Total Labour</small>
+                  <div class="font-weight-bold">{{ $expense->total_labour !== null ? $expense->total_labour : '-' }}</div>
+                </div>
+                @endif
+
                 <div class="col-md-6 mb-3">
                   <small class="text-muted d-block mb-1">Payment Mode</small>
                   <div class="font-weight-bold">{{ $expense->payment_mode ? ucfirst($expense->payment_mode) : '-' }}</div>

@@ -57,9 +57,16 @@ class ExpenseController extends Controller
             }
         }
 
-        $users = User::orderBy('name')->get();
+        $users = User::where('role_id', '!=', 5)
+            ->orderBy('name')
+            ->get();
+        // Vendors are users with role_id 5
+        $vendors = User::where('role_id', 5)
+            ->orderBy('name')
+            ->get();
         $categories = Category::orderBy('name')->get();
-        return view('admin.expense.create', compact('projects', 'users', 'categories'));
+
+        return view('admin.expense.create', compact('projects', 'users', 'vendors', 'categories'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -71,6 +78,12 @@ class ExpenseController extends Controller
                 'amount'       => 'required|numeric|min:0.01',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
+
+                // Labour fields
+                'vendor_id'    => 'nullable|required_if:category,Labour|exists:users,id',
+                'start_date'   => 'nullable|required_if:category,Labour|date',
+                'end_date'     => 'nullable|required_if:category,Labour|date|after_or_equal:start_date',
+                'total_labour' => 'nullable|required_if:category,Labour|numeric|min:0',
 
                 'payment_mode' => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
@@ -127,6 +140,14 @@ class ExpenseController extends Controller
         $validated['reference_number'] = $validated['reference_number'] ?? '';
         $validated['note']             = $validated['note']             ?? '';
 
+        // If not a Labour expense, clear labour-specific fields
+        if (($validated['category'] ?? '') !== 'Labour') {
+            $validated['vendor_id'] = null;
+            $validated['start_date'] = null;
+            $validated['end_date'] = null;
+            $validated['total_labour'] = null;
+        }
+
         try {
             $this->expenseService->createExpense($user, $validated);
         } catch (\Exception $e) {
@@ -152,7 +173,7 @@ class ExpenseController extends Controller
 
     public function show($id): View
     {
-        $expense = Expense::with(['project', 'user'])->findOrFail($id);
+        $expense = Expense::with(['project', 'user', 'vendor'])->findOrFail($id);
 
         return view('admin.expense.view', compact('expense'));
     }
@@ -161,10 +182,15 @@ class ExpenseController extends Controller
     {
         $expense    = Expense::findOrFail($id);
         $projects   = Project::orderBy('name')->get();
-        $users      = User::orderBy('name')->get();
+        $users      = User::where('role_id', '!=', 5)
+                            ->orderBy('name')
+                            ->get();
+        $vendors    = User::where('role_id', 5)
+                            ->orderBy('name')
+                            ->get();
         $categories = Category::orderBy('name')->get();
 
-        return view('admin.expense.edit', compact('expense', 'projects', 'users', 'categories'));
+        return view('admin.expense.edit', compact('expense', 'projects', 'users', 'vendors', 'categories'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -191,6 +217,11 @@ class ExpenseController extends Controller
                 'amount'       => 'required|numeric|min:0.01',
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
+                // Labour fields
+                'vendor_id'    => 'nullable|required_if:category,Labour|exists:users,id',
+                'start_date'   => 'nullable|required_if:category,Labour|date',
+                'end_date'     => 'nullable|required_if:category,Labour|date|after_or_equal:start_date',
+                'total_labour' => 'nullable|required_if:category,Labour|numeric|min:0',
                 'payment_mode'     => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
@@ -236,6 +267,14 @@ class ExpenseController extends Controller
         $validated['description']      = $validated['description']      ?? '';
         $validated['reference_number'] = $validated['reference_number'] ?? '';
         $validated['note']             = $validated['note']             ?? '';
+
+        // If not a Labour expense, clear labour-specific fields
+        if (($validated['category'] ?? '') !== 'Labour') {
+            $validated['vendor_id'] = null;
+            $validated['start_date'] = null;
+            $validated['end_date'] = null;
+            $validated['total_labour'] = null;
+        }
 
         $expense->update($validated);
 

@@ -20,6 +20,7 @@ class RolesSeeder extends Seeder
             ['name' => 'super-admin'],
             ['name' => 'owner'],
             ['name' => 'superviour'],
+            ['name' => 'vendor'],
         ];
 
         // Populate table

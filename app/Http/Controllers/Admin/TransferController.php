@@ -31,7 +31,8 @@ class TransferController extends Controller
     public function create()
     {
         $auth = auth()->user();
-        $usersQuery = User::orderBy('name');
+        $usersQuery = User::where('role_id', '!=', 5)
+                  ->orderBy('name');
         $assignedProjectIds = $auth ? $auth->assignedProjectIds() : [];
 
         // If the authenticated user is not a super-admin, limit the dropdown

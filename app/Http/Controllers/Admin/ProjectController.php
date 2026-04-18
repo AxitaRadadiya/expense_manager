@@ -20,7 +20,9 @@ class ProjectController extends Controller
     public function create(): View
     {
         return view('admin.projects.create', [
-            'users' => User::orderBy('name')->get(),
+            'users' => User::where('role_id', '!=', 5)
+                            ->orderBy('name')
+                            ->get(),
         ]);
     }
 
@@ -64,7 +66,9 @@ class ProjectController extends Controller
 
         return view('admin.projects.edit', [
             'project' => $project,
-            'users' => User::orderBy('name')->get(),
+            'users' => User::where('role_id', '!=', 5)
+                            ->orderBy('name')
+                            ->get(),
         ]);
     }
 

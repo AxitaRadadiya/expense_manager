@@ -84,6 +84,48 @@
               </div>
             </div>
 
+            <!-- Labour fields (shown only when category == Labour) -->
+            <div id="labourFields" class="col-12 {{ old('category') === 'Labour' ? '' : 'd-none' }}">
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="vendor_id" class="font-weight-bold">Vendor <span class="text-danger">*</span></label>
+                    <select class="form-control @error('vendor_id') is-invalid @enderror" name="vendor_id" id="vendor_id" required>
+                      <option value="">-- Select Vendor --</option>
+                      @foreach($vendors as $v)
+                        <option value="{{ $v->id }}" {{ old('vendor_id') == $v->id ? 'selected' : '' }}>{{ $v->name }}</option>
+                      @endforeach
+                    </select>
+                    @error('vendor_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="start_date" class="font-weight-bold">Start Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control @error('start_date') is-invalid @enderror" name="start_date" id="start_date" value="{{ old('start_date') }}" required>
+                    @error('start_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="end_date" class="font-weight-bold">End Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control @error('end_date') is-invalid @enderror" name="end_date" id="end_date" value="{{ old('end_date') }}" required>
+                    @error('end_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="total_labour" class="font-weight-bold">Total Labour <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('total_labour') is-invalid @enderror" name="total_labour" id="total_labour" value="{{ old('total_labour') }}" min="0" step="1" required>
+                    @error('total_labour')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="col-md-6">
               <div class="form-group">
                 <label for="payment_mode" class="font-weight-bold">Payment Mode</label>

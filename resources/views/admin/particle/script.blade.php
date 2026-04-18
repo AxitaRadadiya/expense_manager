@@ -57,6 +57,28 @@
 <script src="{!!asset('admin/dist/js/numeric.js')!!}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
+<script>
+// Toggle Labour fields in expense create/edit forms
+$(function () {
+    function toggleLabourFields() {
+        var cat = $('#category').val();
+        if (cat === 'Labour') {
+            $('#labourFields').removeClass('d-none');
+            $('#vendor_id, #start_date, #end_date, #total_labour').attr('required', true);
+        } else {
+            $('#labourFields').addClass('d-none');
+            $('#vendor_id, #start_date, #end_date, #total_labour').removeAttr('required').val('');
+        }
+    }
+
+    // Bind change event (works with native select and select2)
+    $(document).on('change', '#category', toggleLabourFields);
+    $(document).on('select2:select', '#category', toggleLabourFields);
+
+    // Initialize on page load
+    toggleLabourFields();
+});
+</script>
 
 <script>
     $(function () {
