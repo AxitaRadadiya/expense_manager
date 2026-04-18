@@ -94,6 +94,10 @@ class CreditController extends Controller
         $data['description'] = $data['description'] ?? '';
         $data['reference_number'] = $data['reference_number'] ?? '';
         $data['note'] = $data['note'] ?? '';
+        // Ensure category is present when creating a credit so DB insert
+        // doesn't fail if the column is not nullable or migration
+        // hasn't been run. Use empty string as a safe default.
+        $data['category'] = $data['category'] ?? '';
         $data['status'] = $data['status'] ?? 'pending';
 
         $this->creditService->createCredit($auth, $data);
