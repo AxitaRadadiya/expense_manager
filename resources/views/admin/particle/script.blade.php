@@ -200,6 +200,37 @@ $(document).ready(function () {
     }
     load_user();
 
+    // Vendors table loader
+    function load_vendors() {
+        $('#VendorsTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[1, 'asc']],
+            ajax: {
+                url: '{{ route("vendor.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{csrf_token()}}' },
+                error: function(xhr) {
+                    console.log('Vendors DataTable Ajax Error - Status: ' + xhr.status);
+                    console.log('Response: ' + xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'name' },
+                { data: 'company_name', defaultContent: '-' },
+                { data: 'mobile' },
+                { data: 'email' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_vendors();
+
     // Projects table loader
     function load_projects() {
         $('#projectsTable').DataTable({

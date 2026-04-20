@@ -101,6 +101,7 @@ class User extends Authenticatable
         'profile_image',
         'role_id', 'status', 'mobile', 'note',
         'project_id', 'amount',
+        'company_name', 'address',
     ];
 
     protected $hidden = ['password', 'remember_token'];

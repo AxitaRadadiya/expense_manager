@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\CreditController;
@@ -68,6 +69,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::get('item-list', [ItemController::class, 'list'])->name('item.list');
     Route::resource('item', ItemController::class);
+
+
+    Route::get('vendor-list', [VendorController::class, 'list'])->name('vendor.list');
+    Route::resource('vendor', VendorController::class);
 
     Route::get('transfer-list', [TransferController::class, 'list'])->name('transfer.list');
     Route::resource('transfer', TransferController::class);

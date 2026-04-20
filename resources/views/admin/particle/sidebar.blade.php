@@ -39,6 +39,15 @@
         </a>
       </li>
       @endif
+      @if($authUser && $authUser->can('vendor-view'))
+      <li class="nav-item">
+        <a href="{{ route('vendor.index') }}"
+          class="nav-link {{ Request::routeIs('vendor.*') ? 'active' : '' }}">
+          <i class="nav-icon fas fa-store"></i>
+          <p>Vendors</p>
+        </a>
+      </li>
+      @endif
       @if($authUser && $authUser->can('credit-view'))
       <li class="nav-item">
         <a href="{{ route('credit.index') }}"

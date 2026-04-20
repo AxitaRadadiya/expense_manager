@@ -31,7 +31,7 @@ class UserController extends Controller
     public function index(): View
     {
         return view('admin.users.index', [
-            'users' => User::with(['role', 'projects'])->orderBy('id')->paginate(15),
+            'users' => User::with(['role', 'projects'])->where('role_id', '!=', 5)->orderBy('id')->paginate(15),
         ]);
     }
 
