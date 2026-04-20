@@ -116,6 +116,15 @@
             </a>
           </li>
           @endif
+          @if($authUser && $authUser->can('project-view'))
+          <li class="nav-item">
+            <a href="{{ route('item.index') }}"
+              class="nav-link {{ Request::routeIs('item.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-tag"></i>
+              <p>Items</p>
+            </a>
+          </li>
+          @endif
         </ul>
       </li>
       @endif

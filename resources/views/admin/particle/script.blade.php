@@ -306,6 +306,83 @@ $(document).ready(function () {
         if (Object.keys(errors).length > 0) { if (errors.categoryName) { $('#category_name').addClass('is-invalid'); $('.category-name-error').text(errors.categoryName); } return; }
             $('#categoryForm').submit();
         });
+
+        // Items table loader
+        function load_items() {
+            var table = $('#ItemsTable').DataTable({
+                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+                autoWidth: false, responsive: true, processing: true, serverSide: true,
+                order: [[1, 'asc']],
+                ajax: {
+                    url: '{{ route("item.list") }}',
+                    dataType: 'json',
+                    type: 'GET',
+                    data: { _token: '{{ csrf_token() }}' },
+                    error: function(xhr) {
+                        console.log('Items DataTable Ajax Error - Status: ' + xhr.status);
+                        console.log('Response: ' + xhr.responseText);
+                    }
+                },
+                columns: [
+                    { data: null, orderable: false, searchable: false },
+                    { data: 'id', name: 'id' },
+                    { data: 'name', name: 'name' },
+                    { data: 'action', orderable: false, searchable: false }
+                ],
+                columnDefs: [
+                    { targets: 0, visible: false, searchable: false, orderable: false }
+                ],
+                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            });
+
+            // expose table if needed
+            return table;
+        }
+        load_items();
+        
+        // Items modal handlers (create / edit / save)
+        $(document).on('click', '.item-modal', function () {
+            $('#itemForm')[0].reset();
+            $('#itemForm').attr('action', '{{ route("item.store") }}');
+            $('#itemForm').find('input[name="_method"]').remove();
+            $('#item_id').val('');
+            $('.item-error').text('');
+            $('input').removeClass('is-invalid');
+            $('#ItemModal').modal('show');
+        });
+
+        $(document).on('click', '.edit-item-modal', function () {
+            let itemId = $(this).data('id');
+            let itemName = $(this).data('name');
+            $('#itemForm')[0].reset();
+            $('#item_id').val(itemId);
+            $('#item_name').val(itemName);
+            $('.item-error').text('');
+            $('input').removeClass('is-invalid');
+            let updateUrl = '{{ route("item.update", ":id") }}'.replace(':id', itemId);
+            $('#itemForm').attr('action', updateUrl);
+            $('#itemForm').find('input[name="_method"]').remove();
+            $('#itemForm').append('<input type="hidden" name="_method" value="PUT">');
+            $('#ItemModal').modal('show');
+        });
+
+        $('#ItemModal').on('hidden.bs.modal', function () { $('#itemForm')[0].reset(); $('#itemForm').find('input[name="_method"]').remove(); $('#item_id').val(''); $('.item-error').text(''); $('input').removeClass('is-invalid'); });
+
+        // Save the Item (client validation)
+        $(document).on('click', '#saveItem', function (e) {
+            e.preventDefault();
+            let itemName = $('#item_name').val();
+            $('.item-error').text(''); $('input').removeClass('is-invalid');
+            let errors = {};
+            if (!itemName) errors.itemName = 'Item Name is required.';
+            if (Object.keys(errors).length > 0) {
+                if (errors.itemName) { $('#item_name').addClass('is-invalid'); $('.item-name-error').text(errors.itemName); }
+                return;
+            }
+            $('#itemForm').submit();
+        });
         
     function load_transfer() {
         $('#TransferTable').DataTable({

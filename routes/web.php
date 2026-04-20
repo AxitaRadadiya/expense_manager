@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TransferController;
 use App\Http\Controllers\ActivityLogController;
@@ -64,6 +65,9 @@ Route::group(['middleware' => ['auth']], function () {
    
     Route::get('category-list', [CategoryController::class, 'list'])->name('category.list');
     Route::resource('category', CategoryController::class);
+
+    Route::get('item-list', [ItemController::class, 'list'])->name('item.list');
+    Route::resource('item', ItemController::class);
 
     Route::get('transfer-list', [TransferController::class, 'list'])->name('transfer.list');
     Route::resource('transfer', TransferController::class);
