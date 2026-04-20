@@ -78,6 +78,16 @@
       </li>
       @endif
 
+      @if($authUser && $authUser->can('item-expense-view'))
+      <li class="nav-item">
+        <a href="{{ route('item-expense.index') }}"
+          class="nav-link {{ Request::routeIs('item-expense.*') ? 'active' : '' }}">
+          <i class="nav-icon fas fa-box"></i>
+          <p>Item Management</p>
+        </a>
+      </li>
+      @endif
+
       @if($authUser && $authUser->hasRole('super-admin'))
       <li class="nav-item">
         <a href="{{ route('reports.index') }}"

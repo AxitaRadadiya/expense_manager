@@ -9,6 +9,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ExpenseController;
+use App\Http\Controllers\Admin\ItemExpenseController;
+use App\Http\Controllers\Admin\ItemReturnController;
 use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\ItemController;
@@ -69,6 +71,12 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::get('item-list', [ItemController::class, 'list'])->name('item.list');
     Route::resource('item', ItemController::class);
+
+    Route::get('item-expense-list', [ItemExpenseController::class, 'list'])->name('item-expense.list');
+    Route::resource('item-expense', ItemExpenseController::class);
+    
+    Route::get('item-return-list', [ItemReturnController::class, 'list'])->name('item-return.list');
+    Route::resource('item-return', ItemReturnController::class);
 
 
     Route::get('vendor-list', [VendorController::class, 'list'])->name('vendor.list');

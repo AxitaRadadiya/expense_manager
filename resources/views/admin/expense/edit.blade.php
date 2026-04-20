@@ -128,8 +128,8 @@
 
             <div class="col-md-6">
               <div class="form-group">
-                <label for="payment_mode" class="font-weight-bold">Payment Mode</label>
-                <select class="form-control @error('payment_mode') is-invalid @enderror" name="payment_mode" id="payment_mode">
+                <label for="payment_mode" class="font-weight-bold">Payment Mode <span class="text-danger">*</span></label>
+                <select class="form-control @error('payment_mode') is-invalid @enderror" name="payment_mode" id="payment_mode" required>
                   <option value="">-- Select Payment Mode --</option>
                   @foreach(['cash' => 'Cash', 'online' => 'Online', 'cheque' => 'Cheque'] as $value => $label)
                     <option value="{{ $value }}" {{ old('payment_mode', $expense->payment_mode) == $value ? 'selected' : '' }}>{{ $label }}</option>

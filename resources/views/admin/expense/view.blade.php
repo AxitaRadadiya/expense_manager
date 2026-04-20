@@ -70,7 +70,7 @@ $billExt = $expense->bill_path ? strtolower(pathinfo($expense->bill_path, PATHIN
                   <div class="font-weight-bold">{{ $expense->category ?: '-' }}</div>
                 </div>
 
-                @if(optional($expense->category) === 'Labour')
+                @if(($expense->category ?? null) === 'Labour')
                 <div class="col-md-6 mb-3">
                   <small class="text-muted d-block mb-1">Vendor</small>
                   <div class="font-weight-bold">{{ $expense->vendor->name ?? '-' }}</div>
