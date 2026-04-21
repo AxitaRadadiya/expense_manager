@@ -36,7 +36,7 @@ class Expense extends Model
     protected $casts = [
         'expense_date' => 'date',
         'amount' => 'decimal:2',
-        'total_labour' => 'decimal:2',
+        'total_labour' => 'integer',
         'start_date' => 'date',
         'end_date' => 'date',
     ];

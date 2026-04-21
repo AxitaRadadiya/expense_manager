@@ -43,7 +43,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="projects_id" class="font-weight-bold">Project <span class="text-danger">*</span></label>
-                <select class="form-control select2 @error('projects_id') is-invalid @enderror" name="projects_id" id="projects_id" required>
+                <select class="form-control select @error('projects_id') is-invalid @enderror" name="projects_id" id="projects_id" required>
                   <option value="">-- Select Project --</option>
                   @foreach($projects as $project)
                     <option value="{{ $project->id }}" {{ old('projects_id', $expense->projects_id) == $project->id ? 'selected' : '' }}>
@@ -66,7 +66,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="category" class="font-weight-bold">Expense Category <span class="text-danger">*</span></label>
-                <select class="form-control select2 @error('category') is-invalid @enderror" name="category" id="category" required>
+                <select class="form-control select @error('category') is-invalid @enderror" name="category" id="category" required>
                   <option value="">-- Select Category --</option>
                   @foreach($categories as $cat)
                     <option value="{{ $cat->name }}" {{ old('category', $expense->category) == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>

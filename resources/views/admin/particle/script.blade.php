@@ -538,6 +538,28 @@ $(document).ready(function () {
     }
     load_report_timeline();
 
+    // Labour Management table loader (client-side DataTable for rendered rows)
+    function load_labour_management() {
+        var $labour = $('#LabourTable');
+        if (! $labour.length) return;
+
+        $labour.DataTable({
+            paging: true,
+            lengthChange: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            autoWidth: false,
+            responsive: true,
+            processing: false,
+            serverSide: false,
+            order: [[3, 'desc']], // sort by Start Date (4th column)
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_labour_management();
+
     function load_credit() {
         $('#CreditTable').DataTable({
             processing: true,

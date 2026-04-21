@@ -30,6 +30,7 @@ class DashboardService
                 'availableAmount' => (float) ($authUser->amount ?? 0),
                 'usersWithTransfers' => User::query()
                     ->select('id', 'name', 'email', 'amount')
+                    ->where('role_id', '!=', 5)
                     ->orderBy('name')
                     ->get(),
                 'debitedList' => Expense::with('user', 'project')->latest()->limit(20)->get(),
@@ -106,6 +107,7 @@ class DashboardService
                 ->withSum('transfers', 'amount')
                 ->withCount('transfers')
                 ->where('id', $userId)
+                ->where('role_id', '!=', 5)
                 ->get(),
             'debitedList' => Expense::with('project')->where('users_id', $userId)->latest()->limit(20)->get(),
             'userDebitedTotals' => collect(),

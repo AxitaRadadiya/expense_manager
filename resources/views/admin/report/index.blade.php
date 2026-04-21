@@ -201,6 +201,46 @@
         </div>
       </div>
     </div>
+
+      <div class="main-card mt-4">
+        <div class="main-card-title">
+          <i class="fas fa-user-clock"></i> Labour Management
+        </div>
+        <div class="main-card-body">
+          <div class="table-responsive">
+            <table id="LabourTable" class="table table-hover report-table mb-0">
+              <thead class="thead">
+                <tr>
+                  <th>Sr No.</th>
+                  <th>Project</th>
+                  <th>Vendor</th>
+                  <th>Total Labour</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                @forelse($labourEntries as $entry)
+                <tr>
+                  <td>{{ $loop->iteration }}</td>
+                  <td>{{ optional($entry->project)->name ?? '-' }}</td>
+                  <td>{{ optional($entry->vendor)->name ?? '-' }}</td>
+                  <td>{{ $entry->total_labour ?? '-' }}</td>
+                  <td>{{ $entry->start_date ? $entry->start_date->format('d-m-Y') : '-' }}</td>
+                  <td>{{ $entry->end_date ? $entry->end_date->format('d-m-Y') : '-' }}</td>
+                  <td class="text-danger font-weight-bold">Rs. {{ number_format((float) $entry->amount, 2) }}</td>
+                </tr>
+                @empty
+                <tr>
+                  <td colspan="7" class="empty-table">No labour records found.</td>
+                </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
   </div>
 </div>
 @endsection

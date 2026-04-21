@@ -35,10 +35,10 @@ class ReportService
         }
 
         if ($user->hasRole('super-admin')) {
-            return User::orderBy('name')->get();
+            return User::where('role_id', '!=', 5)->orderBy('name')->get();
         }
 
-        return User::where('id', $user->id)->orderBy('name')->get();
+        return User::where('id', $user->id)->where('role_id', '!=', 5)->orderBy('name')->get();
     }
 
     public function generateExpenseReport(array $filters = []): Collection
@@ -297,6 +297,33 @@ class ReportService
         }
 
         return $timeline;
+    }
+
+    public function getLabourEntries(?User $authUser, array $filters = []): Collection
+    {
+        $query = \App\Models\Expense::query()->where('category', 'Labour');
+
+        if ($authUser && ! $authUser->hasRole('super-admin')) {
+            $query->whereIn('projects_id', $authUser->assignedProjectIds());
+        }
+
+        if (! empty($filters['projects_id'])) {
+            $query->where('projects_id', $filters['projects_id']);
+        }
+
+        if (! empty($filters['users_id'])) {
+            $query->where('users_id', $filters['users_id']);
+        }
+
+        if (! empty($filters['from_date'])) {
+            $query->whereDate('start_date', '>=', $filters['from_date']);
+        }
+
+        if (! empty($filters['to_date'])) {
+            $query->whereDate('end_date', '<=', $filters['to_date']);
+        }
+
+        return $query->with(['project:id,name', 'vendor:id,name'])->orderByDesc('start_date')->get();
     }
 
     public function getExpenseEntries(?User $authUser, array $filters = []): Collection
