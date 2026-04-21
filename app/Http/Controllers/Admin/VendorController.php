@@ -34,7 +34,7 @@ class VendorController extends Controller
 
         $roleId = Role::where('name', 'vendor')->value('id');
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
@@ -43,6 +43,8 @@ class VendorController extends Controller
             'password' => Hash::make('12345678'),
             'role_id' => $roleId,
         ]);
+
+        $user->assignRole((int) $roleId);
 
         return redirect()->route('vendor.index')->with('success', 'Vendor created successfully');
     }
@@ -67,13 +69,17 @@ class VendorController extends Controller
             'address' => 'nullable|string',
         ]);
 
+        $roleId = Role::where('name', 'vendor')->value('id');
+
         $vendor->update([
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
             'company_name' => $request->company_name,
             'address' => $request->address,
+            'role_id' => $roleId,
         ]);
+        $vendor->assignRole((int) $roleId);
 
         return redirect()->route('vendor.index')->with('success', 'Vendor updated successfully.');
     }
