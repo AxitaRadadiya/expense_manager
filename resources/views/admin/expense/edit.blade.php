@@ -3,10 +3,10 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid">
+  <div class="container-fluid-80">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0"><i class="fas fa-edit mr-2 text-primary"></i>Edit Expense</h1>
+        <h1 class="m-0"><i class="mr-2 text-primary"></i>Edit Expense</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -20,12 +20,12 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid">
+  <div class="container-fluid-80">
     <div class="card card-outline card-primary shadow-sm">
       <div class="card-header">
         <h3 class="card-title"><i class="fas fa-file-invoice mr-2"></i>Edit Expense Details</h3>
         <div class="card-tools">
-          <a href="{{ route('expense.index') }}" class="btn btn-default btn-sm">
+          <a href="{{ route('expense.index') }}" class="btn-cancel">
             <i class="fas fa-arrow-left mr-1"></i>Back
           </a>
         </div>
@@ -43,7 +43,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="projects_id" class="font-weight-bold">Project <span class="text-danger">*</span></label>
-                <select class="form-control select2 @error('projects_id') is-invalid @enderror" name="projects_id" id="projects_id" required>
+                <select class="form-control select @error('projects_id') is-invalid @enderror" name="projects_id" id="projects_id" required>
                   <option value="">-- Select Project --</option>
                   @foreach($projects as $project)
                     <option value="{{ $project->id }}" {{ old('projects_id', $expense->projects_id) == $project->id ? 'selected' : '' }}>
@@ -66,7 +66,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="category" class="font-weight-bold">Expense Category <span class="text-danger">*</span></label>
-                <select class="form-control select2 @error('category') is-invalid @enderror" name="category" id="category" required>
+                <select class="form-control select @error('category') is-invalid @enderror" name="category" id="category" required>
                   <option value="">-- Select Category --</option>
                   @foreach($categories as $cat)
                     <option value="{{ $cat->name }}" {{ old('category', $expense->category) == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -81,6 +81,48 @@
                 <label for="amount" class="font-weight-bold">Amount (Rs) <span class="text-danger">*</span></label>
                 <input type="number" class="form-control @error('amount') is-invalid @enderror" name="amount" id="amount" value="{{ old('amount', $expense->amount) }}" min="0.01" step="0.01" placeholder="0.00" required>
                 @error('amount')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+              </div>
+            </div>
+
+            <!-- Labour fields (shown only when category == Labour) -->
+            <div id="labourFields" class="col-12 {{ old('category', $expense->category) === 'Labour' ? '' : 'd-none' }}">
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="vendor_id" class="font-weight-bold">Vendor <span class="text-danger">*</span></label>
+                    <select class="form-control @error('vendor_id') is-invalid @enderror" name="vendor_id" id="vendor_id" required>
+                      <option value="">-- Select Vendor --</option>
+                      @foreach($vendors as $v)
+                        <option value="{{ $v->id }}" {{ old('vendor_id', $expense->vendor_id) == $v->id ? 'selected' : '' }}>{{ $v->name }}</option>
+                      @endforeach
+                    </select>
+                    @error('vendor_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="start_date" class="font-weight-bold">Start Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control @error('start_date') is-invalid @enderror" name="start_date" id="start_date" value="{{ old('start_date', $expense->start_date ? \Carbon\Carbon::parse($expense->start_date)->format('Y-m-d') : '') }}" required>
+                    @error('start_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="end_date" class="font-weight-bold">End Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control @error('end_date') is-invalid @enderror" name="end_date" id="end_date" value="{{ old('end_date', $expense->end_date ? \Carbon\Carbon::parse($expense->end_date)->format('Y-m-d') : '') }}" required>
+                    @error('end_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label for="total_labour" class="font-weight-bold">Total Labour <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('total_labour') is-invalid @enderror" name="total_labour" id="total_labour" value="{{ old('total_labour', $expense->total_labour) }}" min="0" step="1" required>
+                    @error('total_labour')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -160,10 +202,10 @@
           </div>
       </div>
       <div class="card-footer">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn-submit">
           <i class="fas fa-save mr-1"></i>Update Expense
         </button>
-        <a href="{{ route('expense.index') }}" class="btn btn-default ml-2">
+        <a href="{{ route('expense.index') }}" class="btn-cancel ml-2">
           <i class="fas fa-times mr-1"></i>Cancel
         </a>
       </div>

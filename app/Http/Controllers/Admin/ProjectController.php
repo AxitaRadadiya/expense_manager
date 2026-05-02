@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,8 +20,11 @@ class ProjectController extends Controller
 
     public function create(): View
     {
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         return view('admin.projects.create', [
-            'users' => User::orderBy('name')->get(),
+            'users' => User::where('role_id', '!=', $vendorRoleId)
+                            ->orderBy('name')
+                            ->get(),
         ]);
     }
 
@@ -61,10 +65,13 @@ class ProjectController extends Controller
     public function edit(Project $project): View
     {
         $project->load('users');
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
 
         return view('admin.projects.edit', [
             'project' => $project,
-            'users' => User::orderBy('name')->get(),
+            'users' => User::where('role_id', '!=', $vendorRoleId)
+                            ->orderBy('name')
+                            ->get(),
         ]);
     }
 
@@ -164,7 +171,10 @@ class ProjectController extends Controller
                 $canEditProject = $auth?->can('project-edit') ?? false;
                 $canDeleteProject = $auth?->can('project-delete') ?? false;
 
-                $actions = '<div class="table-action-group">';
+                $actions = '<div class="btn-group">';
+                $actions .= '
+                            <i class="fas fa-ellipsis-v" data-toggle="dropdown" style="cursor:pointer;"></i>
+                            <div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
 
                 if ($canViewProject) {
                     $actions .= '<a href="' . route('projects.show', $project->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
@@ -184,7 +194,7 @@ class ProjectController extends Controller
                         . '</form>';
                 }
 
-                $actions .= '</div>';
+                $actions .= '</div></div>';
 
                 $nestedData['action'] = $actions;
                 $data[] = $nestedData;

@@ -57,6 +57,28 @@
 <script src="{!!asset('admin/dist/js/numeric.js')!!}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
+<script>
+// Toggle Labour fields in expense create/edit forms
+$(function () {
+    function toggleLabourFields() {
+        var cat = $('#category').val();
+        if (cat === 'Labour') {
+            $('#labourFields').removeClass('d-none');
+            $('#vendor_id, #start_date, #end_date, #total_labour').attr('required', true);
+        } else {
+            $('#labourFields').addClass('d-none');
+            $('#vendor_id, #start_date, #end_date, #total_labour').removeAttr('required').val('');
+        }
+    }
+
+    // Bind change event (works with native select and select2)
+    $(document).on('change', '#category', toggleLabourFields);
+    $(document).on('select2:select', '#category', toggleLabourFields);
+
+    // Initialize on page load
+    toggleLabourFields();
+});
+</script>
 
 <script>
     $(function () {
@@ -132,7 +154,7 @@ $(document).ready(function () {
 
     // Roles table
     $('#roleTable').DataTable({
-        paging: true, lengthChange: false, searching: true, ordering: true, info: true,
+        paging: true, lengthChange: true, searching: true, ordering: true, info: true,
         autoWidth: false, responsive: true, processing: true, serverSide: true,
         order: [0, 'asc'],
         ajax: { url: '{{ route('roles.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'roles.list' } },
@@ -153,7 +175,7 @@ $(document).ready(function () {
     // Users table loader
     function load_user() {
         $('#userTable').DataTable({
-            paging: true, lengthChange: false, searching: true, ordering: true, info: true,
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
             ajax: {
@@ -178,10 +200,41 @@ $(document).ready(function () {
     }
     load_user();
 
+    // Vendors table loader
+    function load_vendors() {
+        $('#VendorsTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[1, 'asc']],
+            ajax: {
+                url: '{{ route("vendor.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{csrf_token()}}' },
+                error: function(xhr) {
+                    console.log('Vendors DataTable Ajax Error - Status: ' + xhr.status);
+                    console.log('Response: ' + xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'name' },
+                { data: 'company_name', defaultContent: '-' },
+                { data: 'mobile' },
+                { data: 'email' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_vendors();
+
     // Projects table loader
     function load_projects() {
         $('#projectsTable').DataTable({
-            paging: true, lengthChange: false, searching: true, ordering: true, info: true,
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
             ajax: { url: '{{ route('projects.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'projects.list' } },
@@ -235,7 +288,7 @@ $(document).ready(function () {
                     { data: 'action', orderable: false, searchable: false }
                 ],
                 aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
-            language: { paginate: { previous: "<i class='mdi mdi-chevron-left'>", next: "<i class='mdi mdi-chevron-right'>" } },
+            language: { paginate: { previous: "Previous", next: "Next" } },
             drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
             });
 
@@ -284,7 +337,146 @@ $(document).ready(function () {
         if (Object.keys(errors).length > 0) { if (errors.categoryName) { $('#category_name').addClass('is-invalid'); $('.category-name-error').text(errors.categoryName); } return; }
             $('#categoryForm').submit();
         });
+
+        // Items table loader
+        function load_items() {
+            var table = $('#ItemsTable').DataTable({
+                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+                autoWidth: false, responsive: true, processing: true, serverSide: true,
+                order: [[1, 'asc']],
+                ajax: {
+                    url: '{{ route("item.list") }}',
+                    dataType: 'json',
+                    type: 'GET',
+                    data: { _token: '{{ csrf_token() }}' },
+                    error: function(xhr) {
+                        console.log('Items DataTable Ajax Error - Status: ' + xhr.status);
+                        console.log('Response: ' + xhr.responseText);
+                    }
+                },
+                columns: [
+                    { data: null, orderable: false, searchable: false },
+                    { data: 'id', name: 'id' },
+                    { data: 'name', name: 'name' },
+                    { data: 'action', orderable: false, searchable: false }
+                ],
+                columnDefs: [
+                    { targets: 0, visible: false, searchable: false, orderable: false }
+                ],
+                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            });
+
+            // expose table if needed
+            return table;
+        }
+        load_items();
         
+        // Items modal handlers (create / edit / save)
+        $(document).on('click', '.item-modal', function () {
+            $('#itemForm')[0].reset();
+            $('#itemForm').attr('action', '{{ route("item.store") }}');
+            $('#itemForm').find('input[name="_method"]').remove();
+            $('#item_id').val('');
+            $('.item-error').text('');
+            $('input').removeClass('is-invalid');
+            $('#ItemModal').modal('show');
+        });
+
+        $(document).on('click', '.edit-item-modal', function () {
+            let itemId = $(this).data('id');
+            let itemName = $(this).data('name');
+            $('#itemForm')[0].reset();
+            $('#item_id').val(itemId);
+            $('#item_name').val(itemName);
+            $('.item-error').text('');
+            $('input').removeClass('is-invalid');
+            let updateUrl = '{{ route("item.update", ":id") }}'.replace(':id', itemId);
+            $('#itemForm').attr('action', updateUrl);
+            $('#itemForm').find('input[name="_method"]').remove();
+            $('#itemForm').append('<input type="hidden" name="_method" value="PUT">');
+            $('#ItemModal').modal('show');
+        });
+
+        $('#ItemModal').on('hidden.bs.modal', function () { $('#itemForm')[0].reset(); $('#itemForm').find('input[name="_method"]').remove(); $('#item_id').val(''); $('.item-error').text(''); $('input').removeClass('is-invalid'); });
+
+        // Save the Item (client validation)
+        $(document).on('click', '#saveItem', function (e) {
+            e.preventDefault();
+            let itemName = $('#item_name').val();
+            $('.item-error').text(''); $('input').removeClass('is-invalid');
+            let errors = {};
+            if (!itemName) errors.itemName = 'Item Name is required.';
+            if (Object.keys(errors).length > 0) {
+                if (errors.itemName) { $('#item_name').addClass('is-invalid'); $('.item-name-error').text(errors.itemName); }
+                return;
+            }
+            $('#itemForm').submit();
+        });
+
+        // Item Expense table loader
+        function load_item_expense() {
+            if (!$('#ItemExpenseTable').length) return;
+            $('#ItemExpenseTable').DataTable({
+                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+                autoWidth: false, responsive: true, processing: true, serverSide: true,
+                order: [[1, 'asc']],
+                ajax: {
+                    url: '{{ route("item-expense.list") }}',
+                    dataType: 'json',
+                    type: 'GET',
+                    data: { _token: '{{ csrf_token() }}' },
+                    error: function(xhr) { console.log('ItemExpense DataTable Ajax Error - Status: ' + xhr.status); console.log('Response: ' + xhr.responseText); }
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'item' },
+                    { data: 'vendor' },
+                    { data: 'project' },
+                    { data: 'start_date' },
+                    { data: 'end_date' },
+                    { data: 'user' },
+                    { data: 'total_number' },
+                    { data: 'total_amount' },
+                    { data: 'action', orderable: false, searchable: false }
+                ],
+                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            });
+        }
+        load_item_expense();
+
+        // Item Return table loader
+        function load_item_return() {
+            if (!$('#ItemReturnTable').length) return;
+            $('#ItemReturnTable').DataTable({
+                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+                autoWidth: false, responsive: true, processing: true, serverSide: true,
+                order: [[1, 'asc']],
+                ajax: {
+                    url: '{{ route("item-return.list") }}',
+                    dataType: 'json',
+                    type: 'GET',
+                    data: { _token: '{{ csrf_token() }}' },
+                    error: function(xhr) { console.log('ItemReturn DataTable Ajax Error - Status: ' + xhr.status); console.log('Response: ' + xhr.responseText); }
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'project' },
+                    { data: 'item' },
+                    { data: 'date' },
+                    { data: 'total_number' },
+                    { data: 'action', orderable: false, searchable: false }
+                ],
+                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            });
+        }
+        load_item_return();
+
     function load_transfer() {
         $('#TransferTable').DataTable({
             processing: true,
@@ -345,6 +537,68 @@ $(document).ready(function () {
         });
     }
     load_report_timeline();
+
+    // Labour Management table loader (client-side DataTable for rendered rows)
+    function load_labour_management() {
+        var $labour = $('#LabourTable');
+        if (! $labour.length) return;
+
+        $labour.DataTable({
+            paging: true,
+            lengthChange: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            autoWidth: false,
+            responsive: true,
+            processing: false,
+            serverSide: false,
+            order: [[3, 'desc']], // sort by Start Date (4th column)
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_labour_management();
+
+    // Vendor show page tables: VendorLabourTable and VendorItemTable
+    function init_vendor_tables() {
+        var $lab = $('#VendorLabourTable');
+        if ($lab.length) {
+            $lab.DataTable({
+                paging: true,
+                pageLength: 5,
+                lengthChange: false,
+                searching: false,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                order: [[3, 'desc']], // start_date column
+                columnDefs: [ { orderable: false, targets: 0 } ],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); }
+            });
+        }
+
+        var $it = $('#VendorItemTable');
+        if ($it.length) {
+            $it.DataTable({
+                paging: true,
+                pageLength: 5,
+                lengthChange: false,
+                searching: false,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                order: [[4, 'desc']], // start_date column
+                columnDefs: [ { orderable: false, targets: 0 } ],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); }
+            });
+        }
+    }
+    init_vendor_tables();
 
     function load_credit() {
         $('#CreditTable').DataTable({

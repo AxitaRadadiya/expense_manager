@@ -29,6 +29,7 @@ class ReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 	protected $userSummary;
 	protected $timeline;
 	protected array $totals;
+	protected $labourEntries;
 
 	public function __construct(
 		?User $authUser,
@@ -55,6 +56,9 @@ class ReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 		$rows = array_merge($rows, $this->getUserSummaryRows());
 		$rows[] = [];
 
+		$rows = array_merge($rows, $this->getLabourRows());
+		$rows[] = [];
+
 		$rows = array_merge($rows, $this->getTransactionRows());
 
 		return $rows;
@@ -67,6 +71,7 @@ class ReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 		$this->projectSummary = $this->reportService->getProjectWiseSummary($this->authUser, $this->filters);
 		$this->userSummary = $this->reportService->getUserWiseSummary($this->authUser, $this->filters);
 		$this->timeline = $this->reportService->getTransactionTimeline($this->authUser, $this->filters);
+		$this->labourEntries = $this->reportService->getLabourEntries($this->authUser, $this->filters);
 		$this->totals = $this->reportService->getTotals($this->projectSummary, $this->userSummary);
 	}
 
@@ -129,6 +134,7 @@ class ReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 	protected function getTransactionRows(): array
 	{
 		$rows = [];
+		$rows[] = ['TIMELINE'];
 		$rows[] = ['Sr No.', 'Date', 'Project', 'User / Person', 'Type', 'Category', 'Description', 'Credit ₹', 'Expense ₹', 'Transfer To', 'Transfer ₹'];
 
 		$i = 1;
@@ -171,6 +177,28 @@ class ReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
 		$rows[] = [];
 		$rows[] = ['TOTALS', '', '', '', '', '', '', $totalCredit, $totalExpense, '', $totalTransfer];
+
+		return $rows;
+	}
+
+	protected function getLabourRows(): array
+	{
+		$rows = [];
+		$rows[] = ['LABOUR MANAGEMENT'];
+		$rows[] = ['Sr No.', 'Project', 'Vendor', 'Total Labour', 'Start Date', 'End Date', 'Amount (₹)'];
+		$i = 1;
+
+		foreach ($this->labourEntries as $entry) {
+			$rows[] = [
+				$i++,
+				(optional($entry->project)->name) ?: '-',
+				optional($entry->vendor)->name ?: '-',
+				is_numeric($entry->total_labour) ? (float) $entry->total_labour : '-',
+				optional($entry->start_date)?->format('d-m-Y') ?: '-',
+				optional($entry->end_date)?->format('d-m-Y') ?: '-',
+				is_numeric($entry->amount) ? (float) $entry->amount : '-',
+			];
+		}
 
 		return $rows;
 	}
@@ -219,7 +247,7 @@ class ReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
 	protected function styleSectionHeaders($sheet, $highestRow, $lastCol): void
 	{
-		$sections = ['PROJECT SUMMARY','USER SUMMARY','EXPENSE DETAILS','CREDIT DETAILS','TIMELINE','TOTALS'];
+		$sections = ['PROJECT SUMMARY','USER SUMMARY','EXPENSE DETAILS','CREDIT DETAILS','TIMELINE','LABOUR MANAGEMENT','TOTALS'];
 		for ($r = 1; $r <= $highestRow; $r++) {
 			$val = trim((string) $sheet->getCell('A' . $r)->getValue());
 			if (in_array(mb_strtoupper($val), $sections, true)) {
@@ -233,7 +261,7 @@ class ReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
 	protected function styleTableHeaders($sheet, $highestRow, $lastCol): void
 	{
-		$sections = ['PROJECT SUMMARY','USER SUMMARY','EXPENSE DETAILS','CREDIT DETAILS','TIMELINE','TOTALS'];
+		$sections = ['PROJECT SUMMARY','USER SUMMARY','EXPENSE DETAILS','CREDIT DETAILS','TIMELINE','LABOUR MANAGEMENT','TOTALS'];
 		for ($r = 1; $r <= $highestRow; $r++) {
 			$val = trim((string) $sheet->getCell('A' . $r)->getValue());
 			if (in_array(mb_strtoupper($val), $sections, true)) {

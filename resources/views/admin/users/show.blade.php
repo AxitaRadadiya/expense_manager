@@ -7,7 +7,7 @@
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0"><i class="fas fa-user mr-2 text-primary"></i>User Details</h1>
+        <h1 class="m-0"><i class="mr-2 text-primary"></i>User Details</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -112,13 +112,13 @@
           <div class="card-header">
             <h3 class="card-title">
               <i class="fas fa-receipt mr-2"></i>Debited (Expenses)
-              <span class="badge badge-danger ml-1">{{ $expenses->total() }}</span>
+              <span class="badge badge-info ml-1">{{ $expenses->total() }}</span>
             </h3>
           </div>
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-sm table-hover table-bordered mb-0">
-                <thead class="thead-dark">
+                <thead class="thead">
                   <tr>
                     <th>#</th>
                     <th>Date</th>
@@ -164,13 +164,13 @@
           <div class="card-header">
             <h3 class="card-title">
               <i class="fas fa-exchange-alt mr-2"></i>Transfers
-              <span class="badge badge-success ml-1">{{ $transfers->total() }}</span>
+              <span class="badge badge-info ml-1">{{ $transfers->total() }}</span>
             </h3>
           </div>
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-sm table-hover table-bordered mb-0">
-                <thead class="thead-dark">
+                <thead class="thead">
                   <tr>
                     <th>#</th><th>Date</th>
                     <th class="text-right">Amount</th>
@@ -209,7 +209,7 @@
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-sm table-hover table-bordered mb-0">
-                <thead class="thead-dark">
+                <thead class="thead">
                   <tr>
                     <th>#</th><th>Date</th><th>Type</th>
                     <th class="text-right">Change</th>

@@ -2,11 +2,11 @@
 @section('title', 'Activity Logs')
 
 @section('content')
-<div class="page-hero">
-  <div class="orb"></div>
-  <div class="container-fluid" style="position:relative;z-index:2;">
-    <h1><i class="fas fa-history mr-2" style="color:rgba(255,255,255,.85);font-size:1.1rem;"></i>Activity Logs</h1>
-    <p>Review audit history, user actions, and model changes inside the same shared model UI.</p>
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mt-3">
+        <h1><i class="mr-2 text-teal"></i>Activity Logs</h1>
+    </div>
   </div>
 </div>
 
@@ -18,7 +18,7 @@
           <i class="fas fa-filter"></i> Filters
         </div>
       </div>
-      <div class="filter-card-body">
+      <div class="main-card-body">
         <form method="GET" action="{{ route('activity-logs.index') }}">
           <div class="row align-items-end">
             <div class="col-12 col-md-4 col-lg-3 mb-3">
@@ -43,8 +43,8 @@
               <input type="date" name="date_to" class="form-control form-control-sm" value="{{ request('date_to') }}">
             </div>
             <div class="col-12 col-lg-3 mb-3 page-actions">
-              <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search mr-1"></i>Filter</button>
-              <a href="{{ route('activity-logs.index') }}" class="btn btn-default btn-sm"><i class="fas fa-times mr-1"></i>Clear</a>
+              <button type="submit" class="btn-submit mr-2"><i class="fas fa-search mr-1"></i>Filter</button>
+              <a href="{{ route('activity-logs.index') }}" class="btn-cancel"><i class="fas fa-times mr-1"></i>Clear</a>
             </div>
           </div>
         </form>
@@ -52,20 +52,14 @@
     </div>
 
     <div class="main-card table-card">
-      <div class="main-card-head">
-        <div class="main-card-title">
-          <i class="fas fa-list-alt"></i> All Activity
-          <span class="count-badge">{{ $logs->total() }}</span>
-        </div>
         @if($logs->total())
           <div class="page-note">Showing {{ $logs->firstItem() }}-{{ $logs->lastItem() }} of {{ $logs->total() }}</div>
         @endif
-      </div>
 
       <div class="main-card-body p-0">
         <div class="table-responsive">
           <table class="table table-hover mb-0">
-            <thead>
+            <thead class="thead">
               <tr>
                 <th>#</th>
                 <th>User</th>

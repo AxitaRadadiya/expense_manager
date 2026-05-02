@@ -67,31 +67,61 @@
         </div>
         <div class="card-body">
           @if($permissions->isNotEmpty())
-            <div class="row">
-              @foreach($permissions as $group => $perms)
-                <div class="col-md-4 col-sm-6 mb-4">
-                  <div class="card card-outline card-primary mb-0 shadow-none">
-                    <div class="card-header p-2">
-                      <h6 class="card-title mb-0 d-flex align-items-center justify-content-between">
-                        <span>
-                          <i class="fas fa-layer-group mr-1 text-primary"></i>
-                          {{ $group }}
-                          <span class="badge badge-light ml-1">{{ $perms->count() }}</span>
-                        </span>
-                        <button type="button" class="btn btn-xs btn-outline-primary group-toggle-btn" onclick="toggleGroup(this)">All</button>
-                      </h6>
-                    </div>
-                    <div class="card-body p-2">
-                      @foreach($perms as $perm)
-                        <div class="icheck-primary mb-1">
-                          <input class="perm-chk" type="checkbox" name="permissions[]" value="{{ $perm->id }}" id="perm_{{ $perm->id }}" {{ in_array($perm->id, old('permissions', [])) ? 'checked' : '' }}>
-                          <label for="perm_{{ $perm->id }}" style="font-size:.85rem;">{{ $perm->name }}</label>
-                        </div>
-                      @endforeach
-                    </div>
-                  </div>
-                </div>
-              @endforeach
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>Module</th>
+                    <th class="text-center">View</th>
+                    <th class="text-center">Create</th>
+                    <th class="text-center">Edit</th>
+                    <th class="text-center">Delete</th>
+                    <th class="text-center">All</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($permissions as $module => $perms)
+                    @php
+                      // map action => permission id (if present)
+                      $map = ['view' => null, 'create' => null, 'edit' => null, 'delete' => null];
+                      foreach ($perms as $p) {
+                          $name = strtolower($p->name);
+                          if (str_ends_with($name, '-view') || str_contains($name, 'view')) $map['view'] = $p->id;
+                          if (str_ends_with($name, '-create') || str_contains($name, 'create')) $map['create'] = $p->id;
+                          if (str_ends_with($name, '-edit') || str_contains($name, 'edit')) $map['edit'] = $p->id;
+                          if (str_ends_with($name, '-delete') || str_contains($name, 'delete')) $map['delete'] = $p->id;
+                      }
+                      $rowId = 'perm_row_' . \'\'' . md5($module);
+                    @endphp
+                    <tr>
+                      <td class="align-middle">{{ $module }}</td>
+                      <td class="text-center align-middle">
+                        @if($map['view'])
+                          <input class="perm-chk module-{{ md5($module) }}" type="checkbox" name="permissions[]" value="{{ $map['view'] }}" id="perm_{{ $map['view'] }}" {{ in_array($map['view'], old('permissions', [])) ? 'checked' : '' }}>
+                        @endif
+                      </td>
+                      <td class="text-center align-middle">
+                        @if($map['create'])
+                          <input class="perm-chk module-{{ md5($module) }}" type="checkbox" name="permissions[]" value="{{ $map['create'] }}" id="perm_{{ $map['create'] }}" {{ in_array($map['create'], old('permissions', [])) ? 'checked' : '' }}>
+                        @endif
+                      </td>
+                      <td class="text-center align-middle">
+                        @if($map['edit'])
+                          <input class="perm-chk module-{{ md5($module) }}" type="checkbox" name="permissions[]" value="{{ $map['edit'] }}" id="perm_{{ $map['edit'] }}" {{ in_array($map['edit'], old('permissions', [])) ? 'checked' : '' }}>
+                        @endif
+                      </td>
+                      <td class="text-center align-middle">
+                        @if($map['delete'])
+                          <input class="perm-chk module-{{ md5($module) }}" type="checkbox" name="permissions[]" value="{{ $map['delete'] }}" id="perm_{{ $map['delete'] }}" {{ in_array($map['delete'], old('permissions', [])) ? 'checked' : '' }}>
+                        @endif
+                      </td>
+                      <td class="text-center align-middle">
+                        <button type="button" class="btn btn-xs btn-outline-primary row-toggle-btn" data-module="{{ md5($module) }}">All</button>
+                      </td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
             </div>
           @else
             <div class="text-center text-muted py-4">
@@ -124,6 +154,23 @@ function toggleGroup(btn) {
 function selectAll(state) {
   document.querySelectorAll('.perm-chk').forEach(c => { c.checked = state; });
   document.querySelectorAll('.group-toggle-btn').forEach(b => { b.textContent = state ? 'None' : 'All'; });
+}
+</script>
+<script>
+document.addEventListener('click', function (e) {
+  // row toggle button
+  if (e.target && e.target.classList.contains('row-toggle-btn')) {
+    var moduleKey = e.target.getAttribute('data-module');
+    var checks = document.querySelectorAll('.module-' + moduleKey);
+    var allChecked = Array.from(checks).every(function (c) { return c.checked; });
+    checks.forEach(function (c) { c.checked = !allChecked; });
+    e.target.textContent = allChecked ? 'All' : 'None';
+  }
+});
+
+function selectAll(state) {
+  document.querySelectorAll('.perm-chk').forEach(function(c) { c.checked = state; });
+  document.querySelectorAll('.row-toggle-btn').forEach(function(b) { b.textContent = state ? 'None' : 'All'; });
 }
 </script>
 @endsection

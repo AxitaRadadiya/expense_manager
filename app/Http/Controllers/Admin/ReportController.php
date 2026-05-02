@@ -28,6 +28,7 @@ class ReportController extends Controller
         $projectSummary = $this->reportService->getProjectWiseSummary($authUser, $filters);
         $userSummary = $this->reportService->getUserWiseSummary($authUser, $filters);
         $totals = $this->reportService->getTotals($projectSummary, $userSummary);
+        $labourEntries = $this->reportService->getLabourEntries($authUser, $filters);
 
         // Build download query from filters
         $downloadQuery = array_filter([
@@ -45,7 +46,8 @@ class ReportController extends Controller
             'projectSummary',
             'userSummary',
             'totals',
-            'downloadQuery'
+            'downloadQuery',
+            'labourEntries'
         ));
     }
 

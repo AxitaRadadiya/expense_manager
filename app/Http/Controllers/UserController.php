@@ -30,8 +30,9 @@ class UserController extends Controller
      ───────────────────────────────────────── */
     public function index(): View
     {
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         return view('admin.users.index', [
-            'users' => User::with(['role', 'projects'])->orderBy('id')->paginate(15),
+            'users' => User::with(['role', 'projects'])->where('role_id', '!=', $vendorRoleId)->orderBy('id')->paginate(15),
         ]);
     }
 
@@ -40,8 +41,11 @@ class UserController extends Controller
      ───────────────────────────────────────── */
     public function create(): View
     {
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         return view('admin.users.create', [
-            'roles' => Role::orderBy('name')->get(),
+            'roles' => Role::where('id', '!=', $vendorRoleId)
+                            ->orderBy('name')
+                            ->get(),
         ]);
     }
 
@@ -134,16 +138,16 @@ class UserController extends Controller
         // Expenses (paginated) and totals
         $expensesQuery = Expense::with('project')->where('users_id', $user->id);
         $totalDebited = (float) $expensesQuery->sum('amount');
-        $expenses = $expensesQuery->latest()->paginate(15);
+        $expenses = $expensesQuery->latest()->paginate(5);
 
         // Transfers (paginated) and totals
         $transfersQuery = Transfer::where('user_id', $user->id);
         $totalTransfers = (float) $transfersQuery->sum('amount');
         $totalTransfersSent = (float) Transfer::where('created_by', $user->id)->sum('amount');
-        $transfers = $transfersQuery->latest()->paginate(15, ['*'], 'transfers_page');
+        $transfers = $transfersQuery->latest()->paginate(5, ['*'], 'transfers_page');
 
         // Balance histories (paginated)
-        $balanceHistories = UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(15, ['*'], 'balances_page');
+        $balanceHistories = UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(5, ['*'], 'balances_page');
 
         $opening = (float) optional(
             UserBalanceHistory::where('user_id', $user->id)
@@ -176,7 +180,9 @@ class UserController extends Controller
 
         return view('admin.users.edit', [
             'user'  => $user,
-            'roles' => Role::orderBy('name')->get(),
+            'roles' => Role::where('id', '!=', 5)
+                            ->orderBy('name')
+                            ->get(),
         ]);
     }
 
@@ -259,81 +265,87 @@ class UserController extends Controller
             ->withSuccess('User deleted successfully.');
     }
 
-      public function userList(Request $request)
-        {
-            $query = User::with(['role', 'projects']);
+    public function userList(Request $request)
+    {
+        $query = User::with(['role', 'projects']);
 
-            $totalData = $query->count();
-            $totalFiltered = $totalData;
+        $totalData = $query->count();
+        $totalFiltered = $totalData;
 
-            $limit = $request->input('length');
-            $start = $request->input('start');
-            $search = $request->input('search.value');
+        $limit = $request->input('length');
+        $start = $request->input('start');
+        $search = $request->input('search.value');
 
-            if (!empty($search)) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('mobile', 'like', "%{$search}%");
-                });
+            });
 
-                $totalFiltered = $query->count();
-            }
-
-            $users = $query->offset($start)
-                ->limit($limit)
-                ->orderBy('id', 'desc')
-                ->get();
-
-            $data = [];
-
-            $auth = auth()->user();
-            $canViewUser = $auth?->can('user-view') ?? false;
-            $canEditUser = $auth?->can('user-edit') ?? false;
-
-            foreach ($users as $i => $u) {
-
-                $viewUrl = route('users.show', $u->id);
-                $editUrl = route('users.edit', $u->id);
-                // $deleteUrl = route('users.destroy', $u->id);
-
-                $actionHtml  = '<div class="table-action-group">';
-                if ($canViewUser) {
-                    $actionHtml .= '<a href="' . $viewUrl . '" class="table-action-btn is-view" title="View"><i class="fas fa-eye"></i></a>';
-                }
-                if ($canEditUser) {
-                    $actionHtml .= '<a href="' . $editUrl . '" class="table-action-btn is-edit" title="Edit"><i class="fas fa-edit"></i></a>';
-                }
-                // $actionHtml .= '<form method="POST" action="' . $deleteUrl . '" class="table-action-form">';
-                // $actionHtml .= '<input type="hidden" name="_token" value="' . csrf_token() . '">';
-                // $actionHtml .= '<input type="hidden" name="_method" value="DELETE">';
-                // $actionHtml .= '<button type="submit" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fas fa-trash"></i></button>';
-                // $actionHtml .= '</form>';
-                $actionHtml .= '</div>';
-
-                $avatarHtml = '<div class="user-name-cell">'
-                    . '<img src="' . e($u->profile_image_url) . '" alt="' . e($u->name) . '" class="user-list-avatar">'
-                    . '<span>' . e($u->name) . '</span>'
-                    . '</div>';
-
-                $data[] = [
-                    'id'      => $start + $i + 1,
-                    'name'    => $avatarHtml,
-                    'email'   => $u->email,
-                    'mobile'  => $u->mobile,
-                    'project' => $u->assignedProjectNames() ?: '—',
-                    'amount'  => $u->amount,
-                    'role'    => optional($u->role)->name,
-                    'status'  => $u->status ? 'Active' : 'Inactive',
-                    'action'  => $actionHtml
-                ];
-            }
-
-            return response()->json([
-                'draw' => intval($request->input('draw')),
-                'recordsTotal' => $totalData,
-                'recordsFiltered' => $totalFiltered,
-                'data' => $data,
-            ]);
+            $totalFiltered = $query->count();
         }
+        
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $users = $query->where('role_id', '!=', $vendorRoleId)
+            ->offset($start)
+            ->limit($limit)
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $data = [];
+
+        $auth = auth()->user();
+        $canViewUser = $auth?->can('user-view') ?? false;
+        $canEditUser = $auth?->can('user-edit') ?? false;
+
+        foreach ($users as $i => $u) {
+
+            $viewUrl = route('users.show', $u->id);
+            $editUrl = route('users.edit', $u->id);
+            // $deleteUrl = route('users.destroy', $u->id);
+
+            $actionHtml  = '<div class="btn-group">';
+            $actionHtml .= '
+                            <i class="fas fa-ellipsis-v" data-toggle="dropdown" style="cursor:pointer;"></i>
+                            <div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
+
+            if ($canViewUser) {
+                $actionHtml .= '<a href="' . $viewUrl . '" class="table-action-btn is-view" title="View"><i class="fas fa-eye"></i></a>';
+            }
+            if ($canEditUser) {
+                $actionHtml .= '<a href="' . $editUrl . '" class="table-action-btn is-edit" title="Edit"><i class="fas fa-edit"></i></a>';
+            }
+            // $actionHtml .= '<form method="POST" action="' . $deleteUrl . '" class="table-action-form">';
+            // $actionHtml .= '<input type="hidden" name="_token" value="' . csrf_token() . '">';
+            // $actionHtml .= '<input type="hidden" name="_method" value="DELETE">';
+            // $actionHtml .= '<button type="submit" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fas fa-trash"></i></button>';
+            // $actionHtml .= '</form>';
+            $actionHtml .= '</div></div>';
+
+            $avatarHtml = '<div class="user-name-cell">'
+                // . '<img src="' . e($u->profile_image_url) . '" alt="' . e($u->name) . '" class="user-list-avatar">'
+                . '<span>' . e($u->name) . '</span>'
+                . '</div>';
+
+            $data[] = [
+                'id'      => $start + $i + 1,
+                'name'    => $avatarHtml,
+                'email'   => $u->email,
+                'mobile'  => $u->mobile,
+                'project' => $u->assignedProjectNames() ?: '—',
+                'amount'  => $u->amount,
+                'role'    => optional($u->role)->name,
+                'status'  => $u->status ? 'Active' : 'Inactive',
+                'action'  => $actionHtml
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $totalData,
+            'recordsFiltered' => $totalFiltered,
+            'data' => $data,
+        ]);
+    }
 }

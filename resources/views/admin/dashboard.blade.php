@@ -138,7 +138,7 @@
               </p>
               <div class="table-responsive mb-4">
                 <table class="table table-sm table-hover table-bordered">
-                  <thead class="thead-dark">
+                  <thead class="thead">
                     <tr>
                       <th>#</th>
                       <th>User</th>
@@ -181,7 +181,7 @@
               </p>
               <div class="table-responsive">
                 <table class="table table-sm table-hover table-bordered">
-                  <thead class="thead-dark">
+                  <thead class="thead">
                     <tr>
                       <th>#</th>
                       <th>Project</th>
@@ -226,7 +226,7 @@
               </p>
               <div class="table-responsive">
                 <table class="table table-sm table-hover table-bordered">
-                  <thead class="thead-dark">
+                  <thead class="thead">
                     <tr>
                       <th>Date</th>
                       <th>Project</th>
@@ -279,7 +279,7 @@
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-sm table-hover table-bordered">
-                <thead class="thead-dark">
+                <thead class="thead">
                   <tr>
                     <th>#</th>
                     <th>Project</th>

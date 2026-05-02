@@ -12,30 +12,28 @@
 
   <!-- User dropdown -->
   <li class="nav-item dropdown ml-1">
-    <a class="nav-link navbar-user-pill" data-toggle="dropdown" href="#">
+    <a class="navbar-user-pill" data-toggle="dropdown" href="#">
       <span class="user-avatar">
         <img src="{{ auth()->user()->profile_image_url }}"
-             alt="{{ auth()->user()->name }}"
-             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+             alt="{{ auth()->user()->name }}">
       </span>
-      <span class="d-none d-md-inline"
-            style="font-size:.83rem;font-weight:600;color:#fff;">
+      <span class="d-none d-md-inline">
         {{ ucfirst(Auth()->user()->name) }}
       </span>
-      <i class="fas fa-caret-down ml-1" style="font-size:10px;opacity:.7;color:#fff;"></i>
+      <i class="fas fa-caret-down" style="font-size:10px;opacity:.7;color:#000;"></i>
     </a>
     <div class="dropdown-menu dropdown-menu-right" style="min-width:185px;">
       <span class="dropdown-header">
-        <i class="fas fa-user-circle mr-1" style="color:#008d8d;"></i>
+        <i class="fas fa-user-circle mr-1" style="color:#339D9D;"></i>
         {{ ucfirst(Auth()->user()->name) }}
       </span>
 
       <div class="dropdown-divider"></div>
-      <a href="{{ route('admin.profile.edit') }}" class="dropdown-item">
-        <i class="fas fa-user-circle mr-2" style="color:#008d8d;"></i> My Profile
+      <a href="{{ route('admin.profile.edit') }}" class="dropdown-item" style="margin: 4px 0px;">
+        <i class="fas fa-user-circle mr-2" style="color:#339D9D;"></i> My Profile
       </a>
-       <a href="{{ route('admin.profile.password') }}" class="dropdown-item">
-        <i class="fas fa-user-circle mr-2" style="color:#008d8d;"></i> Change Password
+       <a href="{{ route('admin.profile.password') }}" class="dropdown-item" style="margin: 4px 0px;">
+        <i class="fas fa-user-circle mr-2" style="color:#339D9D;"></i> Change Password
       </a>
       
       <!-- <div class="dropdown-divider"></div>
@@ -51,7 +49,7 @@
   </li>
 
   <!-- Fullscreen -->
-  <li class="nav-item ml-1">
+  <li class="nav-item ml-2">
     <a class="nav-link" data-widget="fullscreen" href="#" role="button" title="Fullscreen"
        style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:7px;">
       <i class="fas fa-expand-arrows-alt" style="font-size:.82rem;"></i>
@@ -66,7 +64,7 @@
          onclick="event.preventDefault();this.closest('form').submit();"
          title="Logout"
          style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;
-                border-radius:7px;color:rgba(255,255,255,.85) !important;
+                border-radius:7px;
                 border:1px solid rgba(255,255,255,.25);">
         <i class="fas fa-power-off" style="font-size:.82rem;"></i>
       </a>

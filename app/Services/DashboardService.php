@@ -6,6 +6,7 @@ use App\Models\Credit;
 use App\Models\Expense;
 use App\Models\Transfer;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
@@ -21,6 +22,7 @@ class DashboardService
         }
 
         if ($isSuper) {
+            $vendorRoleId = Role::where('name', 'vendor')->value('id');
             return [
                 'isSuper' => true,
                 'totalUsers' => User::count(),
@@ -30,6 +32,7 @@ class DashboardService
                 'availableAmount' => (float) ($authUser->amount ?? 0),
                 'usersWithTransfers' => User::query()
                     ->select('id', 'name', 'email', 'amount')
+                    ->where('role_id', '!=', $vendorRoleId)
                     ->orderBy('name')
                     ->get(),
                 'debitedList' => Expense::with('user', 'project')->latest()->limit(20)->get(),
@@ -91,6 +94,7 @@ class DashboardService
         $assignedProjectIds = $authUser->assignedProjectIds();
         $receivedTransferTotal = (float) Transfer::where('user_id', $userId)->sum('amount');
         $sentTransferTotal = (float) Transfer::where('created_by', $userId)->sum('amount');
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
 
         return [
             'isSuper' => false,
@@ -106,6 +110,7 @@ class DashboardService
                 ->withSum('transfers', 'amount')
                 ->withCount('transfers')
                 ->where('id', $userId)
+                ->where('role_id', '!=', $vendorRoleId)
                 ->get(),
             'debitedList' => Expense::with('project')->where('users_id', $userId)->latest()->limit(20)->get(),
             'userDebitedTotals' => collect(),

@@ -4,10 +4,10 @@
 @section('content')
 
 <div class="content-header">
-  <div class="container-fluid">
+  <div class="container-fluid-80">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0"><i class="fas fa-user-edit mr-2 text-primary"></i>Edit User</h1>
+        <h1 class="m-0"><i class="mr-2 text-primary"></i>Edit User</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -21,7 +21,7 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid">
+  <div class="container-fluid-80">
     <div class="card card-outline card-primary shadow-sm">
       <div class="card-header">
         <h3 class="card-title">
@@ -29,7 +29,7 @@
           <span class="badge badge-primary ml-2">{{ $user->name }}</span>
         </h3>
         <div class="card-tools">
-          <a href="{{ route('users.index') }}" class="btn btn-default btn-sm">
+          <a href="{{ route('users.index') }}" class="btn-cancel">
             <i class="fas fa-arrow-left mr-1"></i>Back
           </a>
         </div>
@@ -46,7 +46,7 @@
           </p>
 
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
                 <label class="font-weight-bold">Full Name <span class="text-danger">*</span></label>
                 <input id="name" name="name" type="text"
@@ -56,7 +56,7 @@
                 @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group">
                 <label class="font-weight-bold">Email Address <span class="text-danger">*</span></label>
                 <div class="input-group">
@@ -77,6 +77,19 @@
                          inputmode="numeric" pattern="\d{10}" title="Mobile number must contain exactly 10 digits.">
                   @error('mobile')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="font-weight-bold">Opening Balance</label>
+                <div class="input-group">
+                  <div class="input-group-prepend"><span class="input-group-text">₹</span></div>
+                  <input id="amount" name="amount" type="number" min="0" step="0.01"
+                         class="form-control @error('amount') is-invalid @enderror"
+                         value="{{ old('amount', $user->amount) }}" placeholder="0.00">
+                  @error('amount')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+                <small class="text-muted d-block mt-1">Project assignment is managed from each project screen.</small>
               </div>
             </div>
             <div class="col-md-4">
@@ -104,19 +117,6 @@
                   <option value="0" {{ old('status', $user->status) == 0 ? 'selected' : '' }}>Inactive</option>
                 </select>
                 @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label class="font-weight-bold">Opening Balance</label>
-                <div class="input-group">
-                  <div class="input-group-prepend"><span class="input-group-text">₹</span></div>
-                  <input id="amount" name="amount" type="number" min="0" step="0.01"
-                         class="form-control @error('amount') is-invalid @enderror"
-                         value="{{ old('amount', $user->amount) }}" placeholder="0.00">
-                  @error('amount')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                </div>
-                <small class="text-muted d-block mt-1">Project assignment is managed from each project screen.</small>
               </div>
             </div>
             <div class="col-md-12">
@@ -189,10 +189,10 @@
 
       </div>
       <div class="card-footer">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn-submit">
           <i class="fas fa-save mr-1"></i>Save Changes
         </button>
-        <a href="{{ route('users.index') }}" class="btn btn-default ml-2">
+        <a href="{{ route('users.index') }}" class="btn-cancel ml-2">
           <i class="fas fa-times mr-1"></i>Cancel
         </a>
       </div>
