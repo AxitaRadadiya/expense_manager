@@ -19,7 +19,7 @@ class PermissionsSeeder extends Seeder
             'expense-view',
             'expense-edit',
             'expense-delete',
-        ],
+        ], 
         'Credit' => [
             'credit-create',
             'credit-view',
@@ -32,18 +32,31 @@ class PermissionsSeeder extends Seeder
             'user-edit',
             'user-delete',
         ],
-        'Role' => [
-            'role-create',
-            'role-view',
-            'role-edit',
-            'role-delete',
+        'Vendor' => [
+            'vendor-create',
+            'vendor-view',
+            'vendor-edit',
+            'vendor-delete',
         ],
-        'Permission' => [
-            'permission-create',
-            'permission-view',
-            'permission-edit',
-            'permission-delete',
+        'Item' => [
+            'item-create',
+            'item-view',
+            'item-edit',
+            'item-delete',
         ],
+        'Item Expense' => [
+            'item expense-create',
+            'item expense-view',
+            'item expense-edit',
+            'item expense-delete',
+        ],
+        'Transfer' => [
+            'transfer-create',
+            'transfer-view',
+            'transfer-edit',
+            'transfer-delete',
+        ],
+        
     ];
 
     /**
