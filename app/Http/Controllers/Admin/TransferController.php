@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Transfer;
 use App\Models\User;
+use App\Models\Role;
 use App\Services\TransferService;
 use Illuminate\Http\Request;
 
@@ -31,7 +32,8 @@ class TransferController extends Controller
     public function create()
     {
         $auth = auth()->user();
-        $usersQuery = User::where('role_id', '!=', 5)
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $usersQuery = User::where('role_id', '!=', $vendorRoleId)
                   ->orderBy('name');
         $assignedProjectIds = $auth ? $auth->assignedProjectIds() : [];
 

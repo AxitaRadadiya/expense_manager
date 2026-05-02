@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\Project;
 use App\Models\Transfer;
 use App\Models\User;
+use App\Models\Role;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -30,15 +31,16 @@ class ReportService
 
     public function getVisibleUsersForUser(?User $user): Collection
     {
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         if (! $user) {
             return collect();
         }
 
         if ($user->hasRole('super-admin')) {
-            return User::where('role_id', '!=', 5)->orderBy('name')->get();
+            return User::where('role_id', '!=', $vendorRoleId)->orderBy('name')->get();
         }
 
-        return User::where('id', $user->id)->where('role_id', '!=', 5)->orderBy('name')->get();
+        return User::where('id', $user->id)->where('role_id', '!=', $vendorRoleId)->orderBy('name')->get();
     }
 
     public function generateExpenseReport(array $filters = []): Collection

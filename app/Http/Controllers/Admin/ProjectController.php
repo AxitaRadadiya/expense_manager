@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,8 +20,9 @@ class ProjectController extends Controller
 
     public function create(): View
     {
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         return view('admin.projects.create', [
-            'users' => User::where('role_id', '!=', 5)
+            'users' => User::where('role_id', '!=', $vendorRoleId)
                             ->orderBy('name')
                             ->get(),
         ]);
@@ -63,10 +65,11 @@ class ProjectController extends Controller
     public function edit(Project $project): View
     {
         $project->load('users');
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
 
         return view('admin.projects.edit', [
             'project' => $project,
-            'users' => User::where('role_id', '!=', 5)
+            'users' => User::where('role_id', '!=', $vendorRoleId)
                             ->orderBy('name')
                             ->get(),
         ]);

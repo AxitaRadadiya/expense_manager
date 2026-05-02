@@ -70,37 +70,62 @@
         </div>
         <div class="card-body">
           @if($permissions->isNotEmpty())
-            <div class="row">
-              @foreach($permissions as $group => $perms)
-                @php $groupAssigned = $perms->whereIn('id', $assignedIds)->count(); @endphp
-                <div class="col-md-4 col-sm-6 mb-4">
-                  <div class="card card-outline card-primary mb-0 shadow-none">
-                    <div class="card-header p-2">
-                      <h6 class="card-title mb-0 d-flex align-items-center justify-content-between">
-                        <span>
-                          <i class="fas fa-layer-group mr-1 text-primary"></i>
-                          {{ $group }}
-                          <span class="badge badge-light ml-1">{{ $perms->count() }}</span>
-                          @if($groupAssigned > 0)
-                            <span class="badge badge-success ml-1">{{ $groupAssigned }}+</span>
-                          @endif
-                        </span>
-                        <button type="button" class="btn btn-xs btn-outline-primary group-toggle-btn ml-1" onclick="toggleGroup(this)">
-                          {{ $groupAssigned === $perms->count() ? 'None' : 'All' }}
-                        </button>
-                      </h6>
-                    </div>
-                    <div class="card-body p-2">
-                      @foreach($perms as $perm)
-                        <div class="icheck-primary mb-1">
-                          <input class="perm-chk" type="checkbox" name="permissions[]" value="{{ $perm->id }}" id="perm_{{ $perm->id }}" {{ in_array($perm->id, old('permissions', $assignedIds)) ? 'checked' : '' }}>
-                          <label for="perm_{{ $perm->id }}" style="font-size:.85rem;">{{ $perm->name }}</label>
-                        </div>
-                      @endforeach
-                    </div>
-                  </div>
-                </div>
-              @endforeach
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>Module</th>
+                    <th class="text-center">View</th>
+                    <th class="text-center">Create</th>
+                    <th class="text-center">Edit</th>
+                    <th class="text-center">Delete</th>
+                    <th class="text-center">All</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($permissions as $module => $perms)
+                    @php
+                      $map = ['view' => null, 'create' => null, 'edit' => null, 'delete' => null];
+                      foreach ($perms as $p) {
+                          $name = strtolower($p->name);
+                          if (str_ends_with($name, '-view') || str_contains($name, 'view')) $map['view'] = $p->id;
+                          if (str_ends_with($name, '-create') || str_contains($name, 'create')) $map['create'] = $p->id;
+                          if (str_ends_with($name, '-edit') || str_contains($name, 'edit')) $map['edit'] = $p->id;
+                          if (str_ends_with($name, '-delete') || str_contains($name, 'delete')) $map['delete'] = $p->id;
+                      }
+                      $assignedCount = $perms->whereIn('id', $assignedIds)->count();
+                      $btnText = $assignedCount === $perms->count() ? 'None' : 'All';
+                      $moduleKey = md5($module);
+                    @endphp
+                    <tr>
+                      <td class="align-middle">{{ $module }}</td>
+                      <td class="text-center align-middle">
+                        @if($map['view'])
+                          <input class="perm-chk module-{{ $moduleKey }}" type="checkbox" name="permissions[]" value="{{ $map['view'] }}" id="perm_{{ $map['view'] }}" {{ in_array($map['view'], old('permissions', $assignedIds)) ? 'checked' : '' }}>
+                        @endif
+                      </td>
+                      <td class="text-center align-middle">
+                        @if($map['create'])
+                          <input class="perm-chk module-{{ $moduleKey }}" type="checkbox" name="permissions[]" value="{{ $map['create'] }}" id="perm_{{ $map['create'] }}" {{ in_array($map['create'], old('permissions', $assignedIds)) ? 'checked' : '' }}>
+                        @endif
+                      </td>
+                      <td class="text-center align-middle">
+                        @if($map['edit'])
+                          <input class="perm-chk module-{{ $moduleKey }}" type="checkbox" name="permissions[]" value="{{ $map['edit'] }}" id="perm_{{ $map['edit'] }}" {{ in_array($map['edit'], old('permissions', $assignedIds)) ? 'checked' : '' }}>
+                        @endif
+                      </td>
+                      <td class="text-center align-middle">
+                        @if($map['delete'])
+                          <input class="perm-chk module-{{ $moduleKey }}" type="checkbox" name="permissions[]" value="{{ $map['delete'] }}" id="perm_{{ $map['delete'] }}" {{ in_array($map['delete'], old('permissions', $assignedIds)) ? 'checked' : '' }}>
+                        @endif
+                      </td>
+                      <td class="text-center align-middle">
+                        <button type="button" class="btn btn-xs btn-outline-primary row-toggle-btn" data-module="{{ $moduleKey }}">{{ $btnText }}</button>
+                      </td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
             </div>
           @else
             <div class="text-center text-muted py-4">
@@ -122,32 +147,42 @@
 </section>
 
 <script>
-function toggleGroup(btn) {
-  const cardBody = btn.closest('.card').querySelector('.card-body');
-  const checkboxes = cardBody.querySelectorAll('.perm-chk');
-  const allChecked = [...checkboxes].every(c => c.checked);
-  checkboxes.forEach(c => { c.checked = !allChecked; });
-  btn.textContent = allChecked ? 'All' : 'None';
-  updateAssignedBadge();
-}
+document.addEventListener('click', function (e) {
+  // row toggle button
+  if (e.target && e.target.classList.contains('row-toggle-btn')) {
+    var moduleKey = e.target.getAttribute('data-module');
+    var checks = document.querySelectorAll('.module-' + moduleKey);
+    var allChecked = Array.from(checks).length > 0 && Array.from(checks).every(function (c) { return c.checked; });
+    checks.forEach(function (c) { c.checked = !allChecked; });
+    e.target.textContent = allChecked ? 'All' : 'None';
+    updateAssignedBadge();
+  }
+});
+
 function selectAll(state) {
-  document.querySelectorAll('.perm-chk').forEach(c => { c.checked = state; });
-  document.querySelectorAll('.group-toggle-btn').forEach(b => { b.textContent = state ? 'None' : 'All'; });
+  document.querySelectorAll('.perm-chk').forEach(function(c) { c.checked = state; });
+  document.querySelectorAll('.row-toggle-btn').forEach(function(b) { b.textContent = state ? 'None' : 'All'; });
   updateAssignedBadge();
 }
+
 function updateAssignedBadge() {
   const count = document.querySelectorAll('.perm-chk:checked').length;
   const badge = document.getElementById('assignedBadge');
   if (badge) badge.textContent = count + ' assigned';
 }
+
 document.addEventListener('change', function (e) {
   if (e.target && e.target.classList.contains('perm-chk')) {
     updateAssignedBadge();
-    const cardBody = e.target.closest('.card-body');
-    const checkboxes = cardBody.querySelectorAll('.perm-chk');
-    const allChecked = [...checkboxes].every(c => c.checked);
-    const toggleBtn = e.target.closest('.card').querySelector('.group-toggle-btn');
-    if (toggleBtn) toggleBtn.textContent = allChecked ? 'None' : 'All';
+    // update related row button text
+    var classes = Array.from(e.target.classList).filter(function (cl) { return cl.startsWith('module-'); });
+    if (classes.length) {
+      var moduleKey = classes[0].replace('module-', '');
+      var checks = document.querySelectorAll('.module-' + moduleKey);
+      var allChecked = Array.from(checks).length > 0 && Array.from(checks).every(function (c) { return c.checked; });
+      var btn = document.querySelector('.row-toggle-btn[data-module="' + moduleKey + '"]');
+      if (btn) btn.textContent = allChecked ? 'None' : 'All';
+    }
   }
 });
 </script>

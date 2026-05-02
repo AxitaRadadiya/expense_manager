@@ -75,7 +75,7 @@ class RoleController extends Controller
             $canEditRole = (auth()->user()?->can('role-edit') ?? false)
                 && in_array($role->name, ['owner', 'superviour'], true);
             $actions = $canEditRole
-                ? '<a href="' . route('roles.edit', $role->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>'
+                ? '<a href="' . route('roles.edit', $role->id) . '" class="table-action-btn" title="Edit"><i class="fa fa-edit"></i></a>'
                 : '<span class="text-muted">-</span>';
 
             $data[] = [

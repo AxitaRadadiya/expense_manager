@@ -98,16 +98,11 @@ class ItemController extends Controller
                 $nested['id'] = $i;
                 $nested['name'] = $row->name;
 
-                $actions = '<div class="btn-group">';
-                $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
-                $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
+                $actions = '';
 
                 if (auth()->check()) {
-                    $actions .= '<a href="#" data-id="' . $row->id . '" data-name="' . htmlspecialchars($row->name, ENT_QUOTES) . '" class="table-action-btn is-edit edit-item-modal" title="Edit"><i class="fa fa-edit"></i></a>';
-                    $actions .= '<form action="' . route('item.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
+                    $actions .= '<a href="#" data-id="' . $row->id . '" data-name="' . htmlspecialchars($row->name, ENT_QUOTES) . '" class="table-action-btn edit-item-modal" title="Edit"><i class="fa fa-edit"></i></a>';
                 }
-
-                $actions .= '</div></div>';
 
                 $nested['action'] = $actions;
                 $data[] = $nested;

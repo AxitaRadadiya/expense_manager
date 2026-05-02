@@ -30,8 +30,9 @@ class UserController extends Controller
      ───────────────────────────────────────── */
     public function index(): View
     {
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         return view('admin.users.index', [
-            'users' => User::with(['role', 'projects'])->where('role_id', '!=', 5)->orderBy('id')->paginate(15),
+            'users' => User::with(['role', 'projects'])->where('role_id', '!=', $vendorRoleId)->orderBy('id')->paginate(15),
         ]);
     }
 
@@ -40,8 +41,9 @@ class UserController extends Controller
      ───────────────────────────────────────── */
     public function create(): View
     {
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         return view('admin.users.create', [
-            'roles' => Role::where('id', '!=', 5)
+            'roles' => Role::where('id', '!=', $vendorRoleId)
                             ->orderBy('name')
                             ->get(),
         ]);
@@ -136,16 +138,16 @@ class UserController extends Controller
         // Expenses (paginated) and totals
         $expensesQuery = Expense::with('project')->where('users_id', $user->id);
         $totalDebited = (float) $expensesQuery->sum('amount');
-        $expenses = $expensesQuery->latest()->paginate(15);
+        $expenses = $expensesQuery->latest()->paginate(5);
 
         // Transfers (paginated) and totals
         $transfersQuery = Transfer::where('user_id', $user->id);
         $totalTransfers = (float) $transfersQuery->sum('amount');
         $totalTransfersSent = (float) Transfer::where('created_by', $user->id)->sum('amount');
-        $transfers = $transfersQuery->latest()->paginate(15, ['*'], 'transfers_page');
+        $transfers = $transfersQuery->latest()->paginate(5, ['*'], 'transfers_page');
 
         // Balance histories (paginated)
-        $balanceHistories = UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(15, ['*'], 'balances_page');
+        $balanceHistories = UserBalanceHistory::where('user_id', $user->id)->latest()->paginate(5, ['*'], 'balances_page');
 
         $opening = (float) optional(
             UserBalanceHistory::where('user_id', $user->id)
@@ -283,8 +285,9 @@ class UserController extends Controller
 
             $totalFiltered = $query->count();
         }
-
-        $users = $query->where('role_id', '!=', 5)
+        
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $users = $query->where('role_id', '!=', $vendorRoleId)
             ->offset($start)
             ->limit($limit)
             ->orderBy('id', 'desc')

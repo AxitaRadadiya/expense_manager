@@ -5,16 +5,16 @@
 <div class="content-header">
   <div class="container-fluid-80">
     <div class="row mb-2">
-        <div class="col-sm-6">
-            <h1><i class="mr-2 text-teal"></i>Vendor Details</h1>
-        </div>
-        <div class="col-sm-6 text-right">
-            <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('vendor.index') }}">Vendors</a></li>
-                <li class="breadcrumb-item active">View</li>
-            </ol>
-        </div>
+      <div class="col-sm-6">
+        <h1><i class="mr-2 text-teal"></i>Vendor Details</h1>
+      </div>
+      <div class="col-sm-6 text-right">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('vendor.index') }}">Vendors</a></li>
+          <li class="breadcrumb-item active">View</li>
+        </ol>
+      </div>
     </div>
   </div>
 </div>
@@ -64,6 +64,90 @@
             <div>{{ $vendor->created_at ? $vendor->created_at->format('d M Y, H:i') : '-' }}</div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid-80 mt-3">
+  <div class="card card-outline card-primary shadow-sm">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-user-clock mr-1"></i> Labour List</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table id="VendorLabourTable" class="table table-hover report-table mb-0">
+          <thead>
+            <tr>
+              <th>Sr No.</th>
+              <th>Project</th>
+              <th>Total Labour</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse($labourEntries ?? collect() as $i => $entry)
+            <tr>
+              <td>{{ $i + 1 }}</td>
+              <td>{{ optional($entry->project)->name ?? '-' }}</td>
+              <td>{{ $entry->total_labour ?? '-' }}</td>
+              <td>{{ $entry->start_date ? $entry->start_date->format('d-m-Y') : '-' }}</td>
+              <td>{{ $entry->end_date ? $entry->end_date->format('d-m-Y') : '-' }}</td>
+              <td class="text-danger font-weight-bold">Rs. {{ number_format((float) $entry->amount, 2) }}</td>
+            </tr>
+            @empty
+            <tr>
+              <td colspan="6" class="empty-table">No labour records found for this vendor.</td>
+            </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid-80 mt-3">
+  <div class="card card-outline card-primary shadow-sm">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-boxes mr-1"></i> Item List</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table id="VendorItemTable" class="table table-hover report-table mb-0">
+          <thead>
+            <tr>
+              <th>Sr No.</th>
+              <th>Item Name</th>
+              <th>Project</th>
+              <th>User</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Total Number</th>
+              <th>Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse($itemExpenses ?? collect() as $i => $it)
+            <tr>
+              <td>{{ $i + 1 }}</td>
+              <td>{{ optional($it->item)->name ?? '-' }}</td>
+              <td>{{ optional($it->project)->name ?? '-' }}</td>
+              <td>{{ optional($it->user)->name ?? '-' }}</td>
+              <td>{{ $it->start_date ? $it->start_date->format('d-m-Y') : '-' }}</td>
+              <td>{{ $it->end_date ? $it->end_date->format('d-m-Y') : '-' }}</td>
+              <td>{{ $it->total_number ?? '-' }}</td>
+              <td class="text-danger font-weight-bold">Rs. {{ number_format((float) $it->total_amount, 2) }}</td>
+            </tr>
+            @empty
+            <tr>
+              <td colspan="8" class="empty-table">No item expense records found for this vendor.</td>
+            </tr>
+            @endforelse
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

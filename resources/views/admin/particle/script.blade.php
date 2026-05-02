@@ -560,6 +560,46 @@ $(document).ready(function () {
     }
     load_labour_management();
 
+    // Vendor show page tables: VendorLabourTable and VendorItemTable
+    function init_vendor_tables() {
+        var $lab = $('#VendorLabourTable');
+        if ($lab.length) {
+            $lab.DataTable({
+                paging: true,
+                pageLength: 5,
+                lengthChange: false,
+                searching: false,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                order: [[3, 'desc']], // start_date column
+                columnDefs: [ { orderable: false, targets: 0 } ],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); }
+            });
+        }
+
+        var $it = $('#VendorItemTable');
+        if ($it.length) {
+            $it.DataTable({
+                paging: true,
+                pageLength: 5,
+                lengthChange: false,
+                searching: false,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                responsive: true,
+                order: [[4, 'desc']], // start_date column
+                columnDefs: [ { orderable: false, targets: 0 } ],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); }
+            });
+        }
+    }
+    init_vendor_tables();
+
     function load_credit() {
         $('#CreditTable').DataTable({
             processing: true,

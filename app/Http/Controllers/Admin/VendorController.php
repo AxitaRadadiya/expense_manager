@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Expense;
+use App\Models\ItemExpense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -51,7 +53,18 @@ class VendorController extends Controller
 
     public function show(User $vendor)
     {
-        return view('admin.vendors.show', compact('vendor'));
+        $labourEntries = Expense::where('vendor_id', $vendor->id)
+            ->where('category', 'Labour')
+            ->with(['project'])
+            ->orderByDesc('start_date')
+            ->get();
+
+        $itemExpenses = ItemExpense::where('vendor_id', $vendor->id)
+            ->with(['item', 'project', 'user'])
+            ->orderByDesc('start_date')
+            ->get();
+
+        return view('admin.vendors.show', compact('vendor', 'labourEntries', 'itemExpenses'));
     }
 
     public function edit(User $vendor)

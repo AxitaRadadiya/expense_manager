@@ -195,6 +195,9 @@ table.dataTable thead th {
   padding: 8px 10px;
   line-height: 1.3;
 }
+.table td, .table th {
+    padding: 0.3rem !important;
+}
 /* User Create, View, Edit */
 .card-primary.card-outline, .card-danger.card-outline {
     border-color: #339D9D !important;

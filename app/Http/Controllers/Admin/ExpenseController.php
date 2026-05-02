@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Expense;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Transfer;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
@@ -57,11 +58,11 @@ class ExpenseController extends Controller
             }
         }
 
-        $users = User::where('role_id', '!=', 5)
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $users = User::where('role_id', '!=', $vendorRoleId)
             ->orderBy('name')
             ->get();
-        // Vendors are users with role_id 5
-        $vendors = User::where('role_id', 5)
+        $vendors = User::where('role_id', $vendorRoleId)
             ->orderBy('name')
             ->get();
         $categories = Category::orderBy('name')->get();
@@ -182,10 +183,11 @@ class ExpenseController extends Controller
     {
         $expense    = Expense::findOrFail($id);
         $projects   = Project::orderBy('name')->get();
-        $users      = User::where('role_id', '!=', 5)
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $users      = User::where('role_id', '!=', $vendorRoleId)
                             ->orderBy('name')
                             ->get();
-        $vendors    = User::where('role_id', 5)
+        $vendors    = User::where('role_id', $vendorRoleId)
                             ->orderBy('name')
                             ->get();
         $categories = Category::orderBy('name')->get();
