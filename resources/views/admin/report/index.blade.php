@@ -28,7 +28,7 @@
             <div class="col-lg-3 col-md-6">
               <div class="form-group">
                 <label for="projects_id" class="font-weight-bold">Project</label>
-                <select name="projects_id" id="projects_id" class="form-control">
+                <select name="projects_id" id="projects_id" class="form-control select2">
                   <option value="">All Projects</option>
                   @foreach($projects as $project)
                   <option value="{{ $project->id }}" {{ (string) ($filters['projects_id'] ?? '') === (string) $project->id ? 'selected' : '' }}>
@@ -42,7 +42,7 @@
             <div class="col-lg-3 col-md-6">
               <div class="form-group">
                 <label for="users_id" class="font-weight-bold">User</label>
-                <select name="users_id" id="users_id" class="form-control">
+                <select name="users_id" id="users_id" class="form-control select2">
                   <option value="">All Users</option>
                   @foreach($users as $user)
                   <option value="{{ $user->id }}" {{ (string) ($filters['users_id'] ?? '') === (string) $user->id ? 'selected' : '' }}>
@@ -70,7 +70,7 @@
             <div class="col-lg-3 col-md-6">
               <div class="form-group">
                 <label for="entry_type" class="font-weight-bold">Timeline Type</label>
-                <select name="entry_type" id="entry_type" class="form-control">
+                <select name="entry_type" id="entry_type" class="form-control select2">
                   <option value="all" {{ ($filters['entry_type'] ?? 'all') === 'all' ? 'selected' : '' }}>All</option>
                   <option value="expense" {{ ($filters['entry_type'] ?? 'all') === 'expense' ? 'selected' : '' }}>Expense</option>
                   <option value="credit" {{ ($filters['entry_type'] ?? 'all') === 'credit' ? 'selected' : '' }}>Credit</option>

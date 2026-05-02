@@ -40,7 +40,7 @@
 
           <div class="form-group">
             <label class="font-weight-bold">User <span class="text-danger">*</span></label>
-            <select name="user_id" class="form-control @error('user_id') is-invalid @enderror" required>
+            <select name="user_id" class="form-control select2 @error('user_id') is-invalid @enderror" required>
               <option value="">-- Select User --</option>
               @foreach($users as $u)
               <option value="{{ $u->id }}" {{ old('user_id') == $u->id ? 'selected' : '' }}>

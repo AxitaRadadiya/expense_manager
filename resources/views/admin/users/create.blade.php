@@ -91,7 +91,7 @@
               <div class="form-group">
                 <label class="font-weight-bold">Role <span class="text-danger">*</span></label>
                 <select id="role_id" name="role_id"
-                        class="form-control @error('role_id') is-invalid @enderror" required>
+                        class="form-control select2 @error('role_id') is-invalid @enderror" required>
                   <option value="">— Select Role —</option>
                   @foreach($roles as $role)
                     <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
@@ -106,7 +106,7 @@
               <div class="form-group">
                 <label class="font-weight-bold">Status <span class="text-danger">*</span></label>
                 <select id="status" name="status"
-                        class="form-control @error('status') is-invalid @enderror" required>
+                        class="form-control select2 @error('status') is-invalid @enderror" required>
                   <option value="1" {{ old('status','1') == '1' ? 'selected' : '' }}>Active</option>
                   <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Inactive</option>
                 </select>

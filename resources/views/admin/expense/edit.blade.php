@@ -43,7 +43,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="projects_id" class="font-weight-bold">Project <span class="text-danger">*</span></label>
-                <select class="form-control select @error('projects_id') is-invalid @enderror" name="projects_id" id="projects_id" required>
+                <select class="form-control select2 @error('projects_id') is-invalid @enderror" name="projects_id" id="projects_id" required>
                   <option value="">-- Select Project --</option>
                   @foreach($projects as $project)
                     <option value="{{ $project->id }}" {{ old('projects_id', $expense->projects_id) == $project->id ? 'selected' : '' }}>
@@ -66,7 +66,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="category" class="font-weight-bold">Expense Category <span class="text-danger">*</span></label>
-                <select class="form-control select @error('category') is-invalid @enderror" name="category" id="category" required>
+                <select class="form-control select2 @error('category') is-invalid @enderror" name="category" id="category" required>
                   <option value="">-- Select Category --</option>
                   @foreach($categories as $cat)
                     <option value="{{ $cat->name }}" {{ old('category', $expense->category) == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -90,7 +90,7 @@
                 <div class="col-md-3">
                   <div class="form-group">
                     <label for="vendor_id" class="font-weight-bold">Vendor <span class="text-danger">*</span></label>
-                    <select class="form-control @error('vendor_id') is-invalid @enderror" name="vendor_id" id="vendor_id" required>
+                    <select class="form-control select2 @error('vendor_id') is-invalid @enderror" name="vendor_id" id="vendor_id" style="width:100%" required>
                       <option value="">-- Select Vendor --</option>
                       @foreach($vendors as $v)
                         <option value="{{ $v->id }}" {{ old('vendor_id', $expense->vendor_id) == $v->id ? 'selected' : '' }}>{{ $v->name }}</option>
@@ -129,7 +129,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="payment_mode" class="font-weight-bold">Payment Mode <span class="text-danger">*</span></label>
-                <select class="form-control @error('payment_mode') is-invalid @enderror" name="payment_mode" id="payment_mode" required>
+                <select class="form-control select2 @error('payment_mode') is-invalid @enderror" name="payment_mode" id="payment_mode" required>
                   <option value="">-- Select Payment Mode --</option>
                   @foreach(['cash' => 'Cash', 'online' => 'Online', 'cheque' => 'Cheque'] as $value => $label)
                     <option value="{{ $value }}" {{ old('payment_mode', $expense->payment_mode) == $value ? 'selected' : '' }}>{{ $label }}</option>

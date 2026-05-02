@@ -43,7 +43,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="projects_id" class="font-weight-bold">Project <span class="text-danger">*</span></label>
-                <select class="form-control @error('projects_id') is-invalid @enderror" name="projects_id" id="projects_id" required>
+                <select class="form-control select2 @error('projects_id') is-invalid @enderror" name="projects_id" id="projects_id" required>
                   <option value="">-- Select Project --</option>
                   @foreach($projects as $project)
                     <option value="{{ $project->id }}" {{ old('projects_id', $credit->projects_id) == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
@@ -85,7 +85,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="payment_mode" class="font-weight-bold">Payment Mode</label>
-                <select class="form-control @error('payment_mode') is-invalid @enderror" name="payment_mode" id="payment_mode">
+                <select class="form-control select2 @error('payment_mode') is-invalid @enderror" name="payment_mode" id="payment_mode">
                   <option value="">-- Select Payment Mode --</option>
                   @foreach(['cash' => 'Cash', 'online' => 'Online', 'cheque' => 'Cheque'] as $value => $label)
                     <option value="{{ $value }}" {{ old('payment_mode', $credit->payment_mode) == $value ? 'selected' : '' }}>{{ $label }}</option>
