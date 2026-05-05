@@ -43,7 +43,7 @@ class CreditService
 
     public function canManageCredits($user): bool
     {
-        return (bool) ($user && method_exists($user, 'hasRole') && $user->hasRole(['super-admin', 'owner']));
+        return (bool) ($user && method_exists($user, 'hasRole') && $user->hasRole(['super-admin', 'owner','superviour']));
     }
 
     

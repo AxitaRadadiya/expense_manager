@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use App\Models\Role;
-use App\Traits\LogsActivity;                          // ✅ added
+use App\Traits\LogsActivity;                         
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -183,6 +184,20 @@ class User extends Authenticatable
         }
 
         return implode(', ', array_unique($names));
+    }
+
+    public function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? Str::title($value) : $value,
+        );
+    }
+
+    public function companyName(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? Str::title($value) : $value,
+        );
     }
 
     public function getProfileImagePathAttribute(): string

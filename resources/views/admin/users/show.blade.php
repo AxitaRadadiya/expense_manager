@@ -123,7 +123,7 @@
                     <th>#</th>
                     <th>Date</th>
                     <th>Project</th>
-                    <th class="text-right">Amount</th>
+                    <th>Amount</th>
                     <th>Description</th>
                     <th>Status</th>
                     <th></th>

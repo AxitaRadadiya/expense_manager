@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Traits\LogsActivity;                    // ✅ added
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 
 class Project extends Model
 {
@@ -25,8 +28,6 @@ class Project extends Model
         'amount'     => 'decimal:2',
     ];
 
-    // ── Relationships ─────────────────────────────
-
     public function users()
     {
         return $this->belongsToMany(User::class, 'project_user', 'project_id', 'user_id');
@@ -45,5 +46,12 @@ class Project extends Model
     public function credits()
     {
         return $this->hasMany(Credit::class, 'projects_id');
+    }
+
+    public function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? Str::title($value) : $value,
+        );
     }
 }

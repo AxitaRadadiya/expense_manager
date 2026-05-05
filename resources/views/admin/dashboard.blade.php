@@ -103,7 +103,7 @@
                     {{ strtoupper(substr($u->name, 0, 1)) }}
                   </span>
                   <div>
-                    <div class="font-weight-bold" style="font-size:.87rem;">{{ $u->name }}</div>
+                    <div class="font" style="font-size:.87rem;">{{ $u->name }}</div>
                     <div class="text-muted" style="font-size:.75rem;">Current amount</div>
                   </div>
                 </div>
@@ -151,7 +151,7 @@
                       <tr>
                         <td class="text-muted">{{ $i + 1 }}</td>
                         <td>
-                          <span class="font-weight-bold">{{ $u->user->name ?? '-' }}</span>
+                          <span class="font">{{ $u->user->name ?? '-' }}</span>
                         </td>
                         <td class="text-right">
                           <span class="badge badge-danger">&#8377;{{ number_format((float) ($u->total_debited ?? 0), 2) }}</span>
