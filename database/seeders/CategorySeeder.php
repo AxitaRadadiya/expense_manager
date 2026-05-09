@@ -9,11 +9,17 @@ class CategorySeeder extends Seeder
 {
     public function run()
     {
-        Category::updateOrCreate(
-            ['name' => 'Labour'],
-            [
-                'name' => 'Labour',
-            ]
-        );
+        $categories = [
+            'Income',
+            'Expense',
+        ];
+        foreach ($categories as $category) {
+            Category::updateOrCreate(
+                ['name' => $category],
+                [
+                    'name' => $category,
+                ]
+            );
+        }
     }
 }

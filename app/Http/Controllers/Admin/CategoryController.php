@@ -70,7 +70,7 @@ class CategoryController extends Controller
                 0 => 'position',
                 1 => 'id',
                 2 => 'name',
-                3 => 'action'
+                // 3 => 'action'
             );
 
             $limit = intval($request->input('length', 10));
@@ -101,17 +101,17 @@ class CategoryController extends Controller
                 $nestedData['id'] = $i;
                 $nestedData['name'] = $row->name;
 
-                $actions = '<div class="btn-group">';
-                $actions .= '
-                            <i class="fas fa-ellipsis-v" data-toggle="dropdown" style="cursor:pointer;"></i>
-                            <div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
-                if (auth()->user()) {
-                    $actions .= '<a href="#" data-id="' . $row->id . '" data-name="' . htmlspecialchars($row->name, ENT_QUOTES) . '" class="table-action-btn is-edit edit-category-date-modal" title="Edit"><i class="fa fa-edit"></i></a>';
-                    $actions .= '<form action="' . route('category.destroy', $row->id) . '" method="POST" class="table-action-form deleteForm">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE"><button type="submit" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
-                }
-                $actions .= '</div></div>';
+                // $actions = '<div class="btn-group">';
+                // $actions .= '
+                //             <i class="fas fa-ellipsis-v" data-toggle="dropdown" style="cursor:pointer;"></i>
+                //             <div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
+                // if (auth()->user()) {
+                //     // $actions .= '<a href="#" data-id="' . $row->id . '" data-name="' . htmlspecialchars($row->name, ENT_QUOTES) . '" class="table-action-btn is-edit edit-category-date-modal" title="Edit"><i class="fa fa-edit"></i></a>';
+                //     // $actions .= '<form action="' . route('category.destroy', $row->id) . '" method="POST" class="table-action-form deleteForm">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE"><button type="submit" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
+                // }
+                // $actions .= '</div></div>';
 
-                $nestedData['action'] = $actions;
+                // $nestedData['action'] = $actions;
                 $data[] = $nestedData;
                 $i++;
             }

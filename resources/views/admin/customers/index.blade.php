@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'Vendors')
+@section('title', 'Customers')
 
 @section('content')
 
@@ -25,18 +25,17 @@
 
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div></div>
-        <a href="{{ route('vendor.create') }}" class="btn-create">
-          <i class="fas fa-plus"></i> Add Vendor
+        <a href="{{ route('customer.create') }}" class="btn-create">
+          <i class="fas fa-plus"></i> Add Customer
         </a>
       </div>
 
       <div class="table-responsive">
-        <table id="VendorsTable" class="table table-hover w-100">
+        <table id="CustomersTable" class="table table-hover w-100">
           <thead class="thead">
             <tr>
               <th>Sr No.</th>
               <th>Name</th>
-              <th>Company</th>
               <th>Mobile</th>
               <th>Email</th>
               <th>Actions</th>

@@ -20,9 +20,9 @@ class ProjectController extends Controller
 
     public function create(): View
     {
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
         return view('admin.projects.create', [
-            'users' => User::where('role_id', '!=', $vendorRoleId)
+            'users' => User::whereNotIn('role_id', $excludedRoleIds)
                             ->orderBy('name')
                             ->get(),
         ]);
@@ -65,11 +65,11 @@ class ProjectController extends Controller
     public function edit(Project $project): View
     {
         $project->load('users');
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
 
         return view('admin.projects.edit', [
             'project' => $project,
-            'users' => User::where('role_id', '!=', $vendorRoleId)
+            'users' => User::whereNotIn('role_id', $excludedRoleIds)
                             ->orderBy('name')
                             ->get(),
         ]);

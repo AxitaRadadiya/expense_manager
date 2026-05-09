@@ -58,16 +58,26 @@ class ExpenseController extends Controller
             }
         }
 
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
-        $users = User::where('role_id', '!=', $vendorRoleId)
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
+        $users = User::whereNotIn('role_id', $excludedRoleIds)
             ->orderBy('name')
             ->get();
+        
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $vendorRoleId)
             ->orderBy('name')
             ->get();
         $categories = Category::orderBy('name')->get();
 
-        return view('admin.expense.create', compact('projects', 'users', 'vendors', 'categories'));
+        // Load only sub-categories that belong to the parent Category named 'Expense'
+        $expenseCategory = Category::where('name', 'Expense')->first();
+        if ($expenseCategory) {
+            $expenseSubCategories = \App\Models\SubCategory::where('category_id', $expenseCategory->id)->orderBy('name')->get();
+        } else {
+            $expenseSubCategories = collect();
+        }
+
+        return view('admin.expense.create', compact('projects', 'users', 'vendors', 'categories', 'expenseSubCategories'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -81,10 +91,10 @@ class ExpenseController extends Controller
                 'category'     => 'required|string|max:255',
 
                 // Labour fields
-                'vendor_id'    => 'nullable|required_if:category,Labour|exists:users,id',
-                'start_date'   => 'nullable|required_if:category,Labour|date',
-                'end_date'     => 'nullable|required_if:category,Labour|date|after_or_equal:start_date',
-                'total_labour' => 'nullable|required_if:category,Labour|numeric|min:0',
+                // 'vendor_id'    => 'nullable|required_if:category,Labour|exists:users,id',
+                // 'start_date'   => 'nullable|required_if:category,Labour|date',
+                // 'end_date'     => 'nullable|required_if:category,Labour|date|after_or_equal:start_date',
+                // 'total_labour' => 'nullable|required_if:category,Labour|numeric|min:0',
 
                 'payment_mode' => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
@@ -142,12 +152,12 @@ class ExpenseController extends Controller
         $validated['note']             = $validated['note']             ?? '';
 
         // If not a Labour expense, clear labour-specific fields
-        if (($validated['category'] ?? '') !== 'Labour') {
-            $validated['vendor_id'] = null;
-            $validated['start_date'] = null;
-            $validated['end_date'] = null;
-            $validated['total_labour'] = null;
-        }
+        // if (($validated['category'] ?? '') !== 'Labour') {
+        //     $validated['vendor_id'] = null;
+        //     $validated['start_date'] = null;
+        //     $validated['end_date'] = null;
+        //     $validated['total_labour'] = null;
+        // }
 
         try {
             $this->expenseService->createExpense($user, $validated);
@@ -183,16 +193,25 @@ class ExpenseController extends Controller
     {
         $expense    = Expense::findOrFail($id);
         $projects   = Project::orderBy('name')->get();
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
-        $users      = User::where('role_id', '!=', $vendorRoleId)
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
+        $users      = User::whereNotIn('role_id', $excludedRoleIds)
                             ->orderBy('name')
                             ->get();
+        $vendorRoleId = Role::where('name', 'vendor')->value('id');
         $vendors    = User::where('role_id', $vendorRoleId)
                             ->orderBy('name')
                             ->get();
         $categories = Category::orderBy('name')->get();
 
-        return view('admin.expense.edit', compact('expense', 'projects', 'users', 'vendors', 'categories'));
+        // Load only sub-categories that belong to the parent Category named 'Expense'
+        $expenseCategory = Category::where('name', 'Expense')->first();
+        if ($expenseCategory) {
+            $expenseSubCategories = \App\Models\SubCategory::where('category_id', $expenseCategory->id)->orderBy('name')->get();
+        } else {
+            $expenseSubCategories = collect();
+        }
+
+        return view('admin.expense.edit', compact('expense', 'projects', 'users', 'vendors', 'categories', 'expenseSubCategories'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -220,10 +239,10 @@ class ExpenseController extends Controller
                 'bill'         => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
                 'category'     => 'required|string|max:255',
                 // Labour fields
-                'vendor_id'    => 'nullable|required_if:category,Labour|exists:users,id',
-                'start_date'   => 'nullable|required_if:category,Labour|date',
-                'end_date'     => 'nullable|required_if:category,Labour|date|after_or_equal:start_date',
-                'total_labour' => 'nullable|required_if:category,Labour|numeric|min:0',
+                // 'vendor_id'    => 'nullable|required_if:category,Labour|exists:users,id',
+                // 'start_date'   => 'nullable|required_if:category,Labour|date',
+                // 'end_date'     => 'nullable|required_if:category,Labour|date|after_or_equal:start_date',
+                // 'total_labour' => 'nullable|required_if:category,Labour|numeric|min:0',
                 'payment_mode'     => 'required|in:cash,online,cheque',
                 'reference_number' => 'nullable',
                 'description'      => 'nullable',
@@ -271,12 +290,12 @@ class ExpenseController extends Controller
         $validated['note']             = $validated['note']             ?? '';
 
         // If not a Labour expense, clear labour-specific fields
-        if (($validated['category'] ?? '') !== 'Labour') {
-            $validated['vendor_id'] = null;
-            $validated['start_date'] = null;
-            $validated['end_date'] = null;
-            $validated['total_labour'] = null;
-        }
+        // if (($validated['category'] ?? '') !== 'Labour') {
+        //     $validated['vendor_id'] = null;
+        //     $validated['start_date'] = null;
+        //     $validated['end_date'] = null;
+        //     $validated['total_labour'] = null;
+        // }
 
         $expense->update($validated);
 

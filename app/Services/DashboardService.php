@@ -22,7 +22,7 @@ class DashboardService
         }
 
         if ($isSuper) {
-            $vendorRoleId = Role::where('name', 'vendor')->value('id');
+            $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
             return [
                 'isSuper' => true,
                 'totalUsers' => User::count(),
@@ -32,7 +32,7 @@ class DashboardService
                 'availableAmount' => (float) ($authUser->amount ?? 0),
                 'usersWithTransfers' => User::query()
                     ->select('id', 'name', 'email', 'amount')
-                    ->where('role_id', '!=', $vendorRoleId)
+                    ->whereNotIn('role_id', $excludedRoleIds)
                     ->orderBy('name')
                     ->get(),
                 'debitedList' => Expense::with('user', 'project')->latest()->limit(20)->get(),
@@ -94,7 +94,7 @@ class DashboardService
         $assignedProjectIds = $authUser->assignedProjectIds();
         $receivedTransferTotal = (float) Transfer::where('user_id', $userId)->sum('amount');
         $sentTransferTotal = (float) Transfer::where('created_by', $userId)->sum('amount');
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
 
         return [
             'isSuper' => false,
@@ -110,7 +110,7 @@ class DashboardService
                 ->withSum('transfers', 'amount')
                 ->withCount('transfers')
                 ->where('id', $userId)
-                ->where('role_id', '!=', $vendorRoleId)
+                ->whereNotIn('role_id', $excludedRoleIds)
                 ->get(),
             'debitedList' => Expense::with('project')->where('users_id', $userId)->latest()->limit(20)->get(),
             'userDebitedTotals' => collect(),

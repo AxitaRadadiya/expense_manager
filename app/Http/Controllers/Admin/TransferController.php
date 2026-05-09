@@ -32,8 +32,8 @@ class TransferController extends Controller
     public function create()
     {
         $auth = auth()->user();
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
-        $usersQuery = User::where('role_id', '!=', $vendorRoleId)
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
+        $usersQuery = User::whereNotIn('role_id', $excludedRoleIds)
                   ->orderBy('name');
         $assignedProjectIds = $auth ? $auth->assignedProjectIds() : [];
 

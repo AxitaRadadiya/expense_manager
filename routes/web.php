@@ -7,13 +7,18 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\VendorController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\ItemExpenseController;
 use App\Http\Controllers\Admin\ItemReturnController;
 use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\Admin\PurchaseController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TransferController;
 use App\Http\Controllers\ActivityLogController;
@@ -69,6 +74,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('category-list', [CategoryController::class, 'list'])->name('category.list');
     Route::resource('category', CategoryController::class);
 
+    Route::get('sub-category-list', [SubCategoryController::class, 'list'])->name('sub-category.list');
+    Route::resource('sub-category', SubCategoryController::class)->except(['create','show','edit']);
+
+    // Chart of Accounts index (tabs)
+    Route::get('chart', function(){ 
+        $categories = \App\Models\Category::whereIn('name', ['Income','Expense'])->pluck('name','id');
+        return view('admin.chart.index', compact('categories')); 
+    })->name('chart.index');
+
     Route::get('item-list', [ItemController::class, 'list'])->name('item.list');
     Route::resource('item', ItemController::class);
 
@@ -81,6 +95,17 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::get('vendor-list', [VendorController::class, 'list'])->name('vendor.list');
     Route::resource('vendor', VendorController::class);
+
+    Route::get('purchase-list', [PurchaseController::class, 'index'])->name('purchase.list');
+    Route::resource('purchase', PurchaseController::class);
+
+    Route::get('payment-list', [PaymentController::class, 'index'])->name('payment.list');
+    Route::resource('payment', PaymentController::class);
+
+    Route::get('customer-list', [CustomerController::class, 'list'])->name('customer.list');
+    Route::resource('customer', CustomerController::class);
+
+    Route::get('contacts', [ContactController::class, 'index'])->name('contacts.index');
 
     Route::get('transfer-list', [TransferController::class, 'list'])->name('transfer.list');
     Route::resource('transfer', TransferController::class);

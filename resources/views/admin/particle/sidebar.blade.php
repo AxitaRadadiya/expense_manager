@@ -39,12 +39,13 @@
         </a>
       </li>
       @endif
-      @if($authUser && $authUser->can('vendor-view'))
+
+      @if($authUser && ($authUser->can('vendor-view') || $authUser->can('customer-view')))
       <li class="nav-item">
-        <a href="{{ route('vendor.index') }}"
-          class="nav-link {{ Request::routeIs('vendor.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-store"></i>
-          <p>Vendors</p>
+        <a href="{{ route('contacts.index') }}"
+          class="nav-link {{ (Request::routeIs('vendor.*') || Request::routeIs('customer.*') || Request::routeIs('contacts.*')) ? 'active' : '' }}">
+          <i class="nav-icon fas fa-address-book"></i>
+          <p>Contacts</p>
         </a>
       </li>
       @endif
@@ -53,7 +54,7 @@
         <a href="{{ route('credit.index') }}"
           class="nav-link {{ Request::routeIs('credit.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-dollar-sign"></i>
-          <p>Credits</p>
+          <p>Sales</p>
         </a>
       </li>
       @endif
@@ -74,6 +75,16 @@
           class="nav-link {{ Request::routeIs('expense.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-wallet"></i>
           <p>Expenses</p>
+        </a>
+      </li>
+      @endif
+
+      @if($authUser && ($authUser->can('purchase-view') || $authUser->can('payment-view')))
+      <li class="nav-item">
+        <a href="{{ route('purchase.index') }}"
+          class="nav-link {{ Request::routeIs('purchase.*') ? 'active' : '' }}">
+          <i class="nav-icon fas fa-shopping-cart"></i>
+          <p>Purchase</p>
         </a>
       </li>
       @endif
@@ -119,10 +130,10 @@
           </li>
           @if($authUser && $authUser->hasRole('super-admin'))
           <li class="nav-item">
-            <a href="{{ route('category.index') }}"
-              class="nav-link {{ Request::routeIs('category.*') ? 'active' : '' }}">
+            <a href="{{ route('chart.index') }}"
+              class="nav-link {{ Request::routeIs('chart.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-layer-group"></i>
-              <p>Categories</p>
+              <p>Chart of Accounts</p>
             </a>
           </li>
           @endif

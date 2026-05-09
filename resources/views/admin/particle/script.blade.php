@@ -231,6 +231,36 @@ $(document).ready(function () {
     }
     load_vendors();
 
+    // Customers table loader
+    function load_customers() {
+        $('#CustomersTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[1, 'asc']],
+            ajax: {
+                url: '{{ route("customer.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{csrf_token()}}' },
+                error: function(xhr) {
+                    console.log('Customers DataTable Ajax Error - Status: ' + xhr.status);
+                    console.log('Response: ' + xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'name' },
+                { data: 'mobile' },
+                { data: 'email' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_customers();
+
     // Projects table loader
     function load_projects() {
         $('#projectsTable').DataTable({
@@ -256,6 +286,32 @@ $(document).ready(function () {
         });
     }
     load_expense();
+
+    // Purchases table loader (client-side)
+    function load_purchases() {
+        if (!$('#PurchasesTable').length) return;
+        $('#PurchasesTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: false, serverSide: false,
+            order: [[0, 'asc']],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_purchases();
+
+    // Payments table loader (client-side)
+    function load_payments() {
+        if (!$('#PaymentsTable').length) return;
+        $('#PaymentsTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: false, serverSide: false,
+            order: [[0, 'asc']],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_payments();
 
     // Category table
    function load_category() {
@@ -285,7 +341,6 @@ $(document).ready(function () {
                     { data: 'position', orderable: false, className: 'drag-handle'},
                     { data: 'id', orderable: false },
                     { data: 'name' },
-                    { data: 'action', orderable: false, searchable: false }
                 ],
                 aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
@@ -299,31 +354,73 @@ $(document).ready(function () {
         }
         load_category();
 
-        // Modal handlers
-        $(document).on('click', '.category-date-modal', function () {
-            $('#categoryForm')[0].reset();
-            $('#categoryForm').attr('action', '{{ route("category.store") }}');
-            $('#categoryForm').find('input[name="_method"]').remove();
-            $('#category_id').val('');
-            $('.error').text('');
-            $('input').removeClass('is-invalid');
-            $('#CategoryModal').modal('show');
+        // SubCategory table loader
+        function load_subcategory() {
+            if (!$('#SubCategoryTable').length) return;
+            $('#SubCategoryTable').DataTable({
+                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+                autoWidth: false, responsive: true, processing: true, serverSide: true,
+                ajax: { url: '{{ route("sub-category.list") }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}' } },
+                columns: [ { data: 'id' }, { data: 'name' }, { data: 'category' }, { data: 'action', orderable: false, searchable: false } ],
+                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+                language: { paginate: { previous: "Previous", next: "Next" } },
+                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            });
+        }
+        load_subcategory();
+
+        // SubCategory edit modal handler
+        $(document).on('click', '.edit-subcategory-modal', function (e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            var categoryId = $(this).data('category');
+
+            var form = $('#subCategoryForm');
+            form.attr('action', '{{ route("sub-category.update", ":id") }}'.replace(':id', id));
+            if (!form.find('input[name="_method"]').length) {
+                form.append('<input type="hidden" name="_method" value="PATCH">');
+            }
+            $('#subcategory_id').val(id);
+            $('#sub_category_name').val(name);
+            $('#sub_category_category_id').val(categoryId).trigger('change');
+            $('#addSubCategoryModal').modal('show');
         });
 
-        $(document).on('click', '.edit-category-date-modal', function () {
-            let categoryId = $(this).data('id');
-            let categoryName = $(this).data('name');
-            $('#categoryForm')[0].reset();
-            $('#category_id').val(categoryId);
-            $('#category_name').val(categoryName);
-            $('.error').text('');
-            $('input').removeClass('is-invalid');
-            let updateUrl = '{{ route("category.update", ":id") }}'.replace(':id', categoryId);
-            $('#categoryForm').attr('action', updateUrl);
-            $('#categoryForm').find('input[name="_method"]').remove();
-            $('#categoryForm').append('<input type="hidden" name="_method" value="PUT">');
-            $('#CategoryModal').modal('show');
+        // Reset subcategory form when modal is hidden
+        $('#addSubCategoryModal').on('hidden.bs.modal', function () {
+            var form = $('#subCategoryForm');
+            form.attr('action', '{{ route("sub-category.store") }}');
+            form.find('input[name="_method"]').remove();
+            form[0].reset();
+            $('#subcategory_id').val('');
         });
+
+        // Modal handlers
+        // $(document).on('click', '.category-date-modal', function () {
+        //     $('#categoryForm')[0].reset();
+        //     $('#categoryForm').attr('action', '{{ route("category.store") }}');
+        //     $('#categoryForm').find('input[name="_method"]').remove();
+        //     $('#category_id').val('');
+        //     $('.error').text('');
+        //     $('input').removeClass('is-invalid');
+        //     $('#CategoryModal').modal('show');
+        // });
+
+        // $(document).on('click', '.edit-category-date-modal', function () {
+        //     let categoryId = $(this).data('id');
+        //     let categoryName = $(this).data('name');
+        //     $('#categoryForm')[0].reset();
+        //     $('#category_id').val(categoryId);
+        //     $('#category_name').val(categoryName);
+        //     $('.error').text('');
+        //     $('input').removeClass('is-invalid');
+        //     let updateUrl = '{{ route("category.update", ":id") }}'.replace(':id', categoryId);
+        //     $('#categoryForm').attr('action', updateUrl);
+        //     $('#categoryForm').find('input[name="_method"]').remove();
+        //     $('#categoryForm').append('<input type="hidden" name="_method" value="PUT">');
+        //     $('#CategoryModal').modal('show');
+        // });
 
     $('#CategoryModal').on('hidden.bs.modal', function () { $('#categoryForm')[0].reset(); $('#categoryForm').find('input[name="_method"]').remove(); $('#category_id').val(''); $('.error').text(''); $('input').removeClass('is-invalid'); });
 

@@ -30,9 +30,10 @@ class UserController extends Controller
      ───────────────────────────────────────── */
     public function index(): View
     {
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])
+            ->pluck('id');
         return view('admin.users.index', [
-            'users' => User::with(['role', 'projects'])->where('role_id', '!=', $vendorRoleId)->orderBy('id')->paginate(15),
+            'users' => User::with(['role', 'projects'])->whereNotIn('role_id', $excludedRoleIds)->orderBy('id')->paginate(15),
         ]);
     }
 
@@ -41,9 +42,10 @@ class UserController extends Controller
      ───────────────────────────────────────── */
     public function create(): View
     {
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])
+    ->pluck('id');
         return view('admin.users.create', [
-            'roles' => Role::where('id', '!=', $vendorRoleId)
+            'roles' => Role::whereNotIn('id', $excludedRoleIds)
                             ->orderBy('name')
                             ->get(),
         ]);
@@ -286,8 +288,8 @@ class UserController extends Controller
             $totalFiltered = $query->count();
         }
         
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
-        $users = $query->where('role_id', '!=', $vendorRoleId)
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
+        $users = $query->whereNotIn('role_id', $excludedRoleIds)
             ->offset($start)
             ->limit($limit)
             ->orderBy('id', 'desc')

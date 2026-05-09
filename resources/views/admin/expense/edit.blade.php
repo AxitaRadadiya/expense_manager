@@ -67,9 +67,9 @@
               <div class="form-group">
                 <label for="category" class="font-weight-bold">Expense Category <span class="text-danger">*</span></label>
                 <select class="form-control select2 @error('category') is-invalid @enderror" name="category" id="category" required>
-                  <option value="">-- Select Category --</option>
-                  @foreach($categories as $cat)
-                    <option value="{{ $cat->name }}" {{ old('category', $expense->category) == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
+                  <option value="">-- Select Sub Category --</option>
+                  @foreach($expenseSubCategories as $sub)
+                    <option value="{{ $sub->name }}" {{ old('category', $expense->category) == $sub->name ? 'selected' : '' }}>{{ $sub->name }}</option>
                   @endforeach
                 </select>
                 @error('category')<span class="invalid-feedback">{{ $message }}</span>@enderror
@@ -85,7 +85,7 @@
             </div>
 
             <!-- Labour fields (shown only when category == Labour) -->
-            <div id="labourFields" class="col-12 {{ old('category', $expense->category) === 'Labour' ? '' : 'd-none' }}">
+            <!-- <div id="labourFields" class="col-12 {{ old('category', $expense->category) === 'Labour' ? '' : 'd-none' }}">
               <div class="row">
                 <div class="col-md-3">
                   <div class="form-group">
@@ -124,7 +124,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <div class="col-md-6">
               <div class="form-group">

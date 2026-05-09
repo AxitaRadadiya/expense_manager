@@ -2,7 +2,7 @@
 @section('title', 'Categories')
 
 @section('content')
-<div class="content-header">
+<!-- <div class="content-header">
   <div class="container-fluid">
     <div class="row mt-3">
         <h1><i class="mr-2 text-teal"></i>Categories</h1>
@@ -64,5 +64,5 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 @endsection

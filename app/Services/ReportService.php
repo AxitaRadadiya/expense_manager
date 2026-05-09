@@ -31,16 +31,16 @@ class ReportService
 
     public function getVisibleUsersForUser(?User $user): Collection
     {
-        $vendorRoleId = Role::where('name', 'vendor')->value('id');
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
         if (! $user) {
             return collect();
         }
 
         if ($user->hasRole('super-admin')) {
-            return User::where('role_id', '!=', $vendorRoleId)->orderBy('name')->get();
+            return User::whereNotIn('role_id', $excludedRoleIds)->orderBy('name')->get();
         }
 
-        return User::where('id', $user->id)->where('role_id', '!=', $vendorRoleId)->orderBy('name')->get();
+        return User::where('id', $user->id)->whereNotIn('role_id', $excludedRoleIds)->orderBy('name')->get();
     }
 
     public function generateExpenseReport(array $filters = []): Collection

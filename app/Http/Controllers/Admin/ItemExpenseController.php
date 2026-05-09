@@ -23,7 +23,8 @@ class ItemExpenseController extends Controller
         $projects = Project::pluck('name', 'id');
         $roleId = Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $roleId)->pluck('name', 'id');
-        $users = User::where('role_id', '!=', $roleId)->pluck('name', 'id');
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
+        $users = User::whereNotIn('role_id', $excludedRoleIds)->pluck('name', 'id');
 
         return view('admin.item_expense.create', compact('items', 'projects', 'vendors', 'users'));
     }
@@ -57,7 +58,8 @@ class ItemExpenseController extends Controller
         $projects = Project::pluck('name', 'id');
         $roleId = Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $roleId)->pluck('name', 'id');
-        $users = User::where('role_id', '!=', $roleId)->pluck('name', 'id');
+        $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
+        $users = User::whereNotIn('role_id', $excludedRoleIds)->pluck('name', 'id');
 
         return view('admin.item_expense.edit', compact('itemExpense', 'items', 'projects', 'vendors', 'users'));
     }
