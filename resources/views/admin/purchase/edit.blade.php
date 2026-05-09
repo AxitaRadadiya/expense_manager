@@ -13,6 +13,7 @@
                 <li class="breadcrumb-item active">Edit</li>  
             </ol>
         </div>
+        </div>
   </div>
 </div>
 

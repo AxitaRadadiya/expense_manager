@@ -13,7 +13,7 @@ class PaymentController extends Controller
 {
     public function index(): View
     {
-        $payments = Payment::with(['vendor', 'customer'])->latest()->get();
+        $payments = Payment::with(['vendor'])->latest()->get();
         return view('admin.payments.index', compact('payments'));
     }
 
