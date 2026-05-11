@@ -9,11 +9,7 @@
     </div>
   </div>
 </div>
-
-<div class="container-fluid">
-  <div class="card card-outline card-primary shadow-sm">
-    <div class="card-body">
-      <ul class="nav nav-pills mb-3">
+<ul class="nav nav-pills mb-3">
         <li class="nav-item mr-2">
           <a class="nav-link @if(request()->routeIs('purchase.*')) active @endif" href="{{ route('purchase.index') }}">Purchases</a>
         </li>
@@ -21,8 +17,11 @@
           <a class="nav-link @if(request()->routeIs('payment.*')) active @endif" href="{{ route('payment.index') }}">Payments Made</a>
         </li>
       </ul>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container-fluid">
+  <div class="card card-outline card-primary shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">All Payments Made</h5>
         <div></div>
         <a href="{{ route('payment.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> Add Payment

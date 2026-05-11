@@ -6,14 +6,23 @@
   <div class="container-fluid">
     <div class="row mt-3">
         <h1><i class="mr-2 text-teal"></i>Roles</h1>
+
     </div>
   </div>
 </div>
-
+    <ul class="nav nav-pills mb-3">
+        <li class="nav-item mr-2">
+          <a class="nav-link @if(request()->routeIs('users.*')) active @endif" href="{{ route('users.index') }}">Users</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link @if(request()->routeIs('roles.*')) active @endif" href="{{ route('roles.index') }}">Roles</a>
+        </li>
+      </ul>
 <div class="pull-card">
-  <div class="container-fluid" style="padding:0;">
+  <div class="card card-outline card-primary shadow-sm">
     <div class="main-card table-card">
       <div class="main-card-body">
+     
         <div class="table-responsive">
           <table id="roleTable" class="table table-hover w-100">
             <thead class="thead">

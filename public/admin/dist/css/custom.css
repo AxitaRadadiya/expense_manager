@@ -7,6 +7,13 @@
     background-color: #339D9D !important;
     color: #fff !important;
 }
+.mb-3, .my-3 {
+    margin-bottom: 1rem !important;
+    padding: 4px;
+    margin: 5px 20px;
+    background: #ffffff;
+    border-radius: 12px;
+}
 .main-sidebar{
     background: #E6F4F4 !important;
     border-right: 1px solid;
@@ -202,12 +209,13 @@ table.dataTable thead th {
 .card-primary.card-outline, .card-danger.card-outline {
     border-color: #339D9D !important;
 }
-.container-fluid-80 {
-    width: 80%;
+.container-fluid {
+    width: 98%;
     padding-right: 7.5px;
     padding-left: 7.5px;
     margin-right: auto;
     margin-left: auto;
+    margin:10px;
 }
 .card {
     border-radius: 12px;

@@ -30,7 +30,7 @@
       @if(! $isSupervisor)
       <li class="nav-header">System</li>
       @endif
-      @if($authUser && $authUser->can('user-view'))
+      <!--@if($authUser && $authUser->can('user-view'))
       <li class="nav-item">
         <a href="{{ route('users.index') }}"
           class="nav-link {{ Request::routeIs('users.*') ? 'active' : '' }}">
@@ -38,7 +38,7 @@
           <p>Users</p>
         </a>
       </li>
-      @endif
+      @endif-->
 
       @if($authUser && ($authUser->can('vendor-view') || $authUser->can('customer-view')))
       <li class="nav-item">
@@ -125,7 +125,7 @@
             <a href="{{ route('roles.index') }}"
               class="nav-link {{ Request::routeIs('roles.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-user-shield"></i>
-              <p>Roles</p>
+              <p>Users & Roles</p>
             </a>
           </li>
           @if($authUser && $authUser->hasRole('super-admin'))

@@ -113,7 +113,6 @@
         return true;
     }
 
-    // EMAIL VALIDATION
     function validateEmail() {
         var value = emailInput.value.trim();
         if (!value) {

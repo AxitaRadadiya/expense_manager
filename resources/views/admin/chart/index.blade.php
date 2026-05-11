@@ -9,11 +9,7 @@
     </div>
   </div>
 </div>
-
-<div class="container-fluid">
-  <div class="card card-outline card-primary shadow-sm">
-    <div class="card-body">
-      <ul class="nav nav-pills mb-3">
+ <ul class="nav nav-pills mb-3">
         <li class="nav-item mr-2">
           <a class="nav-link @if(request()->routeIs('category.*') || request()->routeIs('chart.index')) active @endif" href="#category-tab" data-toggle="tab">Category</a>
         </li>
@@ -21,6 +17,10 @@
           <a class="nav-link @if(request()->routeIs('sub-category.*')) active @endif" href="#sub-category-tab" data-toggle="tab">Sub Category</a>
         </li>
       </ul>
+<div class="container-fluid">
+  <div class="card card-outline card-primary shadow-sm">
+    <div class="card-body">
+     
 
       <div class="tab-content">
         <div class="tab-pane fade show active" id="category-tab">
@@ -47,7 +47,8 @@
         </div>
 
         <div class="tab-pane fade" id="sub-category-tab">
-          <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">All Sub Categories</h5>
             <div></div>
             <a href="#addSubCategoryModal" data-toggle="modal" class="btn-create">
               <i class="fas fa-plus"></i> Add Sub Category

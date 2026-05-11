@@ -1,78 +1,146 @@
 @extends('admin.layouts.app')
+
 @section('title', 'Invoice Details')
 
 @section('content')
+
 <div class="content-header">
-  <div class="container-fluid-80">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1><i class="mr-2 text-teal"></i>Invoice Details</h1>
-      </div>
-      <div class="col-sm-6 text-right">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-          <li class="breadcrumb-item"><a href="{{ route('invoice.index') }}">Invoices</a></li>
-          <li class="breadcrumb-item active">View</li>
-        </ol>
-      </div>
+    <div class="container-fluid">
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <h1 class="m-0">
+                        <i class="fas fa-file-invoice mr-2 text-primary"></i>
+                        Invoice Details
+                    </h1>
+
+                    <a href="{{ route('invoice.index') }}"
+                        class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Back
+                    </a>
+
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+<section class="content">
+    <div class="container-fluid">
 
-<div class="container-fluid-80">
-  <div class="card card-outline card-primary shadow-sm">
-    <div class="card-header">
-      <h3 class="card-title"><i class="fas fa-file-invoice mr-1"></i>Invoice Information</h3>
-      <div class="card-tools">
-        <a href="{{ route('invoice.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
-        <a href="{{ route('invoice.edit', $invoice->id) }}" class="btn-create ml-2"><i class="fas fa-edit mr-1"></i>Edit</a>
-      </div>
+        <div class="justify-content-center">
+            <div class="card card-outline card-primary shadow-sm">
+                <div class="card-body p-5">
+
+                    <!-- Invoice Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="font-weight-bold mb-1 text-primary">
+                                INVOICE
+                            </h2>
+
+                            <p class="mb-0 text-muted">
+                                Invoice #: {{ $invoice->id ?? 'N/A' }}
+                            </p>
+                        </div>
+
+                        <div class="text-right">
+                            <strong>Date:</strong><br>
+                            {{ $invoice->invoice_date ?? now()->format('d/m/Y') }}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Customer Details -->
+                    <div class="row mb-4">
+                        <div class="col-12 text-md-right">
+                            <h5 class="font-weight-bold mb-3">
+                                Bill To
+                            </h5>
+
+                            <p class="mb-1">
+                                <strong>
+                                    {{ $invoice->customer->name ?? '-' }}
+                                </strong>
+                            </p>
+
+                            <p class="mb-1">
+                                {{ $invoice->customer->address ?? 'No Address Available' }}
+                            </p>
+
+                            <p class="mb-0">
+                                {{ $invoice->customer->mobile ?? '' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Summary -->
+                    <h5 class="font-weight-bold mb-3">
+                        Account Summary
+                    </h5>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Project</th>
+                                    <th>Category</th>
+                                    <th class="text-right">Amount</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        {{ $invoice->project->name ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        {{ $invoice->subCategory->name ?? '-' }}
+                                    </td>
+
+                                    <td class="text-right">
+                                        ₹ {{ number_format($invoice->amount ?? 0, 2) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                            <tfoot>
+                                <tr>
+                                    <th colspan="2" class="text-right">
+                                        Total Amount
+                                    </th>
+
+                                    <th class="text-right text-success">
+                                        ₹ {{ number_format($invoice->amount ?? 0, 2) }}
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Note -->
+                    @if(!empty($invoice->note))
+                        <div class="mb-4">
+                            <label class="font-weight-bold">
+                                Note:
+                            </label>
+
+                            <div class="border rounded p-3 bg-light">
+                                {{ $invoice->note }}
+                            </div>
+                        </div>
+                    @endif
+
+        
+
+                </div>
+            </div>
+        </div>
+
     </div>
-
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label class="font-weight-bold">Customer</label>
-            <div>{{ $invoice->customer->name ?? '-' }}</div>
-          </div>
-
-          <div class="form-group">
-            <label class="font-weight-bold">Project</label>
-            <div>{{ $invoice->project->name ?? '-' }}</div>
-          </div>
-
-          <div class="form-group">
-            <label class="font-weight-bold">Category</label>
-            <div>{{ $invoice->subCategory->name ?? '-' }}</div>
-          </div>
-        </div>
-
-        <div class="col-md-6">
-          <div class="form-group">
-            <label class="font-weight-bold">Amount</label>
-            <div>Rs. {{ number_format($invoice->amount,2) }}</div>
-          </div>
-
-          <div class="form-group">
-            <label class="font-weight-bold">Invoice Date</label>
-            <div>{{ $invoice->invoice_date }}</div>
-          </div>
-        </div>
-      </div>
-
-      @if(!empty($invoice->note))
-      <div class="row mt-3">
-        <div class="col-12">
-          <div class="form-group">
-            <label class="font-weight-bold">Note</label>
-            <div>{{ $invoice->note }}</div>
-          </div>
-        </div>
-      </div>
-      @endif
-    </div>
-  </div>
-</div>
+</section>
 
 @endsection

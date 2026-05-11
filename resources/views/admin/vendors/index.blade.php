@@ -10,11 +10,7 @@
     </div>
   </div>
 </div>
-
-<div class="container-fluid">
-  <div class="card card-outline card-primary shadow-sm">
-    <div class="card-body">
-      <ul class="nav nav-pills mb-3">
+  <ul class="nav nav-pills mb-3">
         <li class="nav-item mr-2">
           <a class="nav-link @if(request()->routeIs('vendor.*')) active @endif" href="{{ route('vendor.index') }}">Vendors</a>
         </li>
@@ -22,8 +18,11 @@
           <a class="nav-link @if(request()->routeIs('customer.*')) active @endif" href="{{ route('customer.index') }}">Customers</a>
         </li>
       </ul>
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container-fluid">
+  <div class="card card-outline card-primary shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">All Vendors</h5>
         <div></div>
         <a href="{{ route('vendor.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> Add Vendor

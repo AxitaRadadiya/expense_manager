@@ -10,11 +10,7 @@
         </div>
     </div>
 </div>
-
-<div class="container-fluid">
-    <div class="card card-outline card-primary shadow-sm">
-        <div class="card-body">
-            <ul class="nav nav-pills mb-3">
+ <ul class="nav nav-pills mb-3">
                 <li class="nav-item mr-2">
                     <a class="nav-link @if(request()->routeIs('invoice.*')) active @endif" href="{{ route('invoice.index') }}">Invoices</a>
                 </li>
@@ -22,8 +18,12 @@
                     <a class="nav-link @if(request()->routeIs('payment-receive.*')) active @endif" href="{{ route('payment-receive.index') }}">Payments Received</a>
                 </li>
             </ul>
+<div class="container-fluid">
+    <div class="card card-outline card-primary shadow-sm">
+        <div class="card-body">
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">All Invoices</h5>
                 <div></div>
                 <a href="{{ route('invoice.create') }}" class="btn-create">
                     <i class="fas fa-plus"></i> Add Invoice

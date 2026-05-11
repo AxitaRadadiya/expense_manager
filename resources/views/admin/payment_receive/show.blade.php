@@ -3,60 +3,61 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid-80">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1><i class="mr-2 text-teal"></i>Payment Received Details</h1>
-      </div>
-      <div class="col-sm-6 text-right">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-          <li class="breadcrumb-item"><a href="{{ route('payment-receive.index') }}">Payments Received</a></li>
-          <li class="breadcrumb-item active">View</li>
-        </ol>
-      </div>
-    </div>
-  </div>
-</div>
+    <div class="container-fluid">
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
 
-<div class="container-fluid-80">
-  <div class="card card-outline card-primary shadow-sm">
-    <div class="card-header">
-      <h3 class="card-title"><i class="fas fa-money-check-alt mr-1"></i>Payment Information</h3>
-      <div class="card-tools">
-        <a href="{{ route('payment-receive.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
-        <a href="{{ route('payment-receive.edit', $payment->id) }}" class="btn-create ml-2"><i class="fas fa-edit mr-1"></i>Edit</a>
-      </div>
-    </div>
+                    <h1 class="m-0">
+                        <i class="fas fa-file-invoice mr-2 text-primary"></i>
+                        Payment Received Details
+                    </h1>
 
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label class="font-weight-bold">Payment Type</label>
-            <div>{{ ucfirst($payment->payment_type) }}</div>
-          </div>
+                    <a href="{{ route('invoice.index') }}"
+                        class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Back
+                    </a>
 
-          <div class="form-group">
-            <label class="font-weight-bold">Customer</label>
-            <div>{{ $payment->customer->name ?? '-' }}</div>
-          </div>
-
-          <div class="form-group">
-            <label class="font-weight-bold">Project</label>
-            <div>{{ $payment->project->name ?? '-' }}</div>
-          </div>
+                </div>
+            </div>
         </div>
-
-        <div class="col-md-6">
-          <div class="form-group">
-            <label class="font-weight-bold">Amount</label>
-            <div>Rs. {{ number_format($payment->amount,2) }}</div>
+    </div>
+</div>
+<div class="container py-5" style="min-height: 90vh;">
+  <div class="justify-content-center">
+    <div class="">
+      <div class="card shadow border-0">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <!-- Avatar/Initial -->
+            <div style="width:64px;height:64px;background:#339D9D;color:#fff;font-size:2rem;line-height:64px;border-radius:8px;display:inline-block;font-weight:bold;">
+              {{ strtoupper(substr($payment->customer->name ?? 'C',0,1)) }}
+            </div>
+            <div class="mt-2 mb-0 h5">{{ $payment->customer->name ?? '-' }}</div>
+            <div class="text-muted small">{{ $payment->customer->country ?? '' }}</div>
           </div>
-
-          <div class="form-group">
-            <label class="font-weight-bold">Payment Date</label>
-            <div>{{ $payment->payment_date }}</div>
+          <hr>
+          <h4 class="text-center mb-4 font-weight-bold">PAYMENT RECEIPT</h4>
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <div class="row mb-2">
+                <div class="col-2 text-muted">Payment Date</div>
+                <div class="col-2 font-weight-bold">{{ $payment->payment_date }}</div>
+              </div>
+             
+              <div class="row mb-2">
+                <div class="col-2 text-muted">Payment Mode</div>
+                <div class="col-2 font-weight-bold">{{ ucfirst($payment->payment_type) }}</div>
+              </div>
+             
+            </div>
+            <div class="col-md-4 text-center">
+              <div style="background:#5cb85c;color:#fff;padding:24px 0;border-radius:8px;">
+                <div class="mb-1">Amount Received</div>
+                <div style="font-size:1.5rem;font-weight:bold;">₹{{ number_format($payment->amount,2) }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
