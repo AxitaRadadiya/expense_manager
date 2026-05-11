@@ -88,6 +88,12 @@ class PurchaseController extends Controller
         return redirect()->route('purchase.index')->with('success', 'Purchase deleted');
     }
 
+    public function show($id): View
+    {
+        $purchase = Purchase::with(['vendor', 'project', 'subCategory'])->findOrFail($id);
+        return view('admin.purchase.show', compact('purchase'));
+    }
+
     public function list(Request $request)
     {
         try {
@@ -139,6 +145,7 @@ class PurchaseController extends Controller
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
                 $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
                 if (auth()->check()) {
+                    $actions .= '<a href="' . route('purchase.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
                     $actions .= '<a href="' . route('purchase.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
                     $actions .= '<form action="' . route('purchase.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }

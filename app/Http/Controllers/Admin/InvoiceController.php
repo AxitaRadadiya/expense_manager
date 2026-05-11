@@ -80,6 +80,12 @@ class InvoiceController extends Controller
         return redirect()->route('invoice.index')->with('success','Invoice deleted');
     }
 
+    public function show($id): View
+    {
+        $invoice = Invoice::with(['customer','project','subCategory'])->findOrFail($id);
+        return view('admin.invoice.show', compact('invoice'));
+    }
+
     public function list(Request $request)
     {
         try {
@@ -130,6 +136,7 @@ class InvoiceController extends Controller
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
                 $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
                 if (auth()->check()) {
+                    $actions .= '<a href="' . route('invoice.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
                     $actions .= '<a href="' . route('invoice.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
                     $actions .= '<form action="' . route('invoice.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }

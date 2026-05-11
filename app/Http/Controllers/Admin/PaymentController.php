@@ -72,6 +72,12 @@ class PaymentController extends Controller
         return redirect()->route('payment.index')->with('success', 'Payment deleted');
     }
 
+    public function show($id): View
+    {
+        $payment = Payment::with(['vendor', 'project'])->findOrFail($id);
+        return view('admin.payments.show', compact('payment'));
+    }
+
     public function list(Request $request)
     {
         try {
@@ -119,6 +125,7 @@ class PaymentController extends Controller
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
                 $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
                 if (auth()->check()) {
+                    $actions .= '<a href="' . route('payment.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
                     $actions .= '<a href="' . route('payment.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
                     $actions .= '<form action="' . route('payment.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }
