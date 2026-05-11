@@ -27,7 +27,7 @@
                 <a href="{{ route('customer.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
             </div>
         </div>
-        <form action="{{ route('customer.store') }}" method="POST">
+        <form id="customer-create-form" action="{{ route('customer.store') }}" method="POST">
             @csrf
             <div class="card-body">
                 <div class="form-group">
@@ -38,13 +38,13 @@
 
                 <div class="form-group">
                     <label>Mobile <span class="text-danger">*</span></label>
-                    <input type="text" name="mobile" class="form-control" value="{{ old('mobile') }}" required>
+                    <input type="text" id="mobile" name="mobile" class="form-control" value="{{ old('mobile') }}" required>
                     @error('mobile')<span class="text-danger small">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
                     <label>Email <span class="text-danger">*</span></label>
-                    <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
+                    <input type="email" id="email" name="email" class="form-control" value="{{ old('email') }}" required>
                     @error('email')<span class="text-danger small">{{ $message }}</span>@enderror
                 </div>
             </div>
@@ -56,4 +56,94 @@
     </div>
 </div>
 
+<script>
+    (function () {
+
+    var form = document.getElementById('customer-create-form');
+    if (!form) return;
+
+    var mobileInput = document.getElementById('mobile');
+    var emailInput = document.getElementById('email');
+
+    var mobilePattern = /^\d{10}$/;
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function getFeedbackElement(input) {
+        var formGroup = input.closest('.form-group');
+        var feedback = formGroup.querySelector(
+            '[data-error-for="' + input.id + '"]'
+        );
+
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback d-block';
+            feedback.setAttribute('data-error-for', input.id);
+            input.insertAdjacentElement('afterend', feedback);
+        }
+        return feedback;
+    }
+
+    function setError(input, message) {
+        input.classList.add('is-invalid');
+        var feedback = getFeedbackElement(input);
+        feedback.textContent = message;
+    }
+
+    function clearError(input) {
+        input.classList.remove('is-invalid');
+        var feedback = getFeedbackElement(input);
+        feedback.textContent = '';
+    }
+
+    // MOBILE VALIDATION
+    function validateMobile() {
+        var value = mobileInput.value.trim();
+        if (!value) {
+            setError(mobileInput, 'Mobile number is required.');
+            return false;
+        }
+        if (!mobilePattern.test(value)) {
+            setError(
+                mobileInput,
+                'Mobile number must be exactly 10 digits.'
+            );
+            return false;
+        }
+        clearError(mobileInput);
+        return true;
+    }
+
+    // EMAIL VALIDATION
+    function validateEmail() {
+        var value = emailInput.value.trim();
+        if (!value) {
+            setError(emailInput, 'Email is required.');
+            return false;
+        }
+        if (!emailPattern.test(value)) {
+            setError(emailInput, 'Enter a valid email address.');
+            return false;
+        }
+        clearError(emailInput);
+        return true;
+    }
+
+    // ONLY NUMBERS IN MOBILE
+    mobileInput.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        validateMobile();
+    });
+
+    // EMAIL VALIDATION
+    emailInput.addEventListener('input', validateEmail);
+
+    // FORM SUBMIT
+    form.addEventListener('submit', function (event) {
+        var isValid = validateMobile() && validateEmail();
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+})();
+</script>
 @endsection
