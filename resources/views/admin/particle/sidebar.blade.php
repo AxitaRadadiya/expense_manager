@@ -49,10 +49,10 @@
         </a>
       </li>
       @endif
-      @if($authUser && $authUser->can('credit-view'))
+      @if($authUser && ($authUser->can('invoice-view') || $authUser->can('payment_receive-view')))
       <li class="nav-item">
-        <a href="{{ route('credit.index') }}"
-          class="nav-link {{ Request::routeIs('credit.*') ? 'active' : '' }}">
+        <a href="{{ route('invoice.index') }}"
+          class="nav-link {{ Request::routeIs('invoice.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-dollar-sign"></i>
           <p>Sales</p>
         </a>

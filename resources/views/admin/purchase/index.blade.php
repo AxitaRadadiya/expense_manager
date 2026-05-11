@@ -43,23 +43,7 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
-            @foreach($purchases as $p)
-              <tr>
-                <td>{{ $p->id }}</td>
-                <td>{{ $p->vendor->name ?? '-' }}</td>
-                <td>{{ $p->project->name ?? '-' }}</td>
-                <td>{{ $p->subCategory->name ?? '-' }}</td>
-                <td>{{ number_format($p->amount,2) }}</td>
-                <td>{{ $p->quantity }}</td>
-                <td>{{ $p->purchase_date }}</td>
-                <td>
-                  <a href="{{ route('purchase.edit', $p->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                  <form method="POST" action="{{ route('purchase.destroy', $p->id) }}" style="display:inline">@csrf @method('DELETE')<button class="btn btn-sm btn-danger">Delete</button></form>
-                </td>
-              </tr>
-            @endforeach
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
 

@@ -19,6 +19,8 @@ use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\Admin\PurchaseController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\PaymentReceiveController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\TransferController;
 use App\Http\Controllers\ActivityLogController;
@@ -96,11 +98,17 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('vendor-list', [VendorController::class, 'list'])->name('vendor.list');
     Route::resource('vendor', VendorController::class);
 
-    Route::get('purchase-list', [PurchaseController::class, 'index'])->name('purchase.list');
+    Route::get('purchase-list', [PurchaseController::class, 'list'])->name('purchase.list');
     Route::resource('purchase', PurchaseController::class);
 
-    Route::get('payment-list', [PaymentController::class, 'index'])->name('payment.list');
+    Route::get('payment-list', [PaymentController::class, 'list'])->name('payment.list');
     Route::resource('payment', PaymentController::class);
+
+    Route::get('invoice-list', [InvoiceController::class, 'list'])->name('invoice.list');
+    Route::resource('invoice', InvoiceController::class);
+
+    Route::get('payment-receive-list', [PaymentReceiveController::class, 'list'])->name('payment-receive.list');
+    Route::resource('payment-receive', PaymentReceiveController::class);
 
     Route::get('customer-list', [CustomerController::class, 'list'])->name('customer.list');
     Route::resource('customer', CustomerController::class);

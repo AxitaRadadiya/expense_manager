@@ -87,4 +87,79 @@ class PurchaseController extends Controller
         $purchase->delete();
         return redirect()->route('purchase.index')->with('success', 'Purchase deleted');
     }
+
+    public function list(Request $request)
+    {
+        try {
+            $columns = [0 => 'id', 1 => 'vendor', 2 => 'project', 3 => 'sub_category', 4 => 'amount', 5 => 'quantity', 6 => 'purchase_date', 7 => 'action'];
+
+            $limit = intval($request->input('length', 10));
+            $start = intval($request->input('start', 0));
+            $orderColumnIndex = intval($request->input('order.0.column', 0));
+            $order = $columns[$orderColumnIndex] ?? 'id';
+            $dir = $request->input('order.0.dir', 'desc');
+            $search = $request->input('search.value');
+
+            $query = Purchase::with(['vendor', 'project', 'subCategory']);
+
+            if (!empty($search)) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('vendor', function ($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
+                      ->orWhereHas('project', function ($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
+                      ->orWhereHas('subCategory', function ($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
+                      ->orWhere('amount', 'like', "%{$search}%")
+                      ->orWhere('quantity', 'like', "%{$search}%");
+                });
+            }
+
+            $totalData = Purchase::count();
+            $totalFiltered = $query->count();
+
+            $allowedOrders = ['id', 'amount', 'purchase_date', 'quantity'];
+            $orderBy = in_array($order, $allowedOrders) ? $order : 'id';
+
+            $rows = $query->offset($start)
+                ->limit($limit)
+                ->orderBy($orderBy, $dir)
+                ->get();
+
+            $data = [];
+            $i = $start + 1;
+            foreach ($rows as $row) {
+                $nested = [];
+                $nested['id'] = $i;
+                $nested['vendor'] = $row->vendor->name ?? '';
+                $nested['project'] = $row->project->name ?? '';
+                $nested['sub_category'] = $row->subCategory->name ?? '';
+                $nested['amount'] = $row->amount;
+                $nested['quantity'] = $row->quantity;
+                $nested['purchase_date'] = $row->purchase_date;
+
+                $actions = '<div class="btn-group">';
+                $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
+                $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
+                if (auth()->check()) {
+                    $actions .= '<a href="' . route('purchase.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
+                    $actions .= '<form action="' . route('purchase.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
+                }
+                $actions .= '</div></div>';
+
+                $nested['action'] = $actions;
+                $data[] = $nested;
+                $i++;
+            }
+
+            $json_data = [
+                'draw' => intval($request->input('draw')),
+                'recordsTotal' => intval($totalData),
+                'recordsFiltered' => intval($totalFiltered),
+                'data' => $data,
+            ];
+
+            return response()->json($json_data);
+        } catch (\Exception $e) {
+            \Log::error('Purchase list error: ' . $e->getMessage());
+            return response()->json(['error' => 'Server error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }

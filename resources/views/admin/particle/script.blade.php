@@ -287,31 +287,117 @@ $(document).ready(function () {
     }
     load_expense();
 
-    // Purchases table loader (client-side)
+    // Payment table loader (server-side)
+    function load_payment() {
+        if (!$('#PaymentsTable').length) return;
+        $('#PaymentsTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("payment.list") }}',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'vendor' },
+                { data: 'project' },
+                { data: 'amount' },
+                { data: 'payment_date' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_payment();
+
+    // Purchases table loader (server-side)
     function load_purchases() {
         if (!$('#PurchasesTable').length) return;
         $('#PurchasesTable').DataTable({
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
-            autoWidth: false, responsive: true, processing: false, serverSide: false,
-            order: [[0, 'asc']],
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("purchase.list") }}',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'vendor' },
+                { data: 'project' },
+                { data: 'sub_category' },
+                { data: 'amount' },
+                { data: 'quantity' },
+                { data: 'purchase_date' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
             drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
         });
     }
     load_purchases();
 
-    // Payments table loader (client-side)
+    // Payments Received table loader (server-side)
     function load_payments() {
-        if (!$('#PaymentsTable').length) return;
-        $('#PaymentsTable').DataTable({
+        if (!$('#PaymentsReceiveTable').length) return;
+        $('#PaymentsReceiveTable').DataTable({
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
-            autoWidth: false, responsive: true, processing: false, serverSide: false,
-            order: [[0, 'asc']],
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("payment-receive.list") }}',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'payment_type' },
+                { data: 'customer' },
+                { data: 'project' },
+                { data: 'amount' },
+                { data: 'payment_date' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
             drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
         });
     }
     load_payments();
+
+    // Invoices table loader (server-side)
+    function load_invoices() {
+        if (!$('#InvoicesTable').length) return;
+        $('#InvoicesTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("invoice.list") }}',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'customer' },
+                { data: 'project' },
+                { data: 'category' },
+                { data: 'amount' },
+                { data: 'invoice_date' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+        });
+    }
+    load_invoices();
 
     // Category table
    function load_category() {

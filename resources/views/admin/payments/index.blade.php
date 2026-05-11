@@ -5,7 +5,7 @@
 <div class="content-header">
   <div class="container-fluid">
     <div class="row mt-3">
-      <h1><i class="mr-2 text-teal"></i>Payments</h1>
+      <h1><i class="mr-2 text-teal"></i>Purchases</h1>
     </div>
   </div>
 </div>
@@ -41,21 +41,7 @@
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
-            @foreach($payments as $p)
-              <tr>
-                <td>{{ $p->id }}</td>
-                <td>{{ $p->vendor->name ?? '-' }}</td>
-                <td>{{ $p->project->name ?? '-' }}</td>
-                <td>{{ number_format($p->amount,2) }}</td>
-                <td>{{ $p->payment_date }}</td>
-                <td>
-                  <a href="{{ route('payment.edit', $p->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                  <form method="POST" action="{{ route('payment.destroy', $p->id) }}" style="display:inline">@csrf @method('DELETE')<button class="btn btn-sm btn-danger">Delete</button></form>
-                </td>
-              </tr>
-            @endforeach
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
 
