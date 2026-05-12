@@ -117,7 +117,7 @@
           <i class="nav-icon fas fa-cog"></i>
           <p>
             Settings
-            <i class="fas fa-angle-left right mr-4"></i>
+            <i class="fas fa-angle-down right mr-4"></i>
           </p>
         </a>
         <ul class="nav nav-treeview">
