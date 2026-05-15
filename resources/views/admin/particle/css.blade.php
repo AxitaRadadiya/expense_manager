@@ -50,4 +50,14 @@
       pointer-events: none;
       font-size: 12px;
     }
+
+    .main-header {
+      position: sticky;
+      top: 0;
+      z-index: 1030;
+    }
+
+    .content-wrapper {
+      padding-top: 8px;
+    }
   </style>

@@ -52,7 +52,7 @@
       @if($authUser && ($authUser->can('invoice-view') || $authUser->can('payment_receive-view')))
       <li class="nav-item">
         <a href="{{ route('invoice.index') }}"
-          class="nav-link {{ Request::routeIs('invoice.*') ? 'active' : '' }}">
+          class="nav-link {{ Request::routeIs('invoice.*') || Request::routeIs('payment-receive.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-dollar-sign"></i>
           <p>Sales</p>
         </a>
@@ -82,7 +82,7 @@
       @if($authUser && ($authUser->can('purchase-view') || $authUser->can('payment-view')))
       <li class="nav-item">
         <a href="{{ route('purchase.index') }}"
-          class="nav-link {{ Request::routeIs('purchase.*') ? 'active' : '' }}">
+          class="nav-link {{ Request::routeIs('purchase.*') || Request::routeIs('payment.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-shopping-cart"></i>
           <p>Purchase</p>
         </a>
@@ -112,8 +112,8 @@
       
 
       @if($authUser && $authUser->can('role-view'))
-      <li class="nav-item {{ Request::routeIs('roles.*') ? 'menu-open' : '' }}">
-        <a href="#" class="nav-link {{ Request::routeIs('roles.*') ? 'active' : '' }}">
+      <li class="nav-item has-treeview {{ Request::routeIs('roles.*') || Request::routeIs('chart.*') || Request::routeIs('projects.*') || Request::routeIs('item.*') ? 'menu-open' : '' }}">
+        <a href="#" class="nav-link {{ Request::routeIs('roles.*') || Request::routeIs('chart.*') || Request::routeIs('projects.*') || Request::routeIs('item.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-cog"></i>
           <p>
             Settings
