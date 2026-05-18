@@ -29,7 +29,7 @@
     </div>
 
     <div class="card-body">
-      <form action="{{ route('item-return.store') }}" method="POST">
+      <form class="prevent-multiple-submit" action="{{ route('item-return.store') }}" method="POST">
         @csrf
 
         <div class="form-row">
@@ -71,7 +71,7 @@
         </div>
 
         <div class="card-footer p-0 mt-3">
-          <button type="submit" class="btn-submit"><i class="fas fa-save mr-1"></i>Create Return</button>
+          <button type="submit" class="btn-submit saveBtn"><i class="fas fa-save mr-1"></i>Create Return</button>
           <a href="{{ route('item-return.index') }}" class="btn-cancel ml-2"><i class="fas fa-times mr-1"></i>Cancel</a>
         </div>
       </form>

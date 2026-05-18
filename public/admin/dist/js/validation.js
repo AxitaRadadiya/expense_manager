@@ -36,7 +36,9 @@ function Validation(formId) {
         if (!mobile) return true;
         var v = mobile.value.trim();
         if (!v) { setError(mobile, 'Mobile is required'); return false; }
-        if (!mobilePattern.test(v)) { setError(mobile, 'Enter 10 digits'); return false; }
+        //if (!mobilePattern.test(v)) { setError(mobile, 'Enter 10 digits'); return false; }
+                if (!mobilePattern.test(v)) { setError(mobile, ''); return false; }
+
         clearError(mobile);
         return true;
     }
@@ -45,7 +47,10 @@ function Validation(formId) {
         if (!email) return true;
         var v = email.value.trim();
         if (!v) { setError(email, 'Email is required'); return false; }
-        if (!emailPattern.test(v)) { setError(email, 'Invalid email'); return false; }
+        
+        //if (!emailPattern.test(v)) { setError(email, 'Invalid email'); return false; }
+        if (!emailPattern.test(v)) { setError(email, ''); return false; }
+
         clearError(email);
         return true;
     }

@@ -28,7 +28,7 @@
                 <a href="{{ route('payment-receive.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
             </div>
         </div>
-        <form action="{{ route('payment-receive.store') }}" method="POST">
+        <form class="prevent-multiple-submit" action="{{ route('payment-receive.store') }}" method="POST">
             @csrf
             <div class="card-body">
                 <div class="row">
@@ -88,7 +88,7 @@
                 </div>
             </div>
             <div class="card-footer">
-                <button type="submit" class="btn-submit"><i class="fas fa-save mr-1"></i>Save Payment</button>
+                <button type="submit" class="btn-submit saveBtn"><i class="fas fa-save mr-1"></i>Save Payment</button>
                 <a href="{{ route('payment-receive.index') }}" class="btn-cancel ml-2"><i class="fas fa-times mr-1"></i>Cancel</a>
             </div>
         </form>

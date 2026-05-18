@@ -442,10 +442,23 @@ $(document).ready(function () {
 
         // SubCategory table loader
         function load_subcategory() {
-            if (!$('#SubCategoryTable').length) return;
+ if ($.fn.DataTable.isDataTable('#SubCategoryTable')) {
+        $('#SubCategoryTable').DataTable().destroy();
+    }
             $('#SubCategoryTable').DataTable({
-                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
-                autoWidth: false, responsive: true, processing: true, serverSide: true,
+
+                paging: true, 
+                lengthChange: true, 
+                searching: true,
+                 ordering: true,
+                order: [[0, 'desc']],
+ 
+                 info: true,
+                autoWidth: false, 
+                responsive: true,      
+                processing: true, 
+                serverSide: true,
+
                 ajax: { url: '{{ route("sub-category.list") }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}' } },
                 columns: [ { data: 'id' }, { data: 'name' }, { data: 'category' }, { data: 'action', orderable: false, searchable: false } ],
                 aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
@@ -480,6 +493,18 @@ $(document).ready(function () {
             form.find('input[name="_method"]').remove();
             form[0].reset();
             $('#subcategory_id').val('');
+        });
+
+        // Proper submit button handler for subCategoryForm
+        $('#subCategoryForm').on('submit', function (e) {
+            var btn = $(this).find('button[type="submit"]');
+            // Prevent double submit
+            if (btn.prop('disabled')) {
+                e.preventDefault();
+                return false;
+            }
+            btn.prop('disabled', true).data('original-text', btn.text()).text('Saving...');
+         
         });
 
         // Modal handlers
@@ -585,18 +610,67 @@ $(document).ready(function () {
         $('#ItemModal').on('hidden.bs.modal', function () { $('#itemForm')[0].reset(); $('#itemForm').find('input[name="_method"]').remove(); $('#item_id').val(''); $('.item-error').text(''); $('input').removeClass('is-invalid'); });
 
         // Save the Item (client validation)
-        $(document).on('click', '#saveItem', function (e) {
-            e.preventDefault();
-            let itemName = $('#item_name').val();
-            $('.item-error').text(''); $('input').removeClass('is-invalid');
-            let errors = {};
-            if (!itemName) errors.itemName = 'Item Name is required.';
-            if (Object.keys(errors).length > 0) {
-                if (errors.itemName) { $('#item_name').addClass('is-invalid'); $('.item-name-error').text(errors.itemName); }
-                return;
-            }
-            $('#itemForm').submit();
-        });
+        $(document).on(
+    'click',
+    '#saveItem',
+    function (e) {
+
+        e.preventDefault();
+
+        let btn = $(this);
+
+        let itemName =
+            $('#item_name')
+                .val()
+                .trim();
+
+        // reset errors
+        $('.item-error')
+            .text('');
+
+        $('#item_name')
+            .removeClass(
+                'is-invalid'
+            );
+
+        // validation
+        if (!itemName) {
+
+            $('#item_name')
+                .addClass(
+                    'is-invalid'
+                );
+
+            $('.item-name-error')
+                .text(
+                    'Item Name is required.'
+                );
+
+            return;
+        }
+
+        // stop multiple click
+        if (
+            btn.prop('disabled')
+        ) {
+            return;
+        }
+
+        // disable button
+        btn.prop(
+            'disabled',
+            true
+        );
+
+        btn.html(
+            '<i class="fas fa-spinner fa-spin mr-1"></i>Saving...'
+        );
+
+        // submit form
+        $('#itemForm')
+            .submit();
+    }
+);
 
         // Item Expense table loader
         function load_item_expense() {
@@ -807,6 +881,30 @@ $(document).ready(function () {
     }
     load_credit();
 
+
+});
+$(document).ready(function () {
+
+    // Prevent multiple submit for all forms
+    $('.prevent-multiple-submit').on('submit', function () {
+
+        var form = $(this);
+        var btn = form.find('.saveBtn');
+
+        // Stop if already disabled
+        if (btn.prop('disabled')) {
+            return false;
+        }
+
+        // Disable button
+        btn.prop('disabled', true);
+
+        // Change button text
+        btn.html(
+            '<i class="fas fa-spinner fa-spin mr-1"></i>Saving...'
+        );
+
+    });
 
 });
 </script>

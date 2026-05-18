@@ -27,7 +27,7 @@
                 <a href="{{ route('invoice.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
             </div>
         </div>
-        <form action="{{ route('invoice.store') }}" method="POST">
+        <form class="prevent-multiple-submit" action="{{ route('invoice.store') }}" method="POST">
             @csrf
             <div class="card-body">
                 <div class="row">
@@ -97,7 +97,7 @@
                 </div>
             </div>
             <div class="card-footer">
-                <button type="submit" class="btn-submit"><i class="fas fa-file-invoice mr-1"></i>Save Invoice</button>
+                <button type="submit" class="btn-submit saveBtn"><i class="fas fa-file-invoice mr-1"></i>Save Invoice</button>
                 <a href="{{ route('invoice.index') }}" class="btn-cancel ml-2"><i class="fas fa-times mr-1"></i>Cancel</a>
             </div>
         </form>

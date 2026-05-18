@@ -58,7 +58,7 @@
 
       <div class="modal-body">
 
-        <form action="{{ route('item.store') }}" method="POST" id="itemForm">
+        <form class="prevent-multiple-submit" action="{{ route('item.store') }}" method="POST" id="itemForm">
           @csrf
 
           <input type="hidden" name="item_id" id="item_id">
