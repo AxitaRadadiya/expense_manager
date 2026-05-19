@@ -89,10 +89,7 @@
         }
         return true;
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> mchanges
+    
     function validateEmail() {
         var value = emailInput.value.trim();
         if (!value) {

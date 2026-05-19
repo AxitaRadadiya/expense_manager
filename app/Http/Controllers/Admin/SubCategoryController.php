@@ -28,8 +28,12 @@ class SubCategoryController extends Controller
         return redirect()->back()->with('success', 'Sub category added successfully');
     }
 
-    public function destroy(SubCategory $subcategory)
+    public function destroy($id)
     {
+        $subcategory = SubCategory::find($id);
+        if (!$subcategory) {
+            return redirect()->back()->with('error', 'Sub category not found');
+        }
         $subcategory->delete();
         return redirect()->back()->with('success', 'Sub category deleted successfully');
     }

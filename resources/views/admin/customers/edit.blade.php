@@ -129,3 +129,10 @@
 })();
 </script>
 @endsection
+<!-- @section('pageScript')
+<script src="{{ asset('admin/dist/js/validation.js') }}"></script>
+
+<script>
+    bindValidation('customer-edit-form');
+</script>
+@endsection -->
