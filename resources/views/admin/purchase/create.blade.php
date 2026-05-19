@@ -21,7 +21,7 @@
   <div class="container-fluid-80">
     <div class="card card-outline card-primary shadow-sm">
       <div class="card-body">
-        <form action="{{ route('purchase.store') }}" method="POST">
+        <form class="prevent-multiple-submit" action="{{ route('purchase.store') }}" method="POST">
           @csrf
           <div class="row">
             <div class="col-md-6">
@@ -90,7 +90,7 @@
           </div>
 
           <div class="card-footer">
-            <button class="btn-submit" type="submit">Save Purchase</button>
+            <button class="btn-submit saveBtn" type="submit">Save Purchase</button>
             <a href="{{ route('purchase.index') }}" class="btn-cancel ml-2">Cancel</a>
           </div>
         </form>

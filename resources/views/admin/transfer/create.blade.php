@@ -31,10 +31,10 @@
         </div>
       </div>
       <div class="card-body">
-        <form action="{{ route('transfer.store') }}" method="POST">
+        <form class="prevent-multiple-submit" action="{{ route('transfer.store') }}" method="POST">
           @csrf
 
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
+          <p class="text-upperca se text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
             <i class="fas fa-wallet mr-1"></i> Transfer Info
           </p>
 
@@ -69,9 +69,8 @@
           </div>
       </div>
       <div class="card-footer">
-        <button class="btn-submit">
-          <i class="fas fa-save mr-1"></i>Create Transfer
-        </button>
+                <button type="submit" class="btn-submit saveBtn"><i class="fas fa-save mr-1"></i>Save Transfer</button>
+
         <a href="{{ route('transfer.index') }}" class="btn-cancel ml-2">
           <i class="fas fa-times mr-1"></i>Cancel
         </a>

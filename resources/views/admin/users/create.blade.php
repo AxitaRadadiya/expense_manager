@@ -33,7 +33,7 @@
       </div>
       <div class="card-body">
 
-        <form id="user-create-form" action="{{ route('users.store') }}" method="POST" autocomplete="off" novalidate>
+        <form id="user-create-form" action="{{ route('users.store') }}" method="POST" autocomplete="off">
           @csrf
 
           {{-- Basic Info --}}
@@ -44,19 +44,17 @@
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                <label class="font-weight-bold">Full Name <span class="text-danger">*</span></label>
-                <input id="name" name="name" type="text"
-                       class="form-control @error('name') is-invalid @enderror"
-                       value="{{ old('name') }}" placeholder="e.g. John Doe" required
-                       pattern="[A-Za-z ]+" title="Name can contain only letters and spaces.">
-                @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                  <label class="font-weight-bold">Name <span class="text-danger">*</span></label>
+                  <input id="name" name="name" type="text"
+                    class="form-control"
+                    value="{{ old('name') }}" required placeholder="e.g. John Doe" >
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label class="font-weight-bold">Email Address <span class="text-danger">*</span></label>
                 <div class="input-group">
-                  <input id="email" name="email" type="email"
+                  <input id="email" name="email" type="text"
                          class="form-control @error('email') is-invalid @enderror"
                          value="{{ old('email') }}" placeholder="user@example.com" required>
                 </div>
@@ -70,7 +68,7 @@
                   <input id="mobile" name="mobile" type="text"
                          class="form-control @error('mobile') is-invalid @enderror"
                          value="{{ old('mobile') }}" placeholder="9876543210" maxlength="10"
-                         inputmode="numeric" pattern="\d{10}" title="Mobile number must contain exactly 10 digits.">
+                         inputmode="numeric" title="Mobile number must contain exactly 10 digits.">
                 </div>
                 @error('mobile')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
               </div>
@@ -179,8 +177,8 @@
 
       </div>
       <div class="card-footer">
-        <button type="submit" class="btn-submit">
-          <i class="fas fa-user-check mr-1"></i>Create User
+        <button type="submit" class="btn-submit saveBtn">
+          <i class="fas fa-user-check mr-1"></i>Save User
         </button>
         <a href="{{ route('users.index') }}" class="btn-cancel ml-2">
           <i class="fas fa-times mr-1"></i>Cancel
@@ -205,6 +203,7 @@ function togglePw(inputId, iconId) {
   }
 }
 
+// ...existing code...
 (function () {
   var form = document.getElementById('user-create-form');
   if (!form) return;
@@ -220,102 +219,111 @@ function togglePw(inputId, iconId) {
   var mobilePattern = /^\d{10}$/;
   var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
-  function getFeedbackElement(input) {
-    var formGroup = input.closest('.form-group');
-    if (!formGroup) {
-      return null;
+
+
+function validateMobile() {
+        var value = mobileInput.value.trim();
+
+        if (!value) {
+            toastr.error(
+                'Mobile number is required.',
+                'Validation Error'
+            );
+            mobileInput.focus();
+            return false;
+        }
+
+        if (!mobilePattern.test(value)) {
+            toastr.error(
+                'Mobile number must be exactly 10 digits.',
+                'Validation Error'
+            );
+            mobileInput.focus();
+            return false;
+        }
+        return true;
+    }
+ 
+    function validateEmail() {
+        var value = emailInput.value.trim();
+        if (!value) {
+            toastr.error(
+                'Email is required.',
+                'Validation Error'
+            );
+            emailInput.focus();
+            return false;
+        }
+        if (!emailPattern.test(value)) {
+            toastr.error(
+                'Enter a valid email address.',
+                'Validation Error'
+            );
+            emailInput.focus();
+            return false;
+        }
+
+        return true;
     }
 
-    var feedback = formGroup.querySelector('[data-error-for="' + input.id + '"]');
-    if (feedback) {
-      return feedback;
-    }
-
-    feedback = document.createElement('div');
-    feedback.className = 'invalid-feedback d-block';
-    feedback.setAttribute('data-error-for', input.id);
-
-    var inputGroup = input.closest('.input-group');
-    if (inputGroup) {
-      inputGroup.insertAdjacentElement('afterend', feedback);
-    } else {
-      input.insertAdjacentElement('afterend', feedback);
-    }
-
-    return feedback;
-  }
-
-  function setError(input, message) {
-    input.classList.add('is-invalid');
-    var feedback = getFeedbackElement(input);
-    if (feedback) {
-      feedback.textContent = message;
-      feedback.style.display = 'block';
-    }
-  }
-
-  function clearError(input) {
-    input.classList.remove('is-invalid');
-    var feedback = getFeedbackElement(input);
-    if (feedback) {
-      feedback.textContent = '';
-      feedback.style.display = 'none';
-    }
-  }
-
+  var nameErrorShown = false;
   function validateName() {
     var value = nameInput.value.trim();
     if (!value) {
-      setError(nameInput, 'Name is required.');
+      if (!nameErrorShown) {
+        toastr.error('Name is required.', 'Validation Error');
+        nameInput.focus();
+        nameErrorShown = true;
+      }
       return false;
     }
-    if (!namePattern.test(value)) {
-      setError(nameInput, 'Name can contain only letters and spaces.');
-      return false;
-    }
-    clearError(nameInput);
+    nameErrorShown = false;
     return true;
   }
 
+  var mobileErrorShown = false;
   function validateMobile() {
     var value = mobileInput.value.trim();
     if (!value) {
-      clearError(mobileInput);
-      return true;
-    }
-    if (!mobilePattern.test(value)) {
-      setError(mobileInput, 'Mobile number must be exactly 10 digits.');
+      if (!mobileErrorShown) {
+        toastr.error('Mobile number is required.', 'Validation Error');
+        mobileInput.focus();
+        mobileErrorShown = true;
+      }
       return false;
     }
-    clearError(mobileInput);
+    if (!mobilePattern.test(value)) {
+      if (!mobileErrorShown) {
+        toastr.error('Mobile number must be exactly 10 digits.', 'Validation Error');
+        mobileInput.focus();
+        mobileErrorShown = true;
+      }
+      return false;
+    }
+    mobileErrorShown = false;
     return true;
   }
 
+  var emailErrorShown = false;
   function validateEmail() {
     var value = emailInput.value.trim();
     if (!value) {
-      setError(emailInput, 'Email is required.');
+      if (!emailErrorShown) {
+        toastr.error('Email is required.', 'Validation Error');
+        emailInput.focus();
+        emailErrorShown = true;
+      }
       return false;
     }
     if (!emailPattern.test(value)) {
-      setError(emailInput, 'Enter a valid email address.');
+      if (!emailErrorShown) {
+        toastr.error('Enter a valid email address.', 'Validation Error');
+        emailInput.focus();
+        emailErrorShown = true;
+      }
       return false;
     }
-    clearError(emailInput);
-    return true;
-  }
-
-  function validatePassword() {
-    var value = passwordInput.value;
-    if (!value) {
-      setError(passwordInput, 'Password is required.');
-      return false;
-    }
-    if (!passwordPattern.test(value)) {
-      setError(passwordInput, 'Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.');
-      return false;
-    }
-    clearError(passwordInput);
+    emailErrorShown = false;
     return true;
   }
 
@@ -325,12 +333,10 @@ function togglePw(inputId, iconId) {
       clearError(amountInput);
       return true;
     }
-
     if (isNaN(value) || Number(value) < 0) {
       setError(amountInput, 'Opening amount must be 0 or greater.');
       return false;
     }
-
     clearError(amountInput);
     return true;
   }
@@ -349,38 +355,66 @@ function togglePw(inputId, iconId) {
   }
 
   nameInput.addEventListener('input', function () {
-    this.value = this.value.replace(/[^A-Za-z ]/g, '');
-    validateName();
+    clearError(nameInput);
+    nameErrorShown = false;
   });
 
   mobileInput.addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 10);
-    validateMobile();
+    clearError(mobileInput);
+    mobileErrorShown = false;
   });
 
-  emailInput.addEventListener('input', validateEmail);
-  amountInput.addEventListener('input', validateAmount);
+  emailInput.addEventListener('input', function () {
+    clearError(emailInput);
+    emailErrorShown = false;
+  });
+  amountInput.addEventListener('input', function () {
+    clearError(amountInput);
+  });
   passwordInput.addEventListener('input', function () {
-    validatePassword();
+    clearError(passwordInput);
     if (confirmPasswordInput.value) {
-      validatePasswordConfirmation();
+      clearError(confirmPasswordInput);
     }
   });
-  confirmPasswordInput.addEventListener('input', validatePasswordConfirmation);
+  confirmPasswordInput.addEventListener('input', function () {
+    clearError(confirmPasswordInput);
+  });
 
   form.addEventListener('submit', function (event) {
-    var isValid = [
-      validateName(),
-      validateMobile(),
-      validateEmail(),
-      validateAmount(),
-      validatePassword(),
-      validatePasswordConfirmation()
-    ].every(Boolean);
-
-    if (!isValid) {
+    toastr.clear();
+    // Validate fields in order, show only the first error and stop
+    if (!validateName()) {
       event.preventDefault();
+      return;
     }
+    if (!validateMobile()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validateEmail()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validateAmount()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validatePassword()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validatePasswordConfirmation()) {
+      event.preventDefault();
+      return;
+    }
+      // If all pass, disable button and show spinner
+      var btn = form.querySelector('.saveBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Saving...';
+      }
   });
 })();
 </script>

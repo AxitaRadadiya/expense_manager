@@ -60,7 +60,7 @@
               <div class="form-group">
                 <label class="font-weight-bold">Email Address <span class="text-danger">*</span></label>
                 <div class="input-group">
-                  <input id="email" name="email" type="email"
+                  <input id="email" name="email" type="text"
                          class="form-control @error('email') is-invalid @enderror"
                          value="{{ old('email', $user->email) }}" required>
                   @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
@@ -74,7 +74,7 @@
                   <input id="mobile" name="mobile" type="text"
                          class="form-control @error('mobile') is-invalid @enderror"
                          value="{{ old('mobile', $user->mobile) }}" maxlength="10"
-                         inputmode="numeric" pattern="\d{10}" title="Mobile number must contain exactly 10 digits.">
+                         inputmode="numeric" title="Mobile number must contain exactly 10 digits.">
                   @error('mobile')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
               </div>
@@ -259,45 +259,94 @@ function togglePwSection() {
     getFeedbackElement(input).textContent = '';
   }
 
+
+  // Toastr options (same as create)
+  toastr.options = {
+    closeButton: true,
+    progressBar: true,
+    newestOnTop: true,
+    positionClass: 'toast-top-right',
+    timeOut: 5000,
+    extendedTimeOut: 1500
+  };
+
+  var nameErrorShown = false;
+  var mobileErrorShown = false;
+  var emailErrorShown = false;
+
   function validateName() {
     var value = nameInput.value.trim();
     if (!value) {
-      setError(nameInput, 'Name is required.');
+      if (!nameErrorShown) {
+        toastr.clear();
+        toastr.error('Name is required.', 'Validation Error');
+        nameInput.classList.add('is-invalid');
+        nameInput.focus();
+        nameErrorShown = true;
+      }
       return false;
     }
     if (!namePattern.test(value)) {
-      setError(nameInput, 'Name can contain only letters and spaces.');
+      if (!nameErrorShown) {
+        toastr.clear();
+        toastr.error('Name can contain only letters and spaces.', 'Validation Error');
+        nameInput.classList.add('is-invalid');
+        nameInput.focus();
+        nameErrorShown = true;
+      }
       return false;
     }
-    clearError(nameInput);
+    nameInput.classList.remove('is-invalid');
+    nameErrorShown = false;
     return true;
   }
 
   function validateMobile() {
     var value = mobileInput.value.trim();
     if (!value) {
-      clearError(mobileInput);
+      mobileInput.classList.remove('is-invalid');
+      mobileErrorShown = false;
       return true;
     }
     if (!mobilePattern.test(value)) {
-      setError(mobileInput, 'Mobile number must be exactly 10 digits.');
+      if (!mobileErrorShown) {
+        toastr.clear();
+        toastr.error('Mobile number must be exactly 10 digits.', 'Validation Error');
+        mobileInput.classList.add('is-invalid');
+        mobileInput.focus();
+        mobileErrorShown = true;
+      }
       return false;
     }
-    clearError(mobileInput);
+    mobileInput.classList.remove('is-invalid');
+    mobileErrorShown = false;
     return true;
   }
 
   function validateEmail() {
     var value = emailInput.value.trim();
     if (!value) {
-      setError(emailInput, 'Email is required.');
+      if (!emailErrorShown) {
+        toastr.clear();
+        toastr.error('Email is required.', 'Validation Error');
+        emailInput.classList.add('is-invalid');
+        emailInput.focus();
+        emailErrorShown = true;
+      }
       return false;
     }
     if (!emailPattern.test(value)) {
-      setError(emailInput, 'Enter a valid email address.');
+      if (!emailErrorShown) {
+        toastr.clear();
+        toastr.error('Enter a valid email address.', 'Validation Error');
+        emailInput.classList.add('is-invalid');
+        emailInput.focus();
+        emailErrorShown = true;
+      }
       return false;
     }
-    clearError(emailInput);
+    emailInput.classList.remove('is-invalid');
+    emailErrorShown = false;
     return true;
   }
 
@@ -350,15 +399,20 @@ function togglePwSection() {
 
   nameInput.addEventListener('input', function () {
     this.value = this.value.replace(/[^A-Za-z ]/g, '');
-    validateName();
+    nameInput.classList.remove('is-invalid');
+    nameErrorShown = false;
   });
 
   mobileInput.addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 10);
-    validateMobile();
+    mobileInput.classList.remove('is-invalid');
+    mobileErrorShown = false;
   });
 
-  emailInput.addEventListener('input', validateEmail);
+  emailInput.addEventListener('input', function () {
+    emailInput.classList.remove('is-invalid');
+    emailErrorShown = false;
+  });
   amountInput.addEventListener('input', validateAmount);
   passwordInput.addEventListener('input', function () {
     if (this.value && document.getElementById('pw-section').style.display === 'none') {
@@ -377,20 +431,44 @@ function togglePwSection() {
   });
 
   form.addEventListener('submit', function (event) {
-    var isValid = [
-      validateName(),
-      validateMobile(),
-      validateEmail(),
-      validateAmount(),
-      validatePassword(),
-      validatePasswordConfirmation()
-    ].every(Boolean);
-
-    if (!isValid) {
+    toastr.clear();
+    // Always reset error flags so toast shows every submit
+    nameErrorShown = false;
+    mobileErrorShown = false;
+    emailErrorShown = false;
+    // Validate fields in order, show only the first error and stop
+    if (!validateName()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validateMobile()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validateEmail()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validateAmount()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validatePassword()) {
+      event.preventDefault();
+      return;
+    }
+    if (!validatePasswordConfirmation()) {
       event.preventDefault();
       if ((passwordInput.value || confirmPasswordInput.value) && document.getElementById('pw-section').style.display === 'none') {
         togglePwSection();
       }
+      return;
+    }
+    // If all pass, disable button and show spinner
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Saving...';
     }
   });
 })();

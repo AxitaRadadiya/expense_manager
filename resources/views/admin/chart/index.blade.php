@@ -86,7 +86,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form action="{{ route('category.store') }}" method="POST" id="categoryForm" enctype="multipart/form-data">
+        <form class="prevent-multiple-submit" action="{{ route('category.store') }}" method="POST" id="categoryForm" enctype="multipart/form-data">
           @csrf
           <input type="hidden" name="category_id" id="category_id">
           <div class="form-group mb-0">
@@ -98,7 +98,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-cancel" data-dismiss="modal">Close</button>
-        <button type="button" class="btn-submit" id="saveCategory">Save</button>
+        <button type="button"class="btn-submit saveBtn" id="saveCategory">Save</button>
       </div>
     </div>
   </div>
@@ -108,7 +108,7 @@
 <div class="modal fade" id="addSubCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addSubCategoryModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="subCategoryForm" action="{{ route('sub-category.store') }}" method="POST">
+      <form class="prevent-multiple-submit" id="subCategoryForm" action="{{ route('sub-category.store') }}" method="POST">
         @csrf
         <input type="hidden" name="subcategory_id" id="subcategory_id" value="">
         <div class="modal-header">
@@ -132,7 +132,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn-submit">Save</button>
+          <button type="submit" class="btn-submit saveBtn">Save</button>
           <button type="button" class="btn-cancel" data-dismiss="modal">Cancel</button>
         </div>
       </form>

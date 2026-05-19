@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="card-body">
-        <form action="{{ route('expense.store') }}" method="POST" enctype="multipart/form-data">
+        <form class="prevent-multiple-submit"action="{{ route('expense.store') }}" method="POST" enctype="multipart/form-data">
           @csrf
           <input type="hidden" name="status" value="pending">
 
@@ -178,7 +178,7 @@
           </div>
       </div>
       <div class="card-footer">
-        <button type="submit" class="btn-submit">
+        <button type="submit" class="btn-submit saveBtn">
           <i class="fas fa-save mr-1"></i>Save Expense
         </button>
         <a href="{{ route('expense.index') }}" class="btn-cancel ml-2">
@@ -244,14 +244,6 @@
 
     if (amountInput) {
       amountInput.addEventListener('input', validateAmount);
-    }
-
-    if (form) {
-      form.addEventListener('submit', function (event) {
-        if (!validateAmount()) {
-          event.preventDefault();
-        }
-      });
     }
 
     document.getElementById('bill').addEventListener('change', function () {
