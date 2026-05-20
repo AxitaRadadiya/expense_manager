@@ -108,7 +108,7 @@
 <div class="modal fade" id="addSubCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addSubCategoryModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form class="prevent-multiple-submit" id="subCategoryForm" action="{{ route('sub-category.store') }}" method="POST">
+      <form id="subCategoryForm" action="{{ route('sub-category.store') }}" method="POST">
         @csrf
         <input type="hidden" name="subcategory_id" id="subcategory_id" value="">
         <div class="modal-header">
@@ -132,7 +132,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn-submit saveBtn">Save</button>
+          <button type="submit" class="btn-submit">Save</button>
           <button type="button" class="btn-cancel" data-dismiss="modal">Cancel</button>
         </div>
       </form>
