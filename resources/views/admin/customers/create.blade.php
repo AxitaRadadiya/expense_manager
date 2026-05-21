@@ -89,7 +89,6 @@
         }
         return true;
     }
-    
     function validateEmail() {
         var value = emailInput.value.trim();
         if (!value) {

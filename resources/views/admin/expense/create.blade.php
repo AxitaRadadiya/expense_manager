@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="card-body">
-        <form class="prevent-multiple-submit"action="{{ route('expense.store') }}" method="POST" enctype="multipart/form-data">
+        <form class="prevent-multiple-submit" id="expense-create" action="{{ route('expense.store') }}" method="POST" enctype="multipart/form-data">
           @csrf
           <input type="hidden" name="status" value="pending">
 
@@ -189,6 +189,30 @@
     </div>
   </div>
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const form = document.querySelector('.prevent-multiple-submit');
+    const btn  = document.querySelector('.saveBtn');
+
+    if (!form || !btn) return;
+
+    form.addEventListener('submit', function (e) {
+
+        // prevent double submit
+        if (btn.disabled) {
+            e.preventDefault();
+            return false;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-1"></i> Saving...';
+
+    });
+
+});
+</script>
 @endsection
 
 @push('scripts')
