@@ -89,10 +89,10 @@
       </li>
       @endif
 
-      @if($authUser && $authUser->can('item-expense-view'))
+      @if($authUser && ($authUser->can('item-expense-view') || $authUser->can('item-return-view')))
       <li class="nav-item">
         <a href="{{ route('item-expense.index') }}"
-          class="nav-link {{ Request::routeIs('item-expense.*') ? 'active' : '' }}">
+          class="nav-link {{ Request::routeIs('item-expense.*') || Request::routeIs('item-return.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-box"></i>
           <p>Item Management</p>
         </a>
