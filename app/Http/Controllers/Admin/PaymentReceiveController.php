@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\PaymentReceive;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\Invoice;
 
 class PaymentReceiveController extends Controller
 {
@@ -37,7 +38,54 @@ class PaymentReceiveController extends Controller
             'payment_date' => 'required|date|after_or_equal:today',
         ]);
 
-        PaymentReceive::create($validated);
+        $payment = PaymentReceive::create($validated);
+
+        // store allocations to invoices if provided
+        $invoicePayments = $request->input('invoice_payments', []);
+        $affectedInvoiceIds = [];
+        if (!empty($invoicePayments) && is_array($invoicePayments)) {
+            // remaining amount from the payment that can be allocated
+            $remainingPayment = (float) $payment->amount;
+            foreach ($invoicePayments as $invoiceId => $amt) {
+                if ($remainingPayment <= 0) { break; }
+                $amt = (float)$amt;
+                // server-side clamp: do not allow payment > remaining due
+                $invoice = Invoice::find((int)$invoiceId);
+                if ($invoice) {
+                    $alreadyPaid = (float) \DB::table('payment_receive_invoices')->where('invoice_id', $invoice->id)->sum('amount');
+                    $due = max(0, (float)$invoice->amount - $alreadyPaid);
+                    // clamp by due and remaining payment
+                    $alloc = min($amt, $due, $remainingPayment);
+                } else {
+                    $alloc = min($amt, $remainingPayment);
+                }
+                if ($alloc > 0) {
+                    \DB::table('payment_receive_invoices')->insert([
+                        'payment_receive_id' => $payment->id,
+                        'invoice_id' => (int)$invoiceId,
+                        'amount' => $alloc,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $affectedInvoiceIds[] = (int)$invoiceId;
+                    $remainingPayment -= $alloc;
+                }
+            }
+        }
+
+        // Update invoices' due_amount and status based on payments
+        $affectedInvoiceIds = array_unique($affectedInvoiceIds);
+        foreach ($affectedInvoiceIds as $invId) {
+            $totalPaid = (float) \DB::table('payment_receive_invoices')->where('invoice_id', $invId)->sum('amount');
+            $invoice = Invoice::find($invId);
+            if ($invoice) {
+                $due = max(0, (float)$invoice->amount - $totalPaid);
+                $invoice->due_amount = $due;
+                $invoice->status = $due <= 0 ? 'Paid' : 'Pending';
+                $invoice->save();
+            }
+        }
+
         return redirect()->route('payment-receive.index')->with('success','Payment recorded');
     }
 
@@ -48,7 +96,13 @@ class PaymentReceiveController extends Controller
         $customers = User::where('role_id', $customerRoleId)->orderBy('name')->get();
         $projects = Project::orderBy('name')->get();
 
-        return view('admin.payment_receive.edit', compact('payment','customers','projects'));
+        // fetch existing invoice allocations for this payment
+        $allocations = \DB::table('payment_receive_invoices')
+            ->where('payment_receive_id', $payment->id)
+            ->pluck('amount', 'invoice_id')
+            ->toArray();
+
+        return view('admin.payment_receive.edit', compact('payment','customers','projects','allocations'));
     }
 
     public function update(Request $request, $id): RedirectResponse

@@ -388,6 +388,7 @@ $(document).ready(function () {
                 { data: 'customer' },
                 { data: 'project' },
                 { data: 'category' },
+                /* { data: 'status' }, */
                 { data: 'amount' },
                 { data: 'invoice_date' },
                 { data: 'action', orderable: false, searchable: false }

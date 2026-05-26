@@ -38,16 +38,24 @@ class InvoiceController extends Controller
             'sub_category_id' => 'required|exists:sub_categories,id',
             'amount' => 'required|numeric|min:0.01',
             'note' => 'required|string',
+            'status' => 'nullable|in:Paid,Pending',
             'invoice_date' => 'required|date|after_or_equal:today',
         ]);
 
+        // ensure due_amount is initialized to the invoice amount
+        $validated['due_amount'] = $validated['amount'];
+        // default status to Pending when not provided by frontend
+        if (empty($validated['status'])) { $validated['status'] = 'Pending'; }
         Invoice::create($validated);
         return redirect()->route('invoice.index')->with('success','Invoice created');
     }
 
-    public function edit($id): View
+    public function edit($id): View|\Illuminate\Http\RedirectResponse
     {
         $invoice = Invoice::findOrFail($id);
+        if ($invoice->status === 'Paid') {
+            return redirect()->route('invoice.index')->with('error', 'Paid invoices cannot be edited');
+        }
         $customerRoleId = \App\Models\Role::where('name','customer')->value('id');
         $customers = User::where('role_id', $customerRoleId)->orderBy('name')->get();
         $projects = Project::orderBy('name')->get();
@@ -60,16 +68,29 @@ class InvoiceController extends Controller
     public function update(Request $request, $id): RedirectResponse
     {
         $invoice = Invoice::findOrFail($id);
+        if ($invoice->status === 'Paid') {
+            return redirect()->route('invoice.index')->with('error', 'Paid invoices cannot be edited');
+        }
         $validated = $request->validate([
             'customer_id' => 'required|exists:users,id',
             'project_id' => 'required|exists:projects,id',
             'sub_category_id' => 'required|exists:sub_categories,id',
             'amount' => 'required|numeric|min:0.01',
             'note' => 'required|string',
+            'status' => 'nullable|in:Paid,Pending',
             'invoice_date' => 'required|date|after_or_equal:today',
         ]);
-
+        // only update status if provided by the form (we hide it in frontend)
+        if (!array_key_exists('status', $validated)) {
+            unset($validated['status']);
+        }
         $invoice->update($validated);
+
+        // Recalculate due_amount after amount change using recorded payments
+        $paid = (float) \DB::table('payment_receive_invoices')->where('invoice_id', $invoice->id)->sum('amount');
+        $invoice->due_amount = max(0, (float)$invoice->amount - $paid);
+        $invoice->status = $invoice->due_amount <= 0 ? 'Paid' : 'Pending';
+        $invoice->save();
         return redirect()->route('invoice.index')->with('success','Invoice updated');
     }
 
@@ -89,7 +110,7 @@ class InvoiceController extends Controller
     public function list(Request $request)
     {
         try {
-            $columns = [0 => 'id', 1 => 'customer', 2 => 'project', 3 => 'category', 4 => 'amount', 5 => 'invoice_date', 6 => 'action'];
+            $columns = [0 => 'id', 1 => 'customer', 2 => 'project', 3 => 'category', 4 => 'amount', 5 => 'status', 6 => 'invoice_date', 7 => 'action'];
 
             $limit = intval($request->input('length', 10));
             $start = intval($request->input('start', 0));
@@ -109,11 +130,20 @@ class InvoiceController extends Controller
                 });
             }
 
+            // optional filters
+            if ($request->filled('customer_id')) {
+                $query->where('customer_id', $request->input('customer_id'));
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+
             $totalData = Invoice::count();
             $totalFiltered = $query->count();
 
             // Order handling: only allow ordering by certain DB columns
-            $allowedOrders = ['id','amount','invoice_date'];
+            $allowedOrders = ['id','amount','invoice_date','status'];
             $orderBy = in_array($order, $allowedOrders) ? $order : 'id';
 
             $rows = $query->offset($start)
@@ -121,16 +151,41 @@ class InvoiceController extends Controller
                 ->orderBy($orderBy, $dir)
                 ->get();
 
+            // compute paid amounts per invoice from payment_receive_invoices (only for returned rows)
+            $invoiceIds = $rows->pluck('id')->toArray();
+            $paidRows = [];
+            if (!empty($invoiceIds)) {
+                $paidRows = \DB::table('payment_receive_invoices')
+                    ->select('invoice_id', \DB::raw('IFNULL(SUM(amount),0) as paid'))
+                    ->whereIn('invoice_id', $invoiceIds)
+                    ->groupBy('invoice_id')
+                    ->get()
+                    ->keyBy('invoice_id')
+                    ->map(function($r){ return (float)$r->paid; })
+                    ->toArray();
+            }
+
             $data = [];
             $i = $start + 1;
-            foreach ($rows as $row) {
+                foreach ($rows as $row) {
                 $nested = [];
                 $nested['id'] = $i;
                 $nested['customer'] = $row->customer->name ?? '';
                 $nested['project'] = $row->project->name ?? '';
                 $nested['category'] = $row->subCategory->name ?? '';
                 $nested['amount'] = $row->amount;
+                $nested['status'] = $row->status;
                 $nested['invoice_date'] = $row->invoice_date;
+
+                $nested['project_id'] = $row->project_id;
+
+                // include actual invoice id for client-side use
+                $nested['invoice_id'] = $row->id;
+
+                // compute paid and due amounts
+                $paid = isset($paidRows[$row->id]) ? (float)$paidRows[$row->id] : 0.0;
+                $nested['paid_amount'] = $paid;
+                $nested['due_amount'] = max(0, (float)$row->amount - $paid);
 
                 $actions = '<div class="btn-group">';
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";

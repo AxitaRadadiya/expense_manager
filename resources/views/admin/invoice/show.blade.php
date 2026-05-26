@@ -43,6 +43,16 @@
                             <p class="mb-0 text-muted">
                                 Invoice #: {{ $invoice->id ?? 'N/A' }}
                             </p>
+                            {{--
+                            <p class="mb-0">
+                                <strong>Status:</strong>
+                                @if(!empty($invoice->status))
+                                    {{ $invoice->status }}
+                                @else
+                                    Pending
+                                @endif
+                            </p>
+                            --}}
                         </div>
 
                         <div class="text-right">
@@ -116,6 +126,10 @@
                                     <th class="text-right text-success">
                                         ₹ {{ number_format($invoice->amount ?? 0, 2) }}
                                     </th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2" class="text-right">Due Amount</th>
+                                    <th class="text-right text-danger">₹ {{ number_format($invoice->due_amount ?? 0, 2) }}</th>
                                 </tr>
                             </tfoot>
                         </table>

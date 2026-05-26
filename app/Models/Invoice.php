@@ -13,9 +13,13 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_id', 'project_id', 'sub_category_id', 'amount', 'note', 'invoice_date'
+        'customer_id', 'project_id', 'sub_category_id', 'amount', 'due_amount', 'note', 'invoice_date', 'status'
     ];
 
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'due_amount' => 'decimal:2',
+    ];
     public function customer() { return $this->belongsTo(User::class, 'customer_id'); }
     public function project() { return $this->belongsTo(Project::class, 'project_id'); }
     public function subCategory() { return $this->belongsTo(SubCategory::class, 'sub_category_id'); }

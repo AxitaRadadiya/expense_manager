@@ -78,6 +78,12 @@
                             @error('amount')<span class="text-danger small">{{ $message }}</span>@enderror
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Due Amount</label>
+                            <input type="text" class="form-control" value="{{ '₹ ' . number_format($invoice->due_amount ?? 0, 2) }}" disabled>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -94,6 +100,18 @@
                             @error('invoice_date')<span class="text-danger small">{{ $message }}</span>@enderror
                         </div>
                     </div>
+                    {{--
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Status <span class="text-danger">*</span></label>
+                            <select name="status" class="form-control">
+                                <option value="Pending" {{ old('status', $invoice->status)=='Pending' ? 'selected':'' }}>Pending</option>
+                                <option value="Paid" {{ old('status', $invoice->status)=='Paid' ? 'selected':'' }}>Paid</option>
+                            </select>
+                            @error('status')<span class="text-danger small">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                    --}}
                 </div>
             </div>
             <div class="card-footer">

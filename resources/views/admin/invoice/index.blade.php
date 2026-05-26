@@ -38,6 +38,7 @@
                             <th>Customer</th>
                             <th>Project</th>
                             <th>Category</th>
+                            {{-- <th>Status</th> --}} 
                             <th>Amount</th>
                             <th>Date</th>
                             <th>Actions</th>

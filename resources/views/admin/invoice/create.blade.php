@@ -94,6 +94,18 @@
                             @error('invoice_date')<span class="text-danger small">{{ $message }}</span>@enderror
                         </div>
                     </div>
+                    {{--
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Status <span class="text-danger">*</span></label>
+                            <select name="status" class="form-control">
+                                <option value="Pending" {{ old('status','Pending')=='Pending' ? 'selected':'' }}>Pending</option>
+                                <option value="Paid" {{ old('status')=='Paid' ? 'selected':'' }}>Paid</option>
+                            </select>
+                            @error('status')<span class="text-danger small">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+                    --}}
                 </div>
             </div>
             <div class="card-footer">
