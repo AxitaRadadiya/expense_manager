@@ -43,9 +43,10 @@ class PaymentReceiveController extends Controller
         // store allocations to invoices if provided
         $invoicePayments = $request->input('invoice_payments', []);
         $affectedInvoiceIds = [];
+
+        // remaining amount from the payment that can be allocated (leftover becomes extra_amount)
+        $remainingPayment = (float) $payment->amount;
         if (!empty($invoicePayments) && is_array($invoicePayments)) {
-            // remaining amount from the payment that can be allocated
-            $remainingPayment = (float) $payment->amount;
             foreach ($invoicePayments as $invoiceId => $amt) {
                 if ($remainingPayment <= 0) { break; }
                 $amt = (float)$amt;
@@ -83,6 +84,17 @@ class PaymentReceiveController extends Controller
                 $invoice->due_amount = $due;
                 $invoice->status = $due <= 0 ? 'Paid' : 'Pending';
                 $invoice->save();
+            }
+        }
+
+        // If there's remaining (unallocated) amount and a customer is selected,
+        // store it on the user's `extra_amount` field so it can be used later.
+        if ($remainingPayment > 0 && !empty($payment->customer_id)) {
+            $user = User::find($payment->customer_id);
+            if ($user) {
+                $current = (float) ($user->extra_amount ?? 0);
+                $user->extra_amount = $current + $remainingPayment;
+                $user->save();
             }
         }
 
