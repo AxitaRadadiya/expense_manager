@@ -97,6 +97,10 @@ class InvoiceController extends Controller
     public function destroy($id): RedirectResponse
     {
         $invoice = Invoice::findOrFail($id);
+        $status = strtolower(trim($invoice->status ?? ''));
+        if (in_array($status, ['paid', 'pais'])) {
+            return redirect()->route('invoice.index')->with('error', 'Paid invoices cannot be deleted');
+        }
         $invoice->delete();
         return redirect()->route('invoice.index')->with('success','Invoice deleted');
     }

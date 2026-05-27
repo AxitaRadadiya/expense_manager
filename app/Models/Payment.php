@@ -22,4 +22,14 @@ class Payment extends Model
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
+
+    public function allocations()
+    {
+        return $this->hasMany(PaymentAllocation::class, 'payment_id');
+    }
+
+    public function purchases()
+    {
+        return $this->hasManyThrough(Purchase::class, PaymentAllocation::class, 'payment_id', 'id', 'id', 'purchase_id');
+    }
 }

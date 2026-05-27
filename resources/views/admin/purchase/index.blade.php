@@ -20,10 +20,10 @@
 <div class="container-fluid">
   <div class="card card-outline card-primary shadow-sm">
     <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">All Purchases</h5>
         <div></div>
-        <a href="{{ route('purchase.create') }}" class="btn-create">
+        <a id="purchaseAddBtn" href="{{ route('purchase.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> Add Purchase
         </a>
       </div>
@@ -31,13 +31,12 @@
       <div class="table-responsive">
         <table id="PurchasesTable" class="table table-hover w-100">
           <thead class="thead">
-            <tr>
+                <tr>
               <th>Sr No.</th>
               <th>Vendor</th>
               <th>Project</th>
               <th>Sub Category</th>
-              <th>Amount</th>
-              <th>Qty</th>
+              <th>Total Amount</th>
               <th>Date</th>
               <th>Actions</th>
             </tr>

@@ -21,21 +21,69 @@ class PaymentController extends Controller
     {
         $vendorRoleId = \App\Models\Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $vendorRoleId)->orderBy('name')->get();
-        $projects = \App\Models\Project::orderBy('name')->get();
-
-        return view('admin.payments.create', compact('vendors','projects'));
+        // project selection removed from payments create form
+        return view('admin.payments.create', compact('vendors'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'vendor_id' => 'required|exists:users,id',
-            'project_id' => 'required|exists:projects,id',
+            'project_id' => 'nullable|exists:projects,id',
             'amount' => 'required|numeric|min:0.01',
             'payment_date' => 'required|date|after_or_equal:today',
         ]);
 
-        Payment::create($validated);
+        // server-side guard: sum of allocations must not exceed payment amount
+        $allocatedSum = 0;
+        if ($request->has('purchase_payments') && is_array($request->purchase_payments)) {
+            foreach ($request->purchase_payments as $v) { $allocatedSum += floatval($v); }
+        }
+        if ($allocatedSum > floatval($validated['amount'])) {
+            return redirect()->back()->withInput()->withErrors(['amount' => 'Allocated amount exceeds total payment amount']);
+        }
+
+        // If purchase allocations exist, derive the payment's project_id from the first allocated purchase
+        $derivedProjectId = $validated['project_id'] ?? null;
+        if (empty($derivedProjectId) && $request->has('purchase_payments') && is_array($request->purchase_payments)) {
+            foreach ($request->purchase_payments as $purchaseId => $payAmt) {
+                $amt = floatval($payAmt);
+                if ($amt <= 0) continue;
+                $purchase = \App\Models\Purchase::find($purchaseId);
+                if ($purchase && !empty($purchase->project_id)) {
+                    $derivedProjectId = $purchase->project_id;
+                    break;
+                }
+            }
+        }
+
+        $validated['project_id'] = $derivedProjectId;
+
+        $payment = Payment::create($validated);
+
+        // If allocations to specific purchases provided, create allocation records and apply them
+        if ($request->has('purchase_payments') && is_array($request->purchase_payments)) {
+            foreach ($request->purchase_payments as $purchaseId => $payAmt) {
+                $amt = floatval($payAmt);
+                if ($amt <= 0) continue;
+                $purchase = \App\Models\Purchase::find($purchaseId);
+                if (!$purchase) continue;
+
+                // create allocation record
+                \App\Models\PaymentAllocation::create([
+                    'payment_id' => $payment->id,
+                    'purchase_id' => $purchase->id,
+                    'amount' => $amt,
+                ]);
+
+                // update purchase due_amount/status
+                $currentDue = floatval($purchase->due_amount ?? $purchase->amount ?? 0);
+                $newDue = max(0, $currentDue - $amt);
+                $purchase->due_amount = $newDue;
+                $purchase->status = ($newDue <= 0) ? 'paid' : 'pending';
+                $purchase->save();
+            }
+        }
 
         return redirect()->route('payment.index')->with('success', 'Payment recorded');
     }
@@ -45,9 +93,8 @@ class PaymentController extends Controller
         $payment = Payment::findOrFail($id);
         $vendorRoleId = \App\Models\Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $vendorRoleId)->orderBy('name')->get();
-        $projects = \App\Models\Project::orderBy('name')->get();
-
-        return view('admin.payments.edit', compact('payment','vendors','projects'));
+        // project selection removed from payments edit form
+        return view('admin.payments.edit', compact('payment','vendors'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -55,12 +102,56 @@ class PaymentController extends Controller
         $payment = Payment::findOrFail($id);
         $validated = $request->validate([
             'vendor_id' => 'required|exists:users,id',
-            'project_id' => 'required|exists:projects,id',
+            'project_id' => 'nullable|exists:projects,id',
             'amount' => 'required|numeric|min:0.01',
             'payment_date' => 'required|date|after_or_equal:today',
         ]);
 
         $payment->update($validated);
+
+        // revert previous allocations (restore purchase due_amounts)
+        $existingAllocs = $payment->allocations()->get();
+        foreach ($existingAllocs as $alloc) {
+            $purchase = \App\Models\Purchase::find($alloc->purchase_id);
+            if ($purchase) {
+                $currentDue = floatval($purchase->due_amount ?? $purchase->amount ?? 0);
+                $purchase->due_amount = max(0, $currentDue + floatval($alloc->amount));
+                $purchase->status = ($purchase->due_amount <= 0) ? 'paid' : 'pending';
+                $purchase->save();
+            }
+        }
+        // delete old allocations
+        $payment->allocations()->delete();
+
+        // apply new allocations if provided
+        $allocatedSum = 0;
+        if ($request->has('purchase_payments') && is_array($request->purchase_payments)) {
+            foreach ($request->purchase_payments as $v) { $allocatedSum += floatval($v); }
+        }
+        if ($allocatedSum > floatval($validated['amount'])) {
+            return redirect()->back()->withInput()->withErrors(['amount' => 'Allocated amount exceeds total payment amount']);
+        }
+
+        if ($request->has('purchase_payments') && is_array($request->purchase_payments)) {
+            foreach ($request->purchase_payments as $purchaseId => $payAmt) {
+                $amt = floatval($payAmt);
+                if ($amt <= 0) continue;
+                $purchase = \App\Models\Purchase::find($purchaseId);
+                if (!$purchase) continue;
+
+                \App\Models\PaymentAllocation::create([
+                    'payment_id' => $payment->id,
+                    'purchase_id' => $purchase->id,
+                    'amount' => $amt,
+                ]);
+
+                $currentDue = floatval($purchase->due_amount ?? $purchase->amount ?? 0);
+                $newDue = max(0, $currentDue - $amt);
+                $purchase->due_amount = $newDue;
+                $purchase->status = ($newDue <= 0) ? 'paid' : 'pending';
+                $purchase->save();
+            }
+        }
 
         return redirect()->route('payment.index')->with('success', 'Payment updated');
     }

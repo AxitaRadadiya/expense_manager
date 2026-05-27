@@ -10,7 +10,7 @@ class Purchase extends Model
     use HasFactory;
 
     protected $fillable = [
-        'vendor_id', 'project_id', 'sub_category_id', 'amount', 'quantity', 'note', 'purchase_date'
+        'vendor_id', 'project_id', 'sub_category_id', 'amount', 'note', 'purchase_date', 'due_amount', 'status'
     ];
 
     public function vendor()
@@ -26,5 +26,15 @@ class Purchase extends Model
     public function subCategory()
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
+    }
+
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+
+    public function purchaseLabours()
+    {
+        return $this->hasMany(PurchaseLabour::class);
     }
 }
