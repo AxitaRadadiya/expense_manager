@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Address;
+use App\Models\BankDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -38,11 +40,41 @@ class CustomerController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
+            'website' => $request->website,
+            'pan_number' => $request->pan_number,
+            'gst_number' => $request->gst_number,
             'password' => Hash::make('12345678'),
             'role_id' => $roleId,
         ]);
 
         $user->assignRole((int) $roleId);
+
+        // Save address
+        $addressData = $request->only([
+            'billing_attention','billing_street','billing_city','billing_state','billing_pin_code','billing_country',
+            'same_as','shipping_attention','shipping_street','shipping_city','shipping_state','shipping_pin_code','shipping_country',
+        ]);
+        if ($request->filled('same_as')) {
+            $addressData['same_as'] = 1;
+            $addressData['shipping_attention'] = $addressData['billing_attention'] ?? null;
+            $addressData['shipping_street'] = $addressData['billing_street'] ?? null;
+            $addressData['shipping_city'] = $addressData['billing_city'] ?? null;
+            $addressData['shipping_state'] = $addressData['billing_state'] ?? null;
+            $addressData['shipping_pin_code'] = $addressData['billing_pin_code'] ?? null;
+            $addressData['shipping_country'] = $addressData['billing_country'] ?? null;
+        }
+
+        if (array_filter($addressData)) {
+            $addressData['user_id'] = $user->id;
+            Address::create($addressData);
+        }
+
+        // Save bank details
+        $bankData = $request->only(['bank_name','ifsc_code','branch_name','account_no']);
+        if (array_filter($bankData)) {
+            $bankData['user_id'] = $user->id;
+            BankDetail::create($bankData);
+        }
 
         return redirect()->route('customer.index')->with('success', 'Customer created successfully');
     }
@@ -63,6 +95,9 @@ class CustomerController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $customer->id,
             'mobile' => 'required|digits:10|unique:users,mobile,' . $customer->id,
+            'website' => 'nullable|string|max:255',
+            'pan_number' => 'nullable|string|max:255',
+            'gst_number' => 'nullable|string|max:255',
         ]);
 
         $roleId = Role::where('name', 'customer')->value('id');
@@ -71,9 +106,49 @@ class CustomerController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
+            'website' => $request->website,
+            'pan_number' => $request->pan_number,
+            'gst_number' => $request->gst_number,
             'role_id' => $roleId,
         ]);
         $customer->assignRole((int) $roleId);
+
+        // Update or create address
+        $addressData = $request->only([
+            'billing_attention','billing_street','billing_city','billing_state','billing_pin_code','billing_country',
+            'same_as','shipping_attention','shipping_street','shipping_city','shipping_state','shipping_pin_code','shipping_country',
+        ]);
+        if ($request->filled('same_as')) {
+            $addressData['same_as'] = 1;
+            $addressData['shipping_attention'] = $addressData['billing_attention'] ?? null;
+            $addressData['shipping_street'] = $addressData['billing_street'] ?? null;
+            $addressData['shipping_city'] = $addressData['billing_city'] ?? null;
+            $addressData['shipping_state'] = $addressData['billing_state'] ?? null;
+            $addressData['shipping_pin_code'] = $addressData['billing_pin_code'] ?? null;
+            $addressData['shipping_country'] = $addressData['billing_country'] ?? null;
+        }
+
+        if (array_filter($addressData)) {
+            $address = $customer->address()->first();
+            if ($address) {
+                $address->update($addressData);
+            } else {
+                $addressData['user_id'] = $customer->id;
+                Address::create($addressData);
+            }
+        }
+
+        // Update or create bank details
+        $bankData = $request->only(['bank_name','ifsc_code','branch_name','account_no']);
+        if (array_filter($bankData)) {
+            $bank = $customer->bankDetail()->first();
+            if ($bank) {
+                $bank->update($bankData);
+            } else {
+                $bankData['user_id'] = $customer->id;
+                BankDetail::create($bankData);
+            }
+        }
 
         return redirect()->route('customer.index')->with('success', 'Customer updated successfully.');
     }

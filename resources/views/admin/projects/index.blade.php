@@ -30,6 +30,7 @@
                 <th>Project Name</th>
                 <th>Start Date</th>
                 <th>End Date</th>
+                <th>Customers</th>
                 <th>Assigned Users</th>
                 <th>Action</th>
               </tr>

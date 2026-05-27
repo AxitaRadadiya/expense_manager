@@ -268,7 +268,7 @@ $(document).ready(function () {
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
             ajax: { url: '{{ route('projects.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'projects.list' } },
-            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'users_count' }, { data: 'action' } ],
+            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'customers_count' }, { data: 'users_count' }, { data: 'action' } ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
         });
     }
