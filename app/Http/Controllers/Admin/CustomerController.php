@@ -23,11 +23,21 @@ class CustomerController extends Controller
 
     public function create()
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('customer-create')) {
+            abort(403);
+        }
+
         return view('admin.customers.create');
     }
     
     public function store(Request $request)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('customer-create')) {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users',
@@ -81,16 +91,31 @@ class CustomerController extends Controller
 
     public function show(User $customer)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('customer-view')) {
+            abort(403);
+        }
+
         return view('admin.customers.show', compact('customer'));
     }
 
     public function edit(User $customer)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('customer-edit')) {
+            abort(403);
+        }
+
         return view('admin.customers.edit', compact('customer'));
     }
 
     public function update(Request $request, User $customer)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('customer-edit')) {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $customer->id,
@@ -155,6 +180,11 @@ class CustomerController extends Controller
 
     public function destroy(User $customer)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('customer-delete')) {
+            abort(403);
+        }
+
         $customer->delete();
         return redirect()->route('customer.index')->with('success', 'Customer deleted successfully.');
     }
@@ -173,6 +203,10 @@ class CustomerController extends Controller
 
             $roleId = Role::where('name', 'customer')->value('id');
 
+            $auth = auth()->user();
+            $canView = $auth?->hasPermission('customer-view') ?? false;
+            $canEdit = $auth?->hasPermission('customer-edit') ?? false;
+            $canDelete = $auth?->hasPermission('customer-delete') ?? false;
             $query = User::where('role_id', $roleId);
             if (!empty($search)) {
                 $query->where(function ($q) use ($search) {
@@ -203,9 +237,13 @@ class CustomerController extends Controller
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
                 $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
 
-                if (auth()->check()) {
+                if ($canView) {
                     $actions .= '<a href="' . route('customer.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                }
+                if ($canEdit) {
                     $actions .= '<a href="' . route('customer.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
+                }
+                if ($canDelete) {
                     $actions .= '<form action="' . route('customer.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }
 

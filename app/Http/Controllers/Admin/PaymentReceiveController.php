@@ -21,6 +21,11 @@ class PaymentReceiveController extends Controller
 
     public function create(): View
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('sales-create')) {
+            abort(403);
+        }
+
         $customerRoleId = \App\Models\Role::where('name','customer')->value('id');
         $customers = User::where('role_id', $customerRoleId)->orderBy('name')->get();
         $projects = Project::orderBy('name')->get();
@@ -30,6 +35,11 @@ class PaymentReceiveController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('sales-create')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'payment_type' => 'required|in:cash,online,cheque',
             'customer_id' => 'nullable|exists:users,id',
@@ -91,6 +101,11 @@ class PaymentReceiveController extends Controller
 
     public function edit($id): View
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('sales-edit')) {
+            abort(403);
+        }
+
         $payment = PaymentReceive::findOrFail($id);
         $customerRoleId = \App\Models\Role::where('name','customer')->value('id');
         $customers = User::where('role_id', $customerRoleId)->orderBy('name')->get();
@@ -107,6 +122,11 @@ class PaymentReceiveController extends Controller
 
     public function update(Request $request, $id): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('sales-edit')) {
+            abort(403);
+        }
+
         $payment = PaymentReceive::findOrFail($id);
         $validated = $request->validate([
             'payment_type' => 'required|in:cash,online,cheque',
@@ -122,6 +142,11 @@ class PaymentReceiveController extends Controller
 
     public function destroy($id): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('sales-delete')) {
+            abort(403);
+        }
+
         $payment = PaymentReceive::findOrFail($id);
         $payment->delete();
         return redirect()->route('payment-receive.index')->with('success','Payment deleted');
@@ -181,9 +206,15 @@ class PaymentReceiveController extends Controller
                 $actions = '<div class="btn-group">';
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
                 $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
-                if (auth()->check()) {
-                    $actions .= '<a href="' . route('payment-receive.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                $auth = auth()->user();
+                $canEdit = $auth?->hasPermission('sales-edit') ?? false;
+                $canDelete = $auth?->hasPermission('sales-delete') ?? false;
+
+                $actions .= '<a href="' . route('payment-receive.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                if ($canEdit) {
                     $actions .= '<a href="' . route('payment-receive.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
+                }
+                if ($canDelete) {
                     $actions .= '<form action="' . route('payment-receive.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }
                 $actions .= '</div></div>';

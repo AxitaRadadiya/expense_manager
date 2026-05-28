@@ -24,11 +24,13 @@
                     Back
                 </a>
 
+                @if(auth()->check() && auth()->user()->hasPermission('purchase-edit'))
                 <a href="{{ route('payment.edit', $payment->id) }}"
                     class="btn-create ml-2">
                     <i class="fas fa-edit mr-1"></i>
                     Edit
                 </a>
+                @endif
             </div>
 
         </div>

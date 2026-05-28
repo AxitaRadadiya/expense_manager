@@ -25,9 +25,11 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="mb-0">All Invoices</h5>
                 <div></div>
+                @if(auth()->check() && auth()->user()->hasPermission('sales-create'))
                 <a href="{{ route('invoice.create') }}" class="btn-create">
                     <i class="fas fa-plus"></i> Add Invoice
                 </a>
+                @endif
             </div>
 
             <div class="table-responsive">

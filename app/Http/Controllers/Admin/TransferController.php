@@ -32,6 +32,9 @@ class TransferController extends Controller
     public function create()
     {
         $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('transfer-create')) {
+            abort(403);
+        }
         $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
         $usersQuery = User::whereNotIn('role_id', $excludedRoleIds)
                   ->orderBy('name');
@@ -64,6 +67,11 @@ class TransferController extends Controller
 
     public function store(Request $request)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('transfer-create')) {
+            abort(403);
+        }
+
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
             'start_date' => 'nullable|date',

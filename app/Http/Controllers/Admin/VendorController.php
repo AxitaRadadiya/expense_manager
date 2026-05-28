@@ -25,11 +25,21 @@ class VendorController extends Controller
 
     public function create()
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('vendor-create')) {
+            abort(403);
+        }
+
         return view('admin.vendors.create');
     }
     
     public function store(Request $request)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('vendor-create')) {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users',
@@ -94,16 +104,31 @@ class VendorController extends Controller
             ->orderByDesc('start_date')
             ->get();
 
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('vendor-view')) {
+            abort(403);
+        }
+
         return view('admin.vendors.show', compact('vendor', 'labourEntries', 'itemExpenses'));
     }
 
     public function edit(User $vendor)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('vendor-edit')) {
+            abort(403);
+        }
+
         return view('admin.vendors.edit', compact('vendor'));
     }
 
     public function update(Request $request, User $vendor)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('vendor-edit')) {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $vendor->id,
@@ -167,6 +192,11 @@ class VendorController extends Controller
 
     public function destroy(User $vendor)
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('vendor-delete')) {
+            abort(403);
+        }
+
         $vendor->delete();
         return redirect()->route('vendor.index')->with('success', 'Vendor deleted successfully.');
     }
@@ -184,6 +214,12 @@ class VendorController extends Controller
             $search = $request->input('search.value');
 
             $roleId = Role::where('name', 'vendor')->value('id');
+
+            $auth = auth()->user();
+            $canView = $auth?->hasPermission('vendor-view') ?? false;
+            $canEdit = $auth?->hasPermission('vendor-edit') ?? false;
+            $canDelete = $auth?->hasPermission('vendor-delete') ?? false;
+            $canCreate = $auth?->hasPermission('vendor-create') ?? false;
 
             $query = User::where('role_id', $roleId);
             if (!empty($search)) {
@@ -217,9 +253,13 @@ class VendorController extends Controller
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
                 $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
 
-                if (auth()->check()) {
+                if ($canView) {
                     $actions .= '<a href="' . route('vendor.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                }
+                if ($canEdit) {
                     $actions .= '<a href="' . route('vendor.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
+                }
+                if ($canDelete) {
                     $actions .= '<form action="' . route('vendor.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }
 

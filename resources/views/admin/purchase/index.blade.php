@@ -23,9 +23,11 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">All Purchases</h5>
         <div></div>
+        @if(auth()->check() && auth()->user()->hasPermission('purchase-create'))
         <a id="purchaseAddBtn" href="{{ route('purchase.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> Add Purchase
         </a>
+        @endif
       </div>
 
       <div class="table-responsive">

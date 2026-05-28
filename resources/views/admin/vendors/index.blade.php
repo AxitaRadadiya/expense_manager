@@ -10,13 +10,21 @@
     </div>
   </div>
 </div>
+  @php
+    $showVendor = auth()->check() && auth()->user()->hasPermission('vendor-view');
+    $showCustomer = auth()->check() && auth()->user()->hasPermission('customer-view');
+  @endphp
   <ul class="nav nav-pills mb-3">
+        @if($showVendor)
         <li class="nav-item mr-2">
           <a class="nav-link @if(request()->routeIs('vendor.*')) active @endif" href="{{ route('vendor.index') }}">Vendors</a>
         </li>
+        @endif
+        @if($showCustomer)
         <li class="nav-item">
           <a class="nav-link @if(request()->routeIs('customer.*')) active @endif" href="{{ route('customer.index') }}">Customers</a>
         </li>
+        @endif
       </ul>
 <div class="container-fluid">
   <div class="card card-outline card-primary shadow-sm">
@@ -24,9 +32,11 @@
       <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="mb-0">All Vendors</h5>
         <div></div>
+        @if(auth()->check() && auth()->user()->hasPermission('vendor-create'))
         <a href="{{ route('vendor.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> Add Vendor
         </a>
+        @endif
       </div>
 
       <div class="table-responsive">

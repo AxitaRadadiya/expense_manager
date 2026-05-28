@@ -26,9 +26,11 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="mb-0">All Payments Received</h5>
                 <div></div>
+                @if(auth()->check() && auth()->user()->hasPermission('sales-create'))
                 <a href="{{ route('payment-receive.create') }}" class="btn-create">
                     <i class="fas fa-plus"></i> Add Payment
                 </a>
+                @endif
             </div>
 
             <div class="table-responsive">
