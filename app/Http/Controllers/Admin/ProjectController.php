@@ -21,11 +21,16 @@ class ProjectController extends Controller
     public function create(): View
     {
         $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
-        return view('admin.projects.create', [
-            'users' => User::whereNotIn('role_id', $excludedRoleIds)
-                            ->orderBy('name')
-                            ->get(),
-        ]);
+
+        $users = User::whereNotIn('role_id', $excludedRoleIds)
+                        ->orderBy('name')
+                        ->get();
+
+        $customers = User::whereHas('role', function ($q) {
+            $q->where('name', 'customer');
+        })->orderBy('name')->get();
+
+        return view('admin.projects.create', compact('users', 'customers'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -39,6 +44,8 @@ class ProjectController extends Controller
             'note' => 'nullable|string',
             'user_ids' => 'nullable|array',
             'user_ids.*' => 'integer|exists:users,id',
+            'customer_ids' => 'nullable|array',
+            'customer_ids.*' => 'integer|exists:users,id',
         ]);
 
         $data['status'] = $data['status'] ?? 'pending';
@@ -49,9 +56,22 @@ class ProjectController extends Controller
             ->values()
             ->all();
 
-        $project = Project::create(collect($data)->except(['user_ids'])->all());
-        $project->users()->sync($userIds);
-        $this->syncPrimaryProjects($userIds);
+        $customerIds = collect($request->input('customer_ids', []))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $allUserIds = collect($userIds)
+            ->merge($customerIds)
+            ->unique()
+            ->values()
+            ->all();
+
+        $project = Project::create(collect($data)->except(['user_ids', 'customer_ids'])->all());
+        $project->users()->sync($allUserIds);
+        $this->syncPrimaryProjects($allUserIds);
 
         return redirect()->route('projects.index')->with('success', 'Project created.');
     }
@@ -67,12 +87,15 @@ class ProjectController extends Controller
         $project->load('users');
         $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
 
-        return view('admin.projects.edit', [
-            'project' => $project,
-            'users' => User::whereNotIn('role_id', $excludedRoleIds)
-                            ->orderBy('name')
-                            ->get(),
-        ]);
+        $users = User::whereNotIn('role_id', $excludedRoleIds)
+                        ->orderBy('name')
+                        ->get();
+
+        $customers = User::whereHas('role', function ($q) {
+            $q->where('name', 'customer');
+        })->orderBy('name')->get();
+
+        return view('admin.projects.edit', compact('project', 'users', 'customers'));
     }
 
     public function update(Request $request, Project $project): RedirectResponse
@@ -86,6 +109,8 @@ class ProjectController extends Controller
             'note' => 'nullable|string',
             'user_ids' => 'nullable|array',
             'user_ids.*' => 'integer|exists:users,id',
+            'customer_ids' => 'nullable|array',
+            'customer_ids.*' => 'integer|exists:users,id',
         ]);
 
         $data['status'] = $data['status'] ?? $project->status;
@@ -95,15 +120,29 @@ class ProjectController extends Controller
             ->unique()
             ->values()
             ->all();
-        $affectedUserIds = $project->users()->pluck('users.id')
+
+        $customerIds = collect($request->input('customer_ids', []))
+            ->filter()
             ->map(fn ($id) => (int) $id)
-            ->merge($userIds)
             ->unique()
             ->values()
             ->all();
 
-        $project->update(collect($data)->except(['user_ids'])->all());
-        $project->users()->sync($userIds);
+        $allUserIds = collect($userIds)
+            ->merge($customerIds)
+            ->unique()
+            ->values()
+            ->all();
+
+        $affectedUserIds = $project->users()->pluck('users.id')
+            ->map(fn ($id) => (int) $id)
+            ->merge($allUserIds)
+            ->unique()
+            ->values()
+            ->all();
+
+        $project->update(collect($data)->except(['user_ids', 'customer_ids'])->all());
+        $project->users()->sync($allUserIds);
         $this->syncPrimaryProjects($affectedUserIds);
 
         return redirect()->route('projects.index')->with('success', 'Project updated.');
@@ -128,8 +167,9 @@ class ProjectController extends Controller
             1 => 'name',
             2 => 'start_date',
             3 => 'end_date',
-            4 => 'users_count',
-            5 => 'action',
+            4 => 'customers_count',
+            5 => 'users_count',
+            6 => 'action',
         ];
 
         $totalData     = Project::count();
@@ -141,7 +181,18 @@ class ProjectController extends Controller
         $dir           = $request->input('order.0.dir', 'desc');
         $search        = $request->input('search.value');
 
-        $query = Project::withCount('users');
+        $query = Project::withCount([
+            'users as customers_count' => function ($q) {
+                $q->whereHas('role', function ($r) {
+                    $r->where('name', 'customer');
+                });
+            },
+            'users as users_count' => function ($q) {
+                $q->whereHas('role', function ($r) {
+                    $r->where('name', '<>', 'customer');
+                });
+            },
+        ]);
 
         if (!empty($search)) {
             $query->where('name', 'like', "%$search%");
@@ -162,7 +213,8 @@ class ProjectController extends Controller
                 $nestedData['name']       = $project->name;
                 $nestedData['start_date'] = $project->start_date ? $project->start_date->format('d-m-Y') : '';
                 $nestedData['end_date']   = $project->end_date ? $project->end_date->format('d-m-Y') : '';
-                $nestedData['users_count'] = (int) $project->users_count;
+                $nestedData['customers_count'] = (int) ($project->customers_count ?? 0);
+                $nestedData['users_count'] = (int) ($project->users_count ?? 0);
                 // $nestedData['status']     = ucfirst($project->status);
                 // $nestedData['amount']     = $project->amount ? number_format($project->amount, 2) : '';
 

@@ -59,7 +59,7 @@
       </li>
       @endif
 
-      @if($authUser && $authUser->can('credit-view') && ! $isSupervisor)
+      @if($authUser && $authUser->can('transfer-view') && ! $isSupervisor)
       <li class="nav-item">
         <a href="{{ route('transfer.index') }}"
           class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
@@ -89,7 +89,7 @@
       </li>
       @endif
 
-      @if($authUser && ($authUser->can('item-expense-view') || $authUser->can('item-return-view')))
+      <!-- @if($authUser && ($authUser->can('item-expense-view') || $authUser->can('item-return-view')))
       <li class="nav-item">
         <a href="{{ route('item-expense.index') }}"
           class="nav-link {{ Request::routeIs('item-expense.*') || Request::routeIs('item-return.*') ? 'active' : '' }}">
@@ -97,7 +97,7 @@
           <p>Item Management</p>
         </a>
       </li>
-      @endif
+      @endif -->
 
       @if($authUser && $authUser->hasRole('super-admin'))
       <li class="nav-item">
@@ -111,9 +111,9 @@
 
       
 
-      @if($authUser && $authUser->can('role-view'))
-      <li class="nav-item has-treeview {{ Request::routeIs('roles.*') || Request::routeIs('chart.*') || Request::routeIs('projects.*') || Request::routeIs('item.*') ? 'menu-open' : '' }}">
-        <a href="#" class="nav-link {{ Request::routeIs('roles.*') || Request::routeIs('chart.*') || Request::routeIs('projects.*') || Request::routeIs('item.*') ? 'active' : '' }}">
+      @if($authUser && $authUser->can('role-view') || $authUser->can('user-view') || $authUser->can('chart-view') || $authUser->can('project-view') || $authUser->can('item-view'))
+      <li class="nav-item has-treeview {{ Request::routeIs('roles.*') || Request::routeIs('users.*') || Request::routeIs('chart.*') || Request::routeIs('projects.*') || Request::routeIs('item.*') ? 'menu-open' : '' }}">
+        <a href="#" class="nav-link {{ Request::routeIs('roles.*') || Request::routeIs('users.*') || Request::routeIs('chart.*') || Request::routeIs('projects.*') || Request::routeIs('item.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-cog"></i>
           <p>
             Settings
@@ -121,13 +121,15 @@
           </p>
         </a>
         <ul class="nav nav-treeview">
+          @if($authUser && $authUser->can('role-view') || $authUser->can('user-view'))
           <li class="nav-item">
-            <a href="{{ route('roles.index') }}"
-              class="nav-link {{ Request::routeIs('roles.*') ? 'active' : '' }}">
+            <a href="{{ route('users.index') }}"
+              class="nav-link {{ Request::routeIs('roles.*') || Request::routeIs('users.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-user-shield"></i>
               <p>Users & Roles</p>
             </a>
           </li>
+          @endif
           @if($authUser && $authUser->hasRole('super-admin'))
           <li class="nav-item">
             <a href="{{ route('chart.index') }}"
@@ -146,7 +148,7 @@
             </a>
           </li>
           @endif
-          @if($authUser && $authUser->can('project-view'))
+          @if($authUser && $authUser->can('item-view'))
           <li class="nav-item">
             <a href="{{ route('item.index') }}"
               class="nav-link {{ Request::routeIs('item.*') ? 'active' : '' }}">

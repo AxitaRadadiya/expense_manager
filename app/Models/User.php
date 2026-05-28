@@ -101,7 +101,8 @@ class User extends Authenticatable
         'profile_image',
         'role_id', 'status', 'mobile', 'note',
         'project_id', 'amount',
-        'company_name', 'address',
+        'company_name',
+        'website', 'pan_number', 'gst_number',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -132,6 +133,16 @@ class User extends Authenticatable
     public function projects()
     {
         return $this->belongsToMany(Project::class, 'project_user', 'user_id', 'project_id');
+    }
+
+    public function address()
+    {
+        return $this->hasOne(Address::class, 'user_id');
+    }
+
+    public function bankDetail()
+    {
+        return $this->hasOne(BankDetail::class, 'user_id');
     }
 
     public function balanceHistories()

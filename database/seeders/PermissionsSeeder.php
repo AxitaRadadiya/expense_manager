@@ -38,6 +38,18 @@ class PermissionsSeeder extends Seeder
             'vendor-edit',
             'vendor-delete',
         ],
+        'Customer' => [
+            'customer-create',
+            'customer-view',
+            'customer-edit',
+            'customer-delete',
+        ],
+        'Role' => [
+            'role-create',
+            'role-view',
+            'role-edit',
+            'role-delete',
+        ],
         'Item' => [
             'item-create',
             'item-view',

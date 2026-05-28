@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Expense;
 use App\Models\ItemExpense;
+use App\Models\Address;
+use App\Models\BankDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -40,13 +42,41 @@ class VendorController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
+            'website' => $request->website,
             'company_name' => $request->company_name,
-            'address' => $request->address,
             'password' => Hash::make('12345678'),
             'role_id' => $roleId,
         ]);
 
         $user->assignRole((int) $roleId);
+
+        // Save bank details if provided
+        $bankData = $request->only(['bank_name','ifsc_code','branch_name','account_no']);
+        if (array_filter($bankData)) {
+            $bankData['user_id'] = $user->id;
+            BankDetail::create($bankData);
+        }
+
+        // Save address (billing/shipping)
+        $addressData = $request->only([
+            'billing_attention','billing_street','billing_city','billing_state','billing_pin_code','billing_country',
+            'same_as','shipping_attention','shipping_street','shipping_city','shipping_state','shipping_pin_code','shipping_country',
+        ]);
+
+        if ($request->filled('same_as')) {
+            $addressData['same_as'] = 1;
+            $addressData['shipping_attention'] = $addressData['billing_attention'] ?? null;
+            $addressData['shipping_street'] = $addressData['billing_street'] ?? null;
+            $addressData['shipping_city'] = $addressData['billing_city'] ?? null;
+            $addressData['shipping_state'] = $addressData['billing_state'] ?? null;
+            $addressData['shipping_pin_code'] = $addressData['billing_pin_code'] ?? null;
+            $addressData['shipping_country'] = $addressData['billing_country'] ?? null;
+        }
+
+        if (array_filter($addressData)) {
+            $addressData['user_id'] = $user->id;
+            Address::create($addressData);
+        }
 
         return redirect()->route('vendor.index')->with('success', 'Vendor created successfully');
     }
@@ -79,7 +109,7 @@ class VendorController extends Controller
             'email' => 'required|email|unique:users,email,' . $vendor->id,
             'mobile' => 'required|digits:10|unique:users,mobile,' . $vendor->id,
             'company_name' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
+            'website' => 'nullable|string|max:255',
         ]);
 
         $roleId = Role::where('name', 'vendor')->value('id');
@@ -88,11 +118,49 @@ class VendorController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
+            'website' => $request->website,
             'company_name' => $request->company_name,
-            'address' => $request->address,
             'role_id' => $roleId,
         ]);
         $vendor->assignRole((int) $roleId);
+
+        // Update or create bank details
+        $bankData = $request->only(['bank_name','ifsc_code','branch_name','account_no']);
+        if (array_filter($bankData)) {
+            $bank = $vendor->bankDetail()->first();
+            if ($bank) {
+                $bank->update($bankData);
+            } else {
+                $bankData['user_id'] = $vendor->id;
+                BankDetail::create($bankData);
+            }
+        }
+
+        // Update or create address
+        $addressData = $request->only([
+            'billing_attention','billing_street','billing_city','billing_state','billing_pin_code','billing_country',
+            'same_as','shipping_attention','shipping_street','shipping_city','shipping_state','shipping_pin_code','shipping_country',
+        ]);
+
+        if ($request->filled('same_as')) {
+            $addressData['same_as'] = 1;
+            $addressData['shipping_attention'] = $addressData['billing_attention'] ?? null;
+            $addressData['shipping_street'] = $addressData['billing_street'] ?? null;
+            $addressData['shipping_city'] = $addressData['billing_city'] ?? null;
+            $addressData['shipping_state'] = $addressData['billing_state'] ?? null;
+            $addressData['shipping_pin_code'] = $addressData['billing_pin_code'] ?? null;
+            $addressData['shipping_country'] = $addressData['billing_country'] ?? null;
+        }
+
+        if (array_filter($addressData)) {
+            $address = $vendor->address()->first();
+            if ($address) {
+                $address->update($addressData);
+            } else {
+                $addressData['user_id'] = $vendor->id;
+                Address::create($addressData);
+            }
+        }
 
         return redirect()->route('vendor.index')->with('success', 'Vendor updated successfully.');
     }

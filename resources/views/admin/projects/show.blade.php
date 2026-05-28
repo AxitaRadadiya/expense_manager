@@ -11,6 +11,13 @@ default => 'secondary',
 };
 @endphp
 
+@php
+  $customers = $project->users->filter(function($u){ return optional($u->role)->name === 'customer'; });
+  $assignedUsers = $project->users->filter(function($u){ return optional($u->role)->name !== 'customer'; });
+  $customersCount = $customers->count();
+  $assignedUsersCount = $assignedUsers->count();
+@endphp
+
 <div class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
@@ -69,14 +76,14 @@ default => 'secondary',
                   <div class="text-muted small mb-1">End Date</div>
                   <div class="font-weight-bold">{{ optional($project->end_date)->format('d-m-Y') ?? '-' }}</div>
                 </div>
-                <div class="col-md-6 mb-3">
+                <!-- <div class="col-md-6 mb-3">
                   <div class="text-muted small mb-1">Budget</div>
                   <div class="font-weight-bold text-success">Rs. {{ number_format((float) ($project->amount ?? 0), 2) }}</div>
-                </div>
-                <div class="col-md-6 mb-3">
+                </div> -->
+                <!-- <div class="col-md-6 mb-3">
                   <div class="text-muted small mb-1">Assigned Users</div>
-                  <div class="font-weight-bold">{{ $project->users->count() }}</div>
-                </div>
+                  <div class="font-weight-bold">{{ $assignedUsersCount }}</div>
+                </div> -->
                 <div class="col-md-12">
                   <div class="text-muted small mb-2">Project Note</div>
                   <div class="mb-0">{{ filled($project->note) ? $project->note : 'No note added for this project.' }}</div>
@@ -87,26 +94,51 @@ default => 'secondary',
 
           <div class="col-lg-4 mt-4 mt-lg-0">
             <div class="border rounded p-3 h-100 bg-light">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="h6 mb-0 font-weight-bold">Assigned User List</h3>
-                <span class="badge badge-info">{{ $project->users->count() }}</span>
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h3 class="h6 mb-0 font-weight-bold">Customers</h3>
+                  <span class="badge badge-info">{{ $customersCount }}</span>
+                </div>
+
+                @if($customers->isEmpty())
+                  <div class="text-muted">No customers assigned yet.</div>
+                @else
+                  @foreach($customers as $user)
+                    <div class="border rounded bg-white px-3 py-2 mb-2">
+                      <div class="font-weight-bold">{{ $user->name }}</div>
+                      <div class="small text-muted">{{ $user->email }}</div>
+                      <div class="small mt-1">
+                        <span>{{ optional($user->role)->name ?? 'No Role' }}</span>
+                        <span class="mx-1">|</span>
+                        <span>{{ $user->mobile ?? 'No Mobile' }}</span>
+                      </div>
+                    </div>
+                  @endforeach
+                @endif
               </div>
 
-              @if($project->users->isEmpty())
-              <div class="text-muted">No users assigned yet.</div>
-              @else
-              @foreach($project->users as $user)
-              <div class="border rounded bg-white px-3 py-2 mb-2">
-                <div class="font-weight-bold">{{ $user->name }}</div>
-                <div class="small text-muted">{{ $user->email }}</div>
-                <div class="small mt-1">
-                  <span>{{ optional($user->role)->name ?? 'No Role' }}</span>
-                  <span class="mx-1">|</span>
-                  <span>{{ $user->mobile ?? 'No Mobile' }}</span>
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h3 class="h6 mb-0 font-weight-bold">Assigned Users</h3>
+                  <span class="badge badge-info">{{ $assignedUsersCount }}</span>
                 </div>
+
+                @if($assignedUsers->isEmpty())
+                  <div class="text-muted">No users assigned yet.</div>
+                @else
+                  @foreach($assignedUsers as $user)
+                    <div class="border rounded bg-white px-3 py-2 mb-2">
+                      <div class="font-weight-bold">{{ $user->name }}</div>
+                      <div class="small text-muted">{{ $user->email }}</div>
+                      <div class="small mt-1">
+                        <span>{{ optional($user->role)->name ?? 'No Role' }}</span>
+                        <span class="mx-1">|</span>
+                        <span>{{ $user->mobile ?? 'No Mobile' }}</span>
+                      </div>
+                    </div>
+                  @endforeach
+                @endif
               </div>
-              @endforeach
-              @endif
             </div>
           </div>
         </div>

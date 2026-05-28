@@ -68,7 +68,7 @@
           </p>
 
           <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6">
               <div class="form-group">
                 <label class="font-weight-bold">Assigned Users</label>
                 <select id="user_ids" name="user_ids[]" class="form-control select2 project-user-select @error('user_ids') is-invalid @enderror @error('user_ids.*') is-invalid @enderror" multiple data-placeholder="Select one or more users">
@@ -80,6 +80,20 @@
                 <small class="text-muted d-block mt-1">Update which users belong to this project.</small>
                 @error('user_ids')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                 @error('user_ids.*')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="font-weight-bold">Selected Customers</label>
+                @php($selectedCustomerIds = old('customer_ids', $project->users->filter(function($u){ return optional($u->role)->name === 'customer'; })->pluck('id')->all()))
+                <select id="customer_ids" name="customer_ids[]" class="form-control select2 project-user-select @error('customer_ids') is-invalid @enderror @error('customer_ids.*') is-invalid @enderror" multiple data-placeholder="Select one or more customers">
+                  @foreach($customers as $c)
+                    <option value="{{ $c->id }}" {{ in_array($c->id, $selectedCustomerIds) ? 'selected' : '' }}>{{ $c->name }}</option>
+                  @endforeach
+                </select>
+                <small class="text-muted d-block mt-1">Update which customers belong to this project.</small>
+                @error('customer_ids')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                @error('customer_ids.*')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
               </div>
             </div>
             <div class="col-md-12">
