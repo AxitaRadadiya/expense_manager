@@ -9,4 +9,9 @@ class Item extends Model
 {
     use LogsActivity;
     protected $fillable = ['name'];
+
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
 }

@@ -332,7 +332,6 @@ $(document).ready(function () {
                 { data: 'project' },
                 { data: 'sub_category' },
                 { data: 'amount' },
-                { data: 'quantity' },
                 { data: 'purchase_date' },
                 { data: 'action', orderable: false, searchable: false }
             ],

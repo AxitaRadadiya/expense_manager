@@ -57,6 +57,11 @@
                         <div class="text-right">
                             <strong>Purchase Date</strong><br>
                             {{ $purchase->purchase_date }}
+                            
+                            <div class="mt-1">
+                                <strong>Due Amount:</strong>
+                                <div class="text-danger font-weight-bold">₹ {{ number_format($purchase->due_amount ?? 0,2) }}</div>
+                            </div>
                         </div>
 
                     </div>
@@ -108,61 +113,79 @@
                     <h5 class="font-weight-bold mb-3">
                         Purchase Summary
                     </h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th class="text-center">Qty</th>
+                                            <th class="text-center">Days</th>
+                                            <th class="text-right">Unit Amount</th>
+                                            <th class="text-right">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($purchase->purchaseItems as $pi)
+                                        <tr>
+                                            <td>{{ $pi->item->name ?? '-' }}</td>
+                                            <td class="text-center">{{ $pi->quantity }}</td>
+                                            <td class="text-center">
+                                                @if($pi->date_start && $pi->date_end)
+                                                    {{ \Carbon\Carbon::parse($pi->date_start)->diffInDays(\Carbon\Carbon::parse($pi->date_end)) + 1 }}
+                                                @else - @endif
+                                            </td>
+                                            <td class="text-right">₹ {{ number_format($pi->amount,2) }}</td>
+                                            <td class="text-right">₹ {{ number_format($pi->total_amount,2) }}</td>
+                                        </tr>
+                                        @empty
+                                        <tr><td colspan="5" class="text-center">No items</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-                    <div class="table-responsive mb-4">
-                        <table class="table table-bordered">
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Labour</th>
+                                            <th class="text-center">Numbers</th>
+                                            <th class="text-center">Days</th>
+                                            <th class="text-right">Unit Amount</th>
+                                            <th class="text-right">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($purchase->purchaseLabours as $pl)
+                                        <tr>
+                                            <td>{{ $pl->labour ?? '-' }}</td>
+                                            <td class="text-center">{{ $pl->numbers }}</td>
+                                            <td class="text-center">
+                                                    @if($pl->date_start && $pl->date_end)
+                                                        {{ \Carbon\Carbon::parse($pl->date_start)->diffInDays(\Carbon\Carbon::parse($pl->date_end)) + 1 }}
+                                                @else - @endif
+                                            </td>
+                                            <td class="text-right">₹ {{ number_format($pl->amount,2) }}</td>
+                                            <td class="text-right">₹ {{ number_format($pl->total_amount,2) }}</td>
+                                        </tr>
+                                        @empty
+                                        <tr><td colspan="5" class="text-center">No labours</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
 
-                            <thead class="bg-light">
-                                <tr>
-                                    <th>Vendor</th>
-                                    <th>Project</th>
-                                    <th>Sub Category</th>
-                                    <th class="text-center">
-                                        Quantity
-                                    </th>
-                                    <th class="text-right">
-                                        Amount
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        {{ $purchase->vendor->name ?? '-' }}
-                                    </td>
-
-                                    <td>
-                                        {{ $purchase->project->name ?? '-' }}
-                                    </td>
-
-                                    <td>
-                                        {{ $purchase->subCategory->name ?? '-' }}
-                                    </td>
-
-                                    <td class="text-center">
-                                        {{ $purchase->quantity }}
-                                    </td>
-
-                                    <td class="text-right text-success font-weight-bold">
-                                        ₹ {{ number_format($purchase->amount, 2) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-
-                            <tfoot>
-                                <tr>
-                                    <th colspan="4" class="text-right">
-                                        Total Amount
-                                    </th>
-
-                                    <th class="text-right text-success">
-                                        ₹ {{ number_format($purchase->amount, 2) }}
-                                    </th>
-                                </tr>
-                            </tfoot>
-
-                        </table>
+                    <div class="d-flex justify-content-end mb-4">
+                        <div class="text-right">
+                            <div class="mb-1"><strong>Grand Total</strong></div>
+                            <div class="text-success font-weight-bold" style="font-size:1.4rem">₹ {{ number_format($purchase->amount,2) }}</div>
+                        </div>
                     </div>
 
                     <!-- Note -->
