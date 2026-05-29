@@ -4,7 +4,7 @@
 @section('content')
 
 <div class="content-header">
-    <div class="container-fluid-80">
+    <div class="container-fluid-85">
         <div class="row mb-2">
             <div class="col-sm-6">
                 <h1 class="m-0"><i class="mr-2 text-teal"></i>Edit Payment</h1>
@@ -20,7 +20,7 @@
     </div>
 </div>
 
-<div class="container-fluid-80">
+<div class="container-fluid-85">
     <div class="card card-outline card-primary shadow-sm">
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-pen mr-2"></i>Edit Payment</h3>
@@ -34,7 +34,7 @@
             <input type="hidden" name="project_id" id="payment_project_id" value="">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>Payment Type <span class="text-danger">*</span></label>
                             <select name="payment_type" class="form-control select2" required>
@@ -46,10 +46,10 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
-                            <label>Customer (optional)</label>
-                            <select name="customer_id" class="form-control select2">
+                            <label>Customer <span class="text-danger">*</span></label>
+                            <select name="customer_id" class="form-control select2" required>
                                 <option value="">Select</option>
                                 @foreach($customers as $c)
                                 <option value="{{ $c->id }}" {{ old('customer_id', $payment->customer_id)==$c->id? 'selected':'' }}>{{ $c->name }}</option>
@@ -59,20 +59,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Project <span class="text-danger">*</span></label>
-                            <select name="project_id" class="form-control select2" required>
-                                <option value="">Select</option>
-                                @foreach($projects as $p)
-                                <option value="{{ $p->id }}" {{ old('project_id', $payment->project_id)==$p->id? 'selected':'' }}>{{ $p->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('project_id')<span class="text-danger small">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>Amount <span class="text-danger">*</span></label>
                             <input type="number" name="amount" step="0.01" class="form-control" value="{{ old('amount', $payment->amount) }}" required>
@@ -80,7 +67,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>Payment Date <span class="text-danger">*</span></label>
                             <input type="date" name="payment_date" class="form-control" min="{{ date('Y-m-d') }}" value="{{ old('payment_date', $payment->payment_date) }}" required>
@@ -90,7 +77,7 @@
                 </div>
                 <!-- Pending invoices list for selected customer -->
                 <div class="row mt-3" id="invoices-for-customer" style="display:none;">
-                    <div class="col-md-8">
+                    <div class="col-12">
                         <div class="card">
                             <div class="card-body p-3">
                                 <h6>Pending Invoices</h6>
@@ -113,8 +100,9 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4">
-                        <div class="card">
+                    <div class="col-12 mt-2">
+                        <div class="d-flex justify-content-end">
+                        <div class="card m-0">
                             <div class="card-body p-3">
                                 <h6>Payment Summary</h6>
                                 <div class="mb-2"><strong>Amount Received:</strong> <span id="summary-amount-received">₹ 0.00</span></div>
@@ -122,10 +110,11 @@
                                 <div class="mb-2"><strong>Amount in Excess:</strong> <span id="summary-amount-excess">₹ 0.00</span></div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
+            <div class="card-footer pt-0">
                 <button type="submit" class="btn-submit"><i class="fas fa-save mr-1"></i>Update Payment</button>
                 <a href="{{ route('payment-receive.index') }}" class="btn-cancel ml-2"><i class="fas fa-times mr-1"></i>Cancel</a>
             </div>

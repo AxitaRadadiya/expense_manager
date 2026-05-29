@@ -12,7 +12,7 @@
 
 <div class="pull-card">
   <div class="container-fluid" style="padding:0;">
-    <div class="filter-card mb-3">
+    <div class="filter-card mb-2">
       <div class="filter-card-head">
         <div class="filter-card-title">
           <i class="fas fa-filter"></i> Filters

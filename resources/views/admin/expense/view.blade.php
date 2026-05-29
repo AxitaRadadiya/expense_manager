@@ -47,25 +47,25 @@ $billExt = $expense->bill_path ? strtolower(pathinfo($expense->bill_path, PATHIN
       <div class="card-body">
         <div class="row">
 
-          <div class="col-lg-7 mb-4">
+          <div class="col-lg-7">
             <div class="border rounded h-100 p-3 bg-light">
               <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-4">
                   <small class="text-muted d-block mb-1">Project</small>
                   <div class="font-weight-bold">{{ $expense->project->name ?? '-' }}</div>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-4">
                   <small class="text-muted d-block mb-1">Expense Date</small>
                   <div class="font-weight-bold">{{ \Carbon\Carbon::parse($expense->expense_date)->format('d-m-Y') }}</div>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-4">
                   <small class="text-muted d-block mb-1">Amount</small>
                   <div class="font-weight-bold text-success">Rs. {{ number_format((float) $expense->amount, 2) }}</div>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-4">
                   <small class="text-muted d-block mb-1">Category</small>
                   <div class="font-weight-bold">{{ $expense->category ?: '-' }}</div>
                 </div>
@@ -92,22 +92,22 @@ $billExt = $expense->bill_path ? strtolower(pathinfo($expense->bill_path, PATHIN
                 </div>
                 @endif -->
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-4">
                   <small class="text-muted d-block mb-1">Payment Mode</small>
                   <div class="font-weight-bold">{{ $expense->payment_mode ? ucfirst($expense->payment_mode) : '-' }}</div>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-4">
                   <small class="text-muted d-block mb-1">Submitted By</small>
                   <div class="font-weight-bold">{{ $expense->user->name ?? '-' }}</div>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-4">
                   <small class="text-muted d-block mb-1">Created On</small>
                   <div class="font-weight-bold">{{ $expense->created_at ? $expense->created_at->format('d-m-Y h:i A') : '-' }}</div>
                 </div>
 
-                <div class="col-12 mb-3">
+                <div class="col-12 mb-2">
                   <small class="text-muted d-block mb-2">Description</small>
                   <div class="mb-0" style="min-height:60px;">{{ $expense->description ?: '-' }}</div>
                 </div>
@@ -120,7 +120,7 @@ $billExt = $expense->bill_path ? strtolower(pathinfo($expense->bill_path, PATHIN
             </div>
           </div>
 
-          <div class="col-lg-5 mb-4">
+          <div class="col-lg-5">
             <div class="card card-outline card-teal h-100 mb-3">
               <div class="card-header">
                 <h3 class="card-title"><i class="fas fa-file-alt mr-2"></i>Bill / Receipt</h3>

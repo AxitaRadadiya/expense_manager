@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid-80">
+  <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
         <h1 class="m-0"><i class="mr-2 text-success"></i>Credit Details</h1>
@@ -20,7 +20,7 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid-80">
+  <div class="container-fluid">
     <div class="card card-outline card-success shadow-sm">
       <div class="card-header">
         <h3 class="card-title"><i class="fas fa-hand-holding-usd mr-2"></i>Credit Summary</h3>

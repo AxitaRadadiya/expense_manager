@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid-80">
+  <div class="container-fluid-85">
     <div class="row mb-2">
         <div class="col-sm-6"><h1 class="m-0">Create Purchase</h1></div>
         <div class="col-sm-6">
@@ -18,7 +18,7 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid-80">
+  <div class="container-fluid-85">
     <div class="card card-outline card-primary shadow-sm">
       <div class="card-body">
         <form class="prevent-multiple-submit" action="{{ route('purchase.store') }}" method="POST">

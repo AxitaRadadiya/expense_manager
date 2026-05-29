@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="content-header">
-    <div class="container-fluid-80">
+    <div class="container-fluid-85">
         <div class="row mb-2">
             <div class="col-sm-6">
                 <h1 class="m-0"><i class="mr-2 text-teal"></i>Edit Invoice</h1>
@@ -19,7 +19,7 @@
     </div>
 </div>
 
-<div class="container-fluid-80">
+<div class="container-fluid-85">
     <div class="card card-outline card-primary shadow-sm">
         <div class="card-header">
             <h3 class="card-title"><i class="fas fa-pen mr-2"></i>Edit Invoice</h3>
@@ -71,14 +71,14 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>Amount <span class="text-danger">*</span></label>
                             <input type="number" step="0.01" name="amount" class="form-control" value="{{ old('amount', $invoice->amount) }}" required>
                             @error('amount')<span class="text-danger small">{{ $message }}</span>@enderror
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label>Due Amount</label>
                             <input type="text" class="form-control" value="{{ '₹ ' . number_format($invoice->due_amount ?? 0, 2) }}" disabled>

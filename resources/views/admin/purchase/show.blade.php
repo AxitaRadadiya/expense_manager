@@ -6,7 +6,7 @@
 
 <!-- Header -->
 <div class="content-header">
-    <div class="container-fluid">
+    <div class="container-fluid-85">
         <div class="row mt-3 align-items-center">
 
             <div class="col-md-6">
@@ -36,7 +36,7 @@
 
 <!-- Main Content -->
 <section class="content">
-    <div class="container-fluid">
+    <div class="container-fluid-85">
 
         <div class="justify-content-center">
             <div class="card card-outline card-primary shadow-sm">
@@ -72,7 +72,7 @@
                     <div class="row mb-4">
 
                         <div class="col-md-6">
-                            <h5 class="font-weight-bold mb-3">
+                            <h5 class="font-weight-bold">
                                 Vendor Details
                             </h5>
 
@@ -90,7 +90,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <h5 class="font-weight-bold mb-3">
+                            <h5 class="font-weight-bold">
                                 Product Details
                             </h5>
 
@@ -110,7 +110,7 @@
                     </div>
 
                     <!-- Amount Summary -->
-                    <h5 class="font-weight-bold mb-3">
+                    <h5 class="font-weight-bold">
                         Purchase Summary
                     </h5>
                     <div class="row mb-4">
@@ -190,7 +190,7 @@
 
                     <!-- Note -->
                     @if(!empty($purchase->note))
-                        <div class="mb-4">
+                        <div>
                             <label class="font-weight-bold">
                                 Note
                             </label>

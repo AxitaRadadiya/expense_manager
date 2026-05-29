@@ -19,7 +19,7 @@ default => 'secondary',
 @endphp
 
 <div class="content-header">
-  <div class="container-fluid">
+  <div class="container-fluid-85">
     <div class="row mb-2">
       <div class="col-sm-6">
         <h1 class="m-0">Project View</h1>
@@ -36,7 +36,7 @@ default => 'secondary',
 </div>
 
 <section class="content">
-  <div class="container-fluid">
+  <div class="container-fluid-85">
     <div class="card border-0 shadow-sm">
       <div class="card-body p-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
