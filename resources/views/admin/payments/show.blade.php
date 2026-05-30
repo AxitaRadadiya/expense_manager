@@ -25,7 +25,7 @@
                 </a>
 
                 <a href="{{ route('payment.edit', $payment->id) }}"
-                    class="btn-create ml-2">
+                    class="btn-submit ml-2">
                     <i class="fas fa-edit mr-1"></i>
                     Edit
                 </a>

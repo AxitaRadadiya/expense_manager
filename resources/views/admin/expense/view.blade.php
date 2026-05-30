@@ -33,14 +33,14 @@ $billExt = $expense->bill_path ? strtolower(pathinfo($expense->bill_path, PATHIN
           <i class="fas fa-receipt mr-2"></i>Expense Summary
         </h3>
         <div class="card-tools d-flex align-items-center" style="gap:.5rem;">
+          <a href="{{ route('expense.index') }}" class="btn-cancel">
+            <i class="fas fa-arrow-left mr-1"></i>Back
+          </a>
           @if(auth()->check() && method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin'))
           <a href="{{ route('expense.edit', $expense->id) }}" class="btn-submit">
             <i class="fas fa-edit mr-1"></i>Edit
           </a>
           @endif
-          <a href="{{ route('expense.index') }}" class="btn-cancel">
-            <i class="fas fa-arrow-left mr-1"></i>Back
-          </a>
         </div>
       </div>
 

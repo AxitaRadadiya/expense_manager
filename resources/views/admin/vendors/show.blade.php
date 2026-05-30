@@ -19,9 +19,9 @@
   </div>
 </div>
 
-<div class="card-tools text-right">
+<div class="card-tools text-right mr-3">
   <a href="{{ route('vendor.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
-  <a href="{{ route('vendor.edit', $vendor->id) }}" class="btn-create ml-2"><i class="fas fa-edit mr-1"></i>Edit</a>
+  <a href="{{ route('vendor.edit', $vendor->id) }}" class="btn-submit ml-2"><i class="fas fa-edit mr-1"></i>Edit</a>
 </div>
    
 
@@ -30,7 +30,7 @@
 
 <!-- Vendor Statement Panel -->
 <div class="container-fluid">
-  <div class="vendor-statement mx-auto my-4" style="max-width:980px; background:#fff; padding:28px; border-radius:4px; box-shadow:0 0 0.5rem rgba(0,0,0,0.03);">
+  <div class="vendor-statement mx-auto mt-3 mb-2" style="max-width:980px; background:#fff; padding:28px; border-radius:4px; box-shadow:0 0 0.5rem rgba(0,0,0,0.03);">
     <h3 class="text-center font-weight-bold mb-3">VENDOR STATEMENT</h3>
 
     <div class="row">

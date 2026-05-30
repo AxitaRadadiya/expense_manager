@@ -231,9 +231,9 @@
                 <textarea name="note" class="form-control" rows="3"></textarea>
               </div>
             </div>
-            <div class="col-md-12 mt-3 d-flex justify-content-end align-items-center">
-              <button type="button" id="reset-form" class="btn btn-outline-secondary mr-3"><i class="fa fa-sync-alt mr-1"></i> Reset</button>
-              <button class="btn btn-primary" type="submit"><i class="fa fa-save mr-1"></i> Save Order</button>
+            <div class="card-footer py-0">
+              <button class="btn-submit" type="submit"><i class="fa fa-save"></i> Save Order</button>
+              <button type="button" id="reset-form" class="btn-cancel ml-2"><i class="fa fa-sync-alt mr-1"></i> Reset</button>
             </div>
 
             <input type="hidden" id="purchase-amount" name="amount" value="0">
