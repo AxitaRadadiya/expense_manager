@@ -101,8 +101,8 @@ class User extends Authenticatable
         'profile_image',
         'role_id', 'status', 'mobile', 'note',
         'project_id', 'amount',
-        'company_name',
-        'website', 'pan_number', 'gst_number',
+        'company_name', 'address',
+        'extra_amount',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -115,6 +115,7 @@ class User extends Authenticatable
             'status'            => 'integer',
             'mobile'            => 'string',
             'amount'            => 'decimal:2',
+            'extra_amount'      => 'decimal:2',
         ];
     }
 
