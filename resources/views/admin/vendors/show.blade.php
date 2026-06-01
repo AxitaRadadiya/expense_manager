@@ -21,13 +21,9 @@
 
 <div class="card-tools text-right mr-3">
   <a href="{{ route('vendor.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
-<<<<<<< HEAD
   @if(auth()->check() && auth()->user()->hasPermission('vendor-edit'))
   <a href="{{ route('vendor.edit', $vendor->id) }}" class="btn-create ml-2"><i class="fas fa-edit mr-1"></i>Edit</a>
   @endif
-=======
-  <a href="{{ route('vendor.edit', $vendor->id) }}" class="btn-submit ml-2"><i class="fas fa-edit mr-1"></i>Edit</a>
->>>>>>> uichangecard
 </div>
    
 

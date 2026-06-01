@@ -79,11 +79,7 @@
       </li>
       @endif
 
-<<<<<<< HEAD
-      @if($authUser && $authUser->can('purchase-view'))
-=======
       @if($authUser && $authUser->can('transfer-view') && ! $isSupervisor)
->>>>>>> uichangecard
       <li class="nav-item">
         <a href="{{ route('transfer.index') }}"
           class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
