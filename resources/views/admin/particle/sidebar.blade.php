@@ -59,12 +59,12 @@
       </li>
       @endif
 
-      @if($authUser && $authUser->can('transfer-view') && ! $isSupervisor)
+      @if($authUser && ($authUser->can('purchase-view') || $authUser->can('payment-view')))
       <li class="nav-item">
-        <a href="{{ route('transfer.index') }}"
-          class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-exchange-alt"></i>
-          <p>Transfers</p>
+        <a href="{{ route('purchase.index') }}"
+          class="nav-link {{ Request::routeIs('purchase.*') || Request::routeIs('payment.*') ? 'active' : '' }}">
+          <i class="nav-icon fas fa-shopping-cart"></i>
+          <p>Purchase</p>
         </a>
       </li>
       @endif
@@ -79,12 +79,16 @@
       </li>
       @endif
 
+<<<<<<< HEAD
       @if($authUser && $authUser->can('purchase-view'))
+=======
+      @if($authUser && $authUser->can('transfer-view') && ! $isSupervisor)
+>>>>>>> uichangecard
       <li class="nav-item">
-        <a href="{{ route('purchase.index') }}"
-          class="nav-link {{ Request::routeIs('purchase.*') || Request::routeIs('payment.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-shopping-cart"></i>
-          <p>Purchase</p>
+        <a href="{{ route('transfer.index') }}"
+          class="nav-link {{ Request::routeIs('transfer.*') ? 'active' : '' }}">
+          <i class="nav-icon fas fa-exchange-alt"></i>
+          <p>Transfers</p>
         </a>
       </li>
       @endif

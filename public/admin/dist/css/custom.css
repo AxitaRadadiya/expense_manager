@@ -215,7 +215,14 @@ table.dataTable thead th {
     padding-left: 7.5px;
     margin-right: auto;
     margin-left: auto;
-    margin:10px;
+    /* margin:10px; */
+}
+.container-fluid-85 {
+    width: 85%;
+    padding-right: 7.5px;
+    padding-left: 7.5px;
+    margin-right: auto;
+    margin-left: auto;
 }
 .card {
     border-radius: 12px;

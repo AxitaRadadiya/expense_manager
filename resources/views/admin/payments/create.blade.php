@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid-80">
+  <div class="container-fluid-85">
     <div class="row mb-2">
       <div class="col-sm-6"><h1 class="m-0">Record Payment</h1></div>
       <div class="col-sm-6">
@@ -18,7 +18,7 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid-80">
+  <div class="container-fluid-85">
     <div class="card card-outline card-primary shadow-sm">
       <div class="card-body">
         <form class="prevent-multiple-submit" action="{{ route('payment.store') }}" method="POST">
@@ -52,8 +52,8 @@
           </div>
 
           <!-- Pending purchases for selected vendor -->
-          <div class="row mt-3" id="purchases-for-vendor" style="display:none;">
-            <div class="col-md-8">
+          <div class="row mt-2" id="purchases-for-vendor" style="display:none;">
+            <div class="col-12">
               <div class="card">
                 <div class="card-body p-3">
                   <h6>Pending Purchases</h6>
@@ -76,7 +76,8 @@
               </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-12 mt-2">
+              <div class="d-flex justify-content-end">
               <div class="card">
                 <div class="card-body p-3">
                   <h6>Payment Summary</h6>
@@ -85,10 +86,11 @@
                   <div class="mb-2"><strong>Amount in Excess:</strong> <span id="summary-amount-excess">₹ 0.00</span></div>
                 </div>
               </div>
+              </div>
             </div>
           </div>
 
-          <div class="card-footer">
+          <div class="card-footer p-0">
             <button class="btn-submit saveBtn" type="submit">Save Payment</button>
             <a href="{{ route('payment.index') }}" class="btn-cancel ml-2">Cancel</a>
           </div>

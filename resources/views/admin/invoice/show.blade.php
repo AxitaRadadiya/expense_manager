@@ -5,18 +5,18 @@
 @section('content')
 
 <div class="content-header">
-    <div class="container-fluid">
-        <div class="row mt-3">
+    <div class="container-fluid-85">
+        <div class="row">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
 
                     <h1 class="m-0">
-                        <i class="fas fa-file-invoice mr-2 text-primary"></i>
+                        <i class="text-primary"></i>
                         Invoice Details
                     </h1>
 
                     <a href="{{ route('invoice.index') }}"
-                        class="btn btn-secondary">
+                        class="btn-cancel">
                         <i class="fas fa-arrow-left mr-1"></i>
                         Back
                     </a>
@@ -27,14 +27,14 @@
     </div>
 </div>
 <section class="content">
-    <div class="container-fluid">
+    <div class="container-fluid-85">
 
         <div class="justify-content-center">
             <div class="card card-outline card-primary shadow-sm">
-                <div class="card-body p-5">
+                <div class="card-body">
 
                     <!-- Invoice Header -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h2 class="font-weight-bold mb-1 text-primary">
                                 INVOICE
@@ -64,9 +64,9 @@
                     <hr>
 
                     <!-- Customer Details -->
-                    <div class="row mb-4">
+                    <div class="row mb-2">
                         <div class="col-12 text-md-right">
-                            <h5 class="font-weight-bold mb-3">
+                            <h5 class="font-weight-bold">
                                 Bill To
                             </h5>
 
@@ -87,11 +87,11 @@
                     </div>
 
                     <!-- Invoice Summary -->
-                    <h5 class="font-weight-bold mb-3">
+                    <h5 class="font-weight-bold">
                         Account Summary
                     </h5>
 
-                    <div class="table-responsive mb-4">
+                    <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="bg-light">
                                 <tr>
@@ -137,7 +137,7 @@
 
                     <!-- Note -->
                     @if(!empty($invoice->note))
-                        <div class="mb-4">
+                        <div>
                             <label class="font-weight-bold">
                                 Note:
                             </label>

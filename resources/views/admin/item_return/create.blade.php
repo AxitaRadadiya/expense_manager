@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid-80">
+  <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-sm-6">
           <h1 class="m-0"><i class="mr-2 text-teal"></i>Add Item Return</h1>
@@ -19,7 +19,7 @@
   </div>
 </div>
 
-<div class="container-fluid-80">
+<div class="container-fluid">
   <div class="card card-outline card-primary shadow-sm">
     <div class="card-header">
       <h3 class="card-title"><i class="fas fa-plus mr-2"></i>New Item Return</h3>

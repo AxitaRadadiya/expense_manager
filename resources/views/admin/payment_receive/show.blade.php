@@ -9,12 +9,12 @@
                 <div class="d-flex justify-content-between align-items-center">
 
                     <h1 class="m-0">
-                        <i class="fas fa-file-invoice mr-2 text-primary"></i>
+                        <i class="text-primary"></i>
                         Payment Received Details
                     </h1>
 
                     <a href="{{ route('invoice.index') }}"
-                        class="btn btn-secondary">
+                        class="btn-cancel">
                         <i class="fas fa-arrow-left mr-1"></i>
                         Back
                     </a>
@@ -24,7 +24,7 @@
         </div>
     </div>
 </div>
-<div class="container py-5" style="min-height: 90vh;">
+<div class="container py-5">
   <div class="justify-content-center">
     <div class="">
       <div class="card shadow border-0">

@@ -4,7 +4,7 @@
 @section('content')
 
 <div class="content-header">
-  <div class="container-fluid-80">
+  <div class="container-fluid-85">
     <div class="row mb-2">
       <div class="col-sm-6">
         <h1 class="m-0">
@@ -23,7 +23,7 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid-80">
+  <div class="container-fluid-85">
     <div class="card card-outline card-primary shadow-sm">
 
       <div class="card-header">
@@ -51,8 +51,9 @@
             <i class="fas fa-wallet mr-1"></i> Transfer Info
           </p>
 
+          <div class="row">
           {{-- User --}}
-          <div class="form-group">
+          <div class="form-group col-md-4">
             <label class="font-weight-bold">User <span class="text-danger">*</span></label>
             <select name="user_id"
                     class="form-control select2 @error('user_id') is-invalid @enderror"
@@ -70,7 +71,7 @@
           </div>
 
           {{-- Date --}}
-          <div class="form-group">
+          <div class="form-group col-md-4">
             <label class="font-weight-bold">Transfer Date</label>
             <input type="date"
                    name="start_date"
@@ -82,7 +83,7 @@
           </div>
 
           {{-- Amount --}}
-          <div class="form-group">
+          <div class="form-group col-md-4">
             <label class="font-weight-bold">Amount <span class="text-danger">*</span></label>
             <input name="amount"
                    value="{{ old('amount','0.00') }}"
@@ -94,6 +95,7 @@
             @error('amount')
               <span class="invalid-feedback d-block">{{ $message }}</span>
             @enderror
+          </div>
           </div>
 
           {{-- Note --}}

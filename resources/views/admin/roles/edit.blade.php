@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="content-header">
-  <div class="container-fluid-80">
+  <div class="container-fluid-85">
     <div class="row mb-2">
       <div class="col-sm-6">
         <h1 class="m-0"><i class="mr-2 text-primary"></i>Edit Role</h1>
@@ -20,7 +20,7 @@
 </div>
 
 <section class="content">
-  <div class="container-fluid-80">
+  <div class="container-fluid-85">
     <form action="{{ route('roles.update', $role->id) }}" method="POST">
       @csrf
       @method('PUT')

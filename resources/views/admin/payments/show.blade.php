@@ -6,7 +6,7 @@
 
 <!-- Header -->
 <div class="content-header">
-    <div class="container-fluid">
+    <div class="container-fluid-85">
 
         <div class="row mt-3 align-items-center">
 
@@ -26,7 +26,7 @@
 
                 @if(auth()->check() && auth()->user()->hasPermission('purchase-edit'))
                 <a href="{{ route('payment.edit', $payment->id) }}"
-                    class="btn-create ml-2">
+                    class="btn-submit ml-2">
                     <i class="fas fa-edit mr-1"></i>
                     Edit
                 </a>
@@ -39,7 +39,7 @@
 
 <!-- Main Content -->
 <section class="content">
-    <div class="container-fluid">
+    <div class="container-fluid-85">
 
         <div class="justify-content-center">
             <div class="card card-outline card-primary shadow-sm">
@@ -68,7 +68,7 @@
                     <div class="row mb-4">
 
                         <div class="col-md-6">
-                            <h5 class="font-weight-bold mb-3">
+                            <h5 class="font-weight-bold">
                                 Vendor Details
                             </h5>
 
@@ -90,7 +90,7 @@
                     </div>
 
                     <!-- Payment Summary Table -->
-                    <h5 class="font-weight-bold mb-3">
+                    <h5 class="font-weight-bold">
                         Payment Information
                     </h5>
 
