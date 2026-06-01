@@ -27,6 +27,11 @@ class PurchaseController extends Controller
 
     public function create(): View
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-create')) {
+            abort(403);
+        }
+
         $vendorRoleId = \App\Models\Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $vendorRoleId)->orderBy('name')->get();
         $projects = Project::orderBy('name')->get();
@@ -40,6 +45,11 @@ class PurchaseController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-create')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'vendor_id' => 'required|exists:users,id',
             'project_id' => 'required|exists:projects,id',
@@ -114,6 +124,11 @@ class PurchaseController extends Controller
 
     public function edit($id): View|\Illuminate\Http\RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-edit')) {
+            abort(403);
+        }
+
         $purchase = Purchase::findOrFail($id);
         if (strtolower($purchase->status) === 'paid') {
             return redirect()->route('purchase.index')->with('error', 'Paid purchases cannot be edited');
@@ -130,6 +145,11 @@ class PurchaseController extends Controller
 
     public function update(Request $request, $id): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-edit')) {
+            abort(403);
+        }
+
         $purchase = Purchase::findOrFail($id);
         if (strtolower($purchase->status) === 'paid') {
             return redirect()->route('purchase.index')->with('error', 'Paid purchases cannot be edited');
@@ -216,6 +236,11 @@ class PurchaseController extends Controller
 
     public function destroy($id): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-delete')) {
+            abort(403);
+        }
+
         $purchase = Purchase::findOrFail($id);
         if (strtolower($purchase->status) === 'paid') {
             return redirect()->route('purchase.index')->with('error', 'Paid purchases cannot be deleted');
@@ -292,9 +317,15 @@ class PurchaseController extends Controller
                 $actions = '<div class="btn-group">';
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
                 $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
-                if (auth()->check()) {
-                    $actions .= '<a href="' . route('purchase.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                $auth = auth()->user();
+                $canEdit = $auth?->hasPermission('purchase-edit') ?? false;
+                $canDelete = $auth?->hasPermission('purchase-delete') ?? false;
+
+                $actions .= '<a href="' . route('purchase.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                if ($canEdit) {
                     $actions .= '<a href="' . route('purchase.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
+                }
+                if ($canDelete) {
                     $actions .= '<form action="' . route('purchase.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }
                 $actions .= '</div></div>';

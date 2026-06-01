@@ -8,30 +8,12 @@ use Illuminate\Database\Seeder;
 class PermissionsSeeder extends Seeder
 {
     protected const PERMISSION_GROUPS = [
-        'Project' => [
-            'project-create',
-            'project-view',
-            'project-edit',
-            'project-delete',
-        ],
         'Expense' => [
             'expense-create',
             'expense-view',
             'expense-edit',
             'expense-delete',
         ], 
-        'Credit' => [
-            'credit-create',
-            'credit-view',
-            'credit-edit',
-            'credit-delete',
-        ],
-        'User' => [
-            'user-create',
-            'user-view',
-            'user-edit',
-            'user-delete',
-        ],
         'Vendor' => [
             'vendor-create',
             'vendor-view',
@@ -44,31 +26,23 @@ class PermissionsSeeder extends Seeder
             'customer-edit',
             'customer-delete',
         ],
-        'Role' => [
-            'role-create',
-            'role-view',
-            'role-edit',
-            'role-delete',
-        ],
-        'Item' => [
-            'item-create',
-            'item-view',
-            'item-edit',
-            'item-delete',
-        ],
-        'Item Expense' => [
-            'item expense-create',
-            'item expense-view',
-            'item expense-edit',
-            'item expense-delete',
-        ],
         'Transfer' => [
             'transfer-create',
             'transfer-view',
-            'transfer-edit',
-            'transfer-delete',
         ],
-        
+        'Sales' => [
+            'sales-create',
+            'sales-view',
+            'sales-edit',
+            'sales-delete',
+        ],
+        'Purchase' => [
+            'purchase-create',
+            'purchase-view',
+            'purchase-edit',
+            'purchase-delete',
+        ],
+
     ];
 
     /**

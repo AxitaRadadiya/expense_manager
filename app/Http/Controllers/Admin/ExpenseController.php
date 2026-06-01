@@ -46,6 +46,9 @@ class ExpenseController extends Controller
     public function create(): View
     {
         $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('expense-create')) {
+            abort(403);
+        }
 
         // Superadmin can see all projects, others see only their assigned project (if any)
         if ($auth && method_exists($auth, 'hasRole') && $auth->hasRole('super-admin')) {
@@ -82,6 +85,11 @@ class ExpenseController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('expense-create')) {
+            abort(403);
+        }
+
         $validated = $request->validate(
             [
                 'projects_id'  => 'required|exists:projects,id',
@@ -184,6 +192,11 @@ class ExpenseController extends Controller
 
     public function show($id): View
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('expense-view')) {
+            abort(403);
+        }
+
         $expense = Expense::with(['project', 'user', 'vendor'])->findOrFail($id);
 
         return view('admin.expense.view', compact('expense'));
@@ -191,6 +204,11 @@ class ExpenseController extends Controller
 
     public function edit($id): View
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('expense-edit')) {
+            abort(403);
+        }
+
         $expense    = Expense::findOrFail($id);
         $projects   = Project::orderBy('name')->get();
         $excludedRoleIds = Role::whereIn('name', ['vendor', 'customer'])->pluck('id');
@@ -216,6 +234,11 @@ class ExpenseController extends Controller
 
     public function update(Request $request, $id): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('expense-edit')) {
+            abort(403);
+        }
+
         $expense = Expense::findOrFail($id);
 
         $validated = $request->validate(
@@ -343,6 +366,11 @@ class ExpenseController extends Controller
 
     public function destroy($id): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('expense-delete')) {
+            abort(403);
+        }
+
         $expense = Expense::findOrFail($id);
 
         // Delete bill file from storage
@@ -370,9 +398,9 @@ class ExpenseController extends Controller
         ];
 
         $auth = auth()->user();
-        $canViewExpense = $auth?->can('expense-view') ?? false;
-        $canEditExpense = $auth?->can('expense-edit') ?? false;
-        $canDeleteExpense = $auth?->can('expense-delete') ?? false;
+        $canViewExpense = $auth?->hasPermission('expense-view') ?? false;
+        $canEditExpense = $auth?->hasPermission('expense-edit') ?? false;
+        $canDeleteExpense = $auth?->hasPermission('expense-delete') ?? false;
 
         // Base query respects permissions: super-admin sees all, others only their own
         $baseQuery = Expense::query();

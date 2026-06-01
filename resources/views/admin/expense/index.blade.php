@@ -16,9 +16,11 @@
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">All Expenses</h5>
         <div></div>
+        @if(auth()->check() && auth()->user()->hasPermission('expense-create'))
         <a href="{{ route('expense.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> Add Expense
         </a>
+        @endif
       </div>
 
         <div class="table-responsive">

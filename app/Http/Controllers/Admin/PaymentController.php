@@ -19,6 +19,11 @@ class PaymentController extends Controller
 
     public function create(): View
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-create')) {
+            abort(403);
+        }
+
         $vendorRoleId = \App\Models\Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $vendorRoleId)->orderBy('name')->get();
         // project selection removed from payments create form
@@ -27,6 +32,11 @@ class PaymentController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-create')) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'vendor_id' => 'required|exists:users,id',
             'project_id' => 'nullable|exists:projects,id',
@@ -90,6 +100,11 @@ class PaymentController extends Controller
 
     public function edit($id): View
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-edit')) {
+            abort(403);
+        }
+
         $payment = Payment::findOrFail($id);
         $vendorRoleId = \App\Models\Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $vendorRoleId)->orderBy('name')->get();
@@ -99,6 +114,11 @@ class PaymentController extends Controller
 
     public function update(Request $request, $id): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-edit')) {
+            abort(403);
+        }
+
         $payment = Payment::findOrFail($id);
         $validated = $request->validate([
             'vendor_id' => 'required|exists:users,id',
@@ -158,6 +178,11 @@ class PaymentController extends Controller
 
     public function destroy($id): RedirectResponse
     {
+        $auth = auth()->user();
+        if (! $auth || ! $auth->hasPermission('purchase-delete')) {
+            abort(403);
+        }
+
         $payment = Payment::findOrFail($id);
         $payment->delete();
         return redirect()->route('payment.index')->with('success', 'Payment deleted');
@@ -215,9 +240,15 @@ class PaymentController extends Controller
                 $actions = '<div class="btn-group">';
                 $actions .= "<i class=\"fas fa-ellipsis-v\" data-toggle=\"dropdown\" style=\"cursor:pointer;\"></i>";
                 $actions .= '<div class="dropdown-menu dropdown-menu-right" style="min-width: 50px; padding: 0;">';
-                if (auth()->check()) {
-                    $actions .= '<a href="' . route('payment.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                $auth = auth()->user();
+                $canEdit = $auth?->hasPermission('purchase-edit') ?? false;
+                $canDelete = $auth?->hasPermission('purchase-delete') ?? false;
+
+                $actions .= '<a href="' . route('payment.show', $row->id) . '" class="table-action-btn is-view" title="View"><i class="fa fa-eye"></i></a>';
+                if ($canEdit) {
                     $actions .= '<a href="' . route('payment.edit', $row->id) . '" class="table-action-btn is-edit" title="Edit"><i class="fa fa-edit"></i></a>';
+                }
+                if ($canDelete) {
                     $actions .= '<form action="' . route('payment.destroy', $row->id) . '" method="POST" class="table-action-form">' . csrf_field() . '<input type="hidden" name="_method" value="DELETE">' . '<button type="button" class="table-action-btn is-delete deleteButton" title="Delete"><i class="fa fa-trash"></i></button></form>';
                 }
                 $actions .= '</div></div>';
