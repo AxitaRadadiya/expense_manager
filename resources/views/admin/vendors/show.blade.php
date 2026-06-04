@@ -37,7 +37,7 @@
 
     <div class="row">
       <div class="col-md-6">
-        <div class="mb-2"><strong>{{ $vendor->name }}</strong></div>
+        <div class="mb-2"><strong>{{ $vendor->first_name }} {{ $vendor->last_name }}</strong></div>
         <!-- <div class="text-muted small">{{ $vendor->company_name ?? '' }}</div> -->
         <div class="text-muted small">{{ $vendor->email ?? '' }}</div>
         <div class="text-muted small">{{ $vendor->mobile ?? '' }}</div>
@@ -56,7 +56,7 @@
         <div class="small text-muted">Date: {{ \Carbon\Carbon::now()->format('d/m/Y') }}</div>
         <div class="mt-5 small"><strong>To:</strong></div>
         <div class="small">
-          {{ $vendor->name }}<br>
+          {{ $vendor->first_name }} {{ $vendor->last_name }}<br>
           {{ optional($addr)->shipping_street ?? '' }}<br>
           {{ optional($addr)->shipping_city ?? '' }}, {{ optional($addr)->shipping_state ?? '' }}<br>
           {{ optional($addr)->shipping_country ?? '' }}<br>

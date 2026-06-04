@@ -48,6 +48,7 @@
             <tr>
               <th>Sr No.</th>
               <th>Name</th>
+              <th>Company</th>
               <th>Mobile</th>
               <th>Email</th>
               <th>Actions</th>

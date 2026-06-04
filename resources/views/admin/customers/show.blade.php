@@ -37,7 +37,7 @@
 
     <div class="row">
       <div class="col-md-6">
-        <div class="mb-2"><strong>{{ $customer->name }}</strong></div>
+        <div class="mb-2"><strong>{{ $customer->first_name }} {{ $customer->last_name }}</strong></div>
         <div class="text-muted small">{{ $customer->email ?? '' }}</div>
         <div class="text-muted small">{{ $customer->mobile ?? '' }}</div>
         <div class="text-muted small">{{ $customer->website ?? '' }}</div>
@@ -57,7 +57,7 @@
         </div>
         <div class="mt-3 small"><strong>To:</strong></div>
         <div class="small">
-          {{ $customer->name }}<br>
+          {{ $customer->first_name }} {{ $customer->last_name }}<br>
           {{ optional($addr)->shipping_street ?? '' }}<br>
           {{ optional($addr)->shipping_city ?? '' }}, {{ optional($addr)->shipping_state ?? '' }}<br>
           {{ optional($addr)->shipping_country ?? '' }}<br>

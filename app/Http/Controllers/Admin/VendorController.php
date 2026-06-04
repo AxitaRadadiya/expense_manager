@@ -41,7 +41,8 @@ class VendorController extends Controller
         }
 
         $request->validate([
-            'name' => 'required',
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'mobile' => 'required|digits:10|unique:users',
         ]);
@@ -49,7 +50,9 @@ class VendorController extends Controller
         $roleId = Role::where('name', 'vendor')->value('id');
 
         $user = User::create([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'name'=> trim($request->first_name . ' ' . $request->last_name),
             'email' => $request->email,
             'mobile' => $request->mobile,
             'website' => $request->website,
@@ -130,7 +133,8 @@ class VendorController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $vendor->id,
             'mobile' => 'required|digits:10|unique:users,mobile,' . $vendor->id,
             'company_name' => 'nullable|string|max:255',
@@ -140,7 +144,9 @@ class VendorController extends Controller
         $roleId = Role::where('name', 'vendor')->value('id');
 
         $vendor->update([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'name' => trim($request->first_name . ' ' . $request->last_name),
             'email' => $request->email,
             'mobile' => $request->mobile,
             'website' => $request->website,
@@ -225,6 +231,8 @@ class VendorController extends Controller
             if (!empty($search)) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%")
                       ->orWhere('mobile', 'like', "%{$search}%")
                       ->orWhere('company_name', 'like', "%{$search}%");
@@ -244,7 +252,7 @@ class VendorController extends Controller
             foreach ($rows as $row) {
                 $nested = [];
                 $nested['id'] = $i;
-                $nested['name'] = $row->name;
+                $nested['name'] = trim($row->first_name . ' ' . $row->last_name) ?? $row->name;
                 $nested['company_name'] = $row->company_name ?? '-';
                 $nested['mobile'] = $row->mobile;
                 $nested['email'] = $row->email;

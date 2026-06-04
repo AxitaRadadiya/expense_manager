@@ -39,7 +39,8 @@ class CustomerController extends Controller
         }
 
         $request->validate([
-            'name' => 'required',
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'mobile' => 'required|digits:10|unique:users',
         ]);
@@ -47,9 +48,12 @@ class CustomerController extends Controller
         $roleId = Role::where('name', 'customer')->value('id');
 
         $user = User::create([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'name'=> trim($request->first_name . ' ' . $request->last_name),
             'email' => $request->email,
             'mobile' => $request->mobile,
+            'company_name' => $request->company_name,
             'website' => $request->website,
             'pan_number' => $request->pan_number,
             'gst_number' => $request->gst_number,
@@ -117,9 +121,11 @@ class CustomerController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $customer->id,
             'mobile' => 'required|digits:10|unique:users,mobile,' . $customer->id,
+            'company_name' => 'nullable|string|max:255',
             'website' => 'nullable|string|max:255',
             'pan_number' => 'nullable|string|max:255',
             'gst_number' => 'nullable|string|max:255',
@@ -128,9 +134,12 @@ class CustomerController extends Controller
         $roleId = Role::where('name', 'customer')->value('id');
 
         $customer->update([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'name' => trim($request->first_name . ' ' . $request->last_name),
             'email' => $request->email,
             'mobile' => $request->mobile,
+            'company_name' => $request->company_name,
             'website' => $request->website,
             'pan_number' => $request->pan_number,
             'gst_number' => $request->gst_number,
@@ -192,7 +201,7 @@ class CustomerController extends Controller
     public function list(Request $request)
     {
         try {
-            $columns = [0 => 'id', 1 => 'name', 2 => 'mobile', 3 => 'email', 4 => 'action'];
+            $columns = [0 => 'id', 1 => 'name', 2 => 'company_name', 3 => 'mobile', 4 => 'email', 5 => 'action'];
 
             $limit = intval($request->input('length', 10));
             $start = intval($request->input('start', 0));
@@ -211,8 +220,11 @@ class CustomerController extends Controller
             if (!empty($search)) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('mobile', 'like', "%{$search}%");
+                      ->orWhere('mobile', 'like', "%{$search}%")
+                      ->orWhere('company_name', 'like', "%{$search}%");
                 });
             }
 
@@ -229,7 +241,8 @@ class CustomerController extends Controller
             foreach ($rows as $row) {
                 $nested = [];
                 $nested['id'] = $i;
-                $nested['name'] = $row->name;
+                $nested['name'] = trim($row->first_name . ' ' . $row->last_name) ?? $row->name;
+                $nested['company_name'] = $row->company_name ?? '-';
                 $nested['mobile'] = $row->mobile;
                 $nested['email'] = $row->email;
 

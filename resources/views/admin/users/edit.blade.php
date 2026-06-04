@@ -43,12 +43,22 @@
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                <label class="font-weight-bold">Full Name <span class="text-danger">*</span></label>
-                <input id="name" name="name" type="text"
-                       class="form-control @error('name') is-invalid @enderror"
-                       value="{{ old('name', $user->name) }}" required
+                <label class="font-weight-bold">First Name <span class="text-danger">*</span></label>
+                <input id="first_name" name="first_name" type="text"
+                       class="form-control @error('first_name') is-invalid @enderror"
+                       value="{{ old('first_name', $user->first_name) }}" required
                        pattern="[A-Za-z ]+" title="Name can contain only letters and spaces.">
-                @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                @error('first_name')<span class="invalid-feedback">{{ $message }}</span>@enderror
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="font-weight-bold">Last Name <span class="text-danger">*</span></label>
+                <input id="last_name" name="last_name" type="text"
+                       class="form-control @error('last_name') is-invalid @enderror"
+                       value="{{ old('last_name', $user->last_name) }}" required
+                       pattern="[A-Za-z ]+" title="Name can contain only letters and spaces.">
+                @error('last_name')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>
             <div class="col-md-4">
@@ -217,7 +227,8 @@ function togglePwSection() {
   var form = document.getElementById('user-edit-form');
   if (!form) return;
 
-  var nameInput = document.getElementById('name');
+  var firstNameInput = document.getElementById('first_name');
+  var lastNameInput  = document.getElementById('last_name');
   var mobileInput = document.getElementById('mobile');
   var emailInput = document.getElementById('email');
   var passwordInput = document.getElementById('password');
@@ -267,28 +278,32 @@ function togglePwSection() {
   var emailErrorShown = false;
 
   function validateName() {
-    var value = nameInput.value.trim();
-    if (!value) {
+    var first = firstNameInput.value.trim();
+    var last  = lastNameInput.value.trim();
+    if (!first || !last) {
       if (!nameErrorShown) {
         toastr.clear();
-        toastr.error('Name is required.', 'Validation Error');
-        nameInput.classList.add('is-invalid');
-        nameInput.focus();
+        toastr.error('First name and last name are required.', 'Validation Error');
+        if (!first) firstNameInput.classList.add('is-invalid');
+        if (!last) lastNameInput.classList.add('is-invalid');
+        ( !first ? firstNameInput : lastNameInput ).focus();
         nameErrorShown = true;
       }
       return false;
     }
-    if (!namePattern.test(value)) {
+    if (!namePattern.test(first) || !namePattern.test(last)) {
       if (!nameErrorShown) {
         toastr.clear();
         toastr.error('Name can contain only letters and spaces.', 'Validation Error');
-        nameInput.classList.add('is-invalid');
-        nameInput.focus();
+        if (!namePattern.test(first)) firstNameInput.classList.add('is-invalid');
+        if (!namePattern.test(last)) lastNameInput.classList.add('is-invalid');
+        firstNameInput.focus();
         nameErrorShown = true;
       }
       return false;
     }
-    nameInput.classList.remove('is-invalid');
+    firstNameInput.classList.remove('is-invalid');
+    lastNameInput.classList.remove('is-invalid');
     nameErrorShown = false;
     return true;
   }
@@ -389,9 +404,15 @@ function togglePwSection() {
     return true;
   }
 
-  nameInput.addEventListener('input', function () {
+  firstNameInput.addEventListener('input', function () {
     this.value = this.value.replace(/[^A-Za-z ]/g, '');
-    nameInput.classList.remove('is-invalid');
+    firstNameInput.classList.remove('is-invalid');
+    nameErrorShown = false;
+  });
+
+  lastNameInput.addEventListener('input', function () {
+    this.value = this.value.replace(/[^A-Za-z ]/g, '');
+    lastNameInput.classList.remove('is-invalid');
     nameErrorShown = false;
   });
 

@@ -13,7 +13,7 @@
         <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
           <li class="breadcrumb-item"><a href="{{ route('users.index') }}">Users</a></li>
-          <li class="breadcrumb-item active">{{ $user->name }}</li>
+          <li class="breadcrumb-item active">{{ $user->first_name }} {{ $user->last_name }}</li>
         </ol>
       </div>
     </div>
@@ -32,7 +32,7 @@
                  alt="{{ $user->name }}"
                  class="rounded-circle mb-3"
                  style="width:72px;height:72px;object-fit:cover;border:3px solid rgba(0, 141, 141, .15);padding:4px;background:#fff;">
-            <h5 class="font-weight-bold mb-1">{{ $user->name }}</h5>
+            <h5 class="font-weight-bold mb-1">{{ $user->first_name }} {{ $user->last_name }}</h5>
             <p class="text-muted mb-2">{{ $user->email }}</p>
             <span class="badge {{ $user->status ? 'badge-success' : 'badge-danger' }} mb-3">
               {{ $user->status ? 'Active' : 'Inactive' }}

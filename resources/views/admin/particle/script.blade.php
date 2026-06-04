@@ -250,6 +250,7 @@ $(document).ready(function () {
             columns: [
                 { data: 'id' },
                 { data: 'name' },
+                { data: 'company_name'},
                 { data: 'mobile' },
                 { data: 'email' },
                 { data: 'action', orderable: false, searchable: false }

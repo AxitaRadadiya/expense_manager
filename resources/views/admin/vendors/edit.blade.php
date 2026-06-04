@@ -34,9 +34,14 @@
             <div class="card-body">
                 <div class="row">
                 <div class="form-group col-md-4">
-                    <label>Name <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control" value="{{ old('name', $vendor->name) }}" required>
-                    @error('name')<span class="text-danger small">{{ $message }}</span>@enderror
+                    <label>First Name <span class="text-danger">*</span></label>
+                    <input type="text" name="first_name" class="form-control" value="{{ old('first_name', $vendor->first_name) }}" required>
+                    @error('first_name')<span class="text-danger small">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Last Name <span class="text-danger">*</span></label>
+                    <input type="text" name="last_name" class="form-control" value="{{ old('last_name', $vendor->last_name) }}" required>
+                    @error('last_name')<span class="text-danger small">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group col-md-4">

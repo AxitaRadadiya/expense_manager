@@ -97,7 +97,7 @@ class User extends Authenticatable
     }
 
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'first_name', 'last_name', 'email', 'password',
         'profile_image',
         'role_id', 'status', 'mobile', 'note',
         'project_id', 'amount',
@@ -216,5 +216,41 @@ class User extends Authenticatable
         }
 
         return asset($path);
+    }
+
+    protected static function booted()
+    {
+        static::saving(function ($user) {
+            $user->name = trim(
+                ($user->first_name ?? '') . ' ' .
+                ($user->last_name ?? '')
+            );
+        });
+    }
+
+    /**
+     * Return combined full name from first_name and last_name when available.
+     */
+    public function getNameAttribute($value): string
+    {
+        $first = $this->attributes['first_name'] ?? null;
+        $last = $this->attributes['last_name'] ?? null;
+
+        $full = trim((string) ($first ? $first : '') . ' ' . ($last ? $last : ''));
+
+        return $full !== '' ? $full : ($value ?? '');
+    }
+
+    /**
+     * When setting name, populate first_name and last_name for compatibility.
+     */
+    public function setNameAttribute($value): void
+    {
+        $name = trim((string) $value);
+        $parts = preg_split('/\s+/', $name);
+
+        $this->attributes['first_name'] = $parts[0] ?? null;
+        $this->attributes['last_name'] = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : null;
+        $this->attributes['name'] = $name;
     }
 }

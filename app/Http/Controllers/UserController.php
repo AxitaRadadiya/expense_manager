@@ -57,7 +57,8 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'        => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
+            'first_name'  => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
+            'last_name'   => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
             'email'       => ['required', 'email', 'unique:users,email'],
             'mobile'      => ['nullable', 'regex:/^\d{10}$/'],
             'role_id'     => ['required', 'exists:roles,id'],
@@ -73,7 +74,9 @@ class UserController extends Controller
 
         $user = DB::transaction(function () use ($request, $loginUser, $openingAmount, &$hasInsufficientBalance) {
             $user = User::create([
-                'name'     => $request->name,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'name'     => trim($request->first_name . ' ' . $request->last_name),
                 'email'    => $request->email,
                 'mobile'   => $request->mobile,
                 'role_id'  => $request->role_id,
@@ -193,7 +196,8 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'name'        => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
+            'first_name'  => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
+            'last_name'   => ['required', 'string', 'max:255', 'regex:/^[A-Za-z ]+$/'],
             'email'       => ['required', 'email', 'unique:users,email,' . $user->id],
             'mobile'      => ['nullable', 'regex:/^\d{10}$/'],
             'role_id'     => ['required', 'exists:roles,id'],
@@ -204,7 +208,9 @@ class UserController extends Controller
         ]);
 
         $data = [
-            'name'    => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'name' => trim($request->first_name . ' ' . $request->last_name),
             'email'   => $request->email,
             'mobile'  => $request->mobile,
             'role_id' => $request->role_id,
@@ -281,6 +287,8 @@ class UserController extends Controller
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('mobile', 'like', "%{$search}%");
             });
@@ -327,7 +335,7 @@ class UserController extends Controller
 
             $avatarHtml = '<div class="user-name-cell">'
                 // . '<img src="' . e($u->profile_image_url) . '" alt="' . e($u->name) . '" class="user-list-avatar">'
-                . '<span>' . e($u->name) . '</span>'
+                . '<span>' . e($u->name ?? trim($u->first_name . ' ' . $u->last_name)) . '</span>'
                 . '</div>';
 
             $data[] = [

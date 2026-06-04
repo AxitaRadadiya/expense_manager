@@ -39,10 +39,14 @@
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
-                  <label class="font-weight-bold">Name <span class="text-danger">*</span></label>
-                  <input id="name" name="name" type="text"
-                    class="form-control"
-                    value="{{ old('name') }}" required placeholder="e.g. John Doe" >
+                  <label class="font-weight-bold">First Name <span class="text-danger">*</span></label>
+                  <input id="first_name" name="first_name" type="text" class="form-control" value="{{ old('first_name') }}" required placeholder="e.g. John" >
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                  <label class="font-weight-bold">Last Name <span class="text-danger">*</span></label>
+                  <input id="last_name" name="last_name" type="text" class="form-control" value="{{ old('last_name') }}" required placeholder="e.g. Doe" >
               </div>
             </div>
             <div class="col-md-4">
