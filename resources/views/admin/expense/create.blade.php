@@ -35,10 +35,6 @@
           @csrf
           <input type="hidden" name="status" value="pending">
 
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-receipt mr-1"></i> Expense Info
-          </p>
-
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -150,12 +146,6 @@
               </div>
             </div>
           </div>
-
-          <hr>
-
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-sticky-note mr-1"></i> Additional Info
-          </p>
 
           <div class="row">
             <div class="col-md-6">

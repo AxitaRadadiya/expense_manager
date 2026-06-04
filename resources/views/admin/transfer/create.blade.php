@@ -46,11 +46,6 @@
 
           @csrf
 
-          <p class="text-uppercase text-muted font-weight-bold mb-3"
-             style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-wallet mr-1"></i> Transfer Info
-          </p>
-
           <div class="row">
           {{-- User --}}
           <div class="form-group col-md-4">
@@ -75,7 +70,7 @@
             <label class="font-weight-bold">Transfer Date</label>
             <input type="date"
                    name="start_date"
-                   value="{{ old('start_date', now()->toDateString()) }}"
+                   value="{{ old('start_date', now()->toDateString()) }}" min="{{ date('Y-m-d') }}"
                    class="form-control @error('start_date') is-invalid @enderror">
             @error('start_date')
               <span class="invalid-feedback d-block">{{ $message }}</span>

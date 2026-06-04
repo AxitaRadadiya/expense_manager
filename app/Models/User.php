@@ -102,6 +102,7 @@ class User extends Authenticatable
         'role_id', 'status', 'mobile', 'note',
         'project_id', 'amount',
         'company_name', 'address',
+        'website', 'pan_number', 'gst_number',
         'extra_amount',
     ];
 

@@ -34,10 +34,6 @@
         <form class="prevent-multiple-submit" action="{{ route('projects.store') }}" method="POST">
           @csrf
 
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-folder-open mr-1"></i> Project Info
-          </p>
-
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -49,24 +45,18 @@
             <div class="col-md-3">
               <div class="form-group">
                 <label class="font-weight-bold">Start Date</label>
-                <input type="date" name="start_date" value="{{ old('start_date') }}" class="form-control @error('start_date') is-invalid @enderror">
+                <input type="date" name="start_date" value="{{ old('start_date') }}" min="{{ date('Y-m-d') }}" class="form-control @error('start_date') is-invalid @enderror">
                 @error('start_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>
             <div class="col-md-3">
               <div class="form-group">
                 <label class="font-weight-bold">End Date</label>
-                <input type="date" name="end_date" value="{{ old('end_date') }}" class="form-control @error('end_date') is-invalid @enderror">
+                <input type="date" name="end_date" value="{{ old('end_date') }}" min="{{ date('Y-m-d') }}" class="form-control @error('end_date') is-invalid @enderror">
                 @error('end_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>
           </div>
-
-          <hr>
-
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-users mr-1"></i> Assignment
-          </p>
 
           <div class="row">
             <div class="col-md-6">

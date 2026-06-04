@@ -20,15 +20,15 @@
 </div>
 
 <div class="container-fluid-85">
-    <div class="card card-outline card-primary shadow-sm">
-        <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-user-edit mr-2"></i>New Customer</h3>
-            <div class="card-tools">
-                <a href="{{ route('customer.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
+    <form id="customer-create-form" class="prevent-multiple-submit" action="{{ route('customer.store') }}" method="POST">
+        @csrf
+        <div class="card card-outline card-primary shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-user-edit mr-2"></i>New Customer</h3>
+                <div class="card-tools">
+                    <a href="{{ route('customer.index') }}" class="btn-cancel"><i class="fas fa-arrow-left mr-1"></i>Back</a>
+                </div>
             </div>
-        </div>
-        <form id="customer-create-form" class="prevent-multiple-submit" action="{{ route('customer.store') }}" method="POST">
-            @csrf 
             <div class="card-body">
                 <div class="row">
                 <div class="form-group col-md-4">
@@ -66,10 +66,12 @@
                     @error('gst_number')<span class="text-danger small">{{ $message }}</span>@enderror
                 </div>
                 </div>
-
-                <hr>
+            </div>
+        </div>
+        <div class="card card-outline card-primary shadow-sm mt-4">
+            <div class="card-body">
                 <ul class="nav nav-tabs" id="customerAddressTabs" role="tablist">
-                    <li class="nav-item">
+                    <li class="nav-item mr-2">
                         <a class="nav-link active" id="address-tab" data-toggle="tab" href="#address-pane" role="tab" aria-controls="address-pane" aria-selected="true">Address</a>
                     </li>
                     <li class="nav-item">
@@ -79,17 +81,17 @@
                 <div class="tab-content pt-3" id="customerAddressTabsContent">
                     <div class="tab-pane fade show active" id="address-pane" role="tabpanel" aria-labelledby="address-tab">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="card card-outline card-primary p-3 col-md-5 mr-5 ml-5">
                                 <p class="text-uppercase text-muted small">Billing Address</p>
-                                <div class="form-group">
-                                    <label>Attention</label>
-                                    <input type="text" id="billing_attention" name="billing_attention" class="form-control" value="{{ old('billing_attention') }}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Street</label>
-                                    <textarea id="billing_street" name="billing_street" class="form-control" rows="2">{{ old('billing_street') }}</textarea>
-                                </div>
                                 <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Attention</label>
+                                        <input type="text" id="billing_attention" name="billing_attention" class="form-control" value="{{ old('billing_attention') }}">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Street</label>
+                                        <input type="text" id="billing_street" name="billing_street" class="form-control" value="{{ old('billing_street') }}">
+                                    </div>
                                     <div class="form-group col-md-6">
                                         <label>City</label>
                                         <select id="billing_city" name="billing_city" class="form-control">
@@ -104,8 +106,6 @@
                                             <option value="Gujarat" {{ old('billing_state') === 'Gujarat' ? 'selected' : '' }}>Gujarat</option>
                                         </select>
                                     </div>
-                                </div>
-                                <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label>Country</label>
                                         <select id="billing_country" name="billing_country" class="form-control">
@@ -119,7 +119,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="card card-outline card-primary p-3 col-md-5">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <p class="text-uppercase text-muted small">Shipping Address</p>
                                     <div class="form-check">
@@ -127,16 +127,15 @@
                                         <label class="form-check-label small" for="same_as">Copy Billing Address</label>
                                     </div>
                                 </div>
-
-                                <div class="form-group">
-                                    <label>Attention</label>
-                                    <input type="text" id="shipping_attention" name="shipping_attention" class="form-control" value="{{ old('shipping_attention') }}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Street</label>
-                                    <textarea id="shipping_street" name="shipping_street" class="form-control" rows="2">{{ old('shipping_street') }}</textarea>
-                                </div>
                                 <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Attention</label>
+                                        <input type="text" id="shipping_attention" name="shipping_attention" class="form-control" value="{{ old('shipping_attention') }}">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Street</label>
+                                        <input type="text" id="shipping_street" name="shipping_street" class="form-control" value="{{ old('shipping_street') }}">
+                                    </div>
                                     <div class="form-group col-md-6">
                                         <label>City</label>
                                         <select id="shipping_city" name="shipping_city" class="form-control">
@@ -151,8 +150,6 @@
                                             <option value="Gujarat" {{ old('shipping_state') === 'Gujarat' ? 'selected' : '' }}>Gujarat</option>
                                         </select>
                                     </div>
-                                </div>
-                                <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label>Country</label>
                                         <select id="shipping_country" name="shipping_country" class="form-control">
@@ -197,8 +194,8 @@
                 <button type="submit" class="btn-submit saveBtn"><i class="fas fa-user-check mr-1"></i>Save Customer</button>
                 <a href="{{ route('customer.index') }}" class="btn-cancel ml-2"><i class="fas fa-times mr-1"></i>Cancel</a>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
 <script>

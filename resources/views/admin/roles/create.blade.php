@@ -34,9 +34,6 @@
           </div>
         </div>
         <div class="card-body">
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-user-shield mr-1"></i> Basic Info
-          </p>
 
           <div class="row">
             <div class="col-md-4">

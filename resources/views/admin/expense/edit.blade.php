@@ -35,10 +35,6 @@
           @csrf
           @method('PUT')
 
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-receipt mr-1"></i> Expense Info
-          </p>
-
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -58,7 +54,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="expense_date" class="font-weight-bold">Expense Date <span class="text-danger">*</span></label>
-                <input type="date" class="form-control @error('expense_date') is-invalid @enderror" name="expense_date" id="expense_date" value="{{ old('expense_date', \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d')) }}" required>
+                <input type="date" class="form-control @error('expense_date') is-invalid @enderror" name="expense_date" id="expense_date" min="{{ date('Y-m-d') }}" value="{{ old('expense_date', \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d')) }}" required>
                 @error('expense_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
               </div>
             </div>
@@ -174,12 +170,6 @@
               </div>
             </div>
           </div>
-
-          <hr>
-
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-sticky-note mr-1"></i> Additional Info
-          </p>
 
           <div class="row">
             <div class="col-md-6">

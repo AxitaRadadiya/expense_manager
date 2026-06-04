@@ -40,11 +40,6 @@
           @csrf
           @method('PUT')
 
-          {{-- Basic Info --}}
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-id-card mr-1"></i> Basic Info
-          </p>
-
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
@@ -140,9 +135,6 @@
           <hr>
 
           {{-- Change Password (collapsible) --}}
-          <p class="text-uppercase text-muted font-weight-bold mb-0" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-lock mr-1"></i> Change Password
-          </p>
           <div class="callout callout-warning mt-2 mb-3" style="cursor:pointer;" onclick="togglePwSection()">
             <p class="mb-0 font-weight-bold" style="font-size:.85rem;">
               <i class="fas fa-key mr-1"></i> Click to change password for this user

@@ -74,7 +74,7 @@ class TransferController extends Controller
 
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'start_date' => 'nullable|date',
+            'start_date' => 'nullable|date|after_or_equal:today',
             'amount' => 'required|numeric|min:0.01',
             'note' => 'nullable|string',
         ]);

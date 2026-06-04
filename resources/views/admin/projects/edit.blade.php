@@ -35,10 +35,6 @@
           @csrf
           @method('PUT')
 
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-folder-open mr-1"></i> Project Info
-          </p>
-
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
@@ -50,22 +46,16 @@
             <div class="col-md-3">
               <div class="form-group">
                 <label class="font-weight-bold">Start Date</label>
-                <input type="date" name="start_date" value="{{ old('start_date', optional($project->start_date)->format('Y-m-d')) }}" class="form-control">
+                <input type="date" name="start_date" value="{{ old('start_date', optional($project->start_date)->format('Y-m-d')) }}" min="{{ date('Y-m-d') }}" class="form-control">
               </div>
             </div>
             <div class="col-md-3">
               <div class="form-group">
                 <label class="font-weight-bold">End Date</label>
-                <input type="date" name="end_date" value="{{ old('end_date', optional($project->end_date)->format('Y-m-d')) }}" class="form-control">
+                <input type="date" name="end_date" value="{{ old('end_date', optional($project->end_date)->format('Y-m-d')) }}" min="{{ date('Y-m-d') }}"  class="form-control">
               </div>
             </div>
           </div>
-
-          <hr>
-
-          <p class="text-uppercase text-muted font-weight-bold mb-3" style="font-size:.7rem;letter-spacing:1.4px;">
-            <i class="fas fa-users mr-1"></i> Assignment
-          </p>
 
           <div class="row">
             <div class="col-md-6">
