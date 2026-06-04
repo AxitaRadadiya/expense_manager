@@ -11,6 +11,8 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\SubCategory;
 use App\Models\Category;
+use App\Models\Item;
+use App\Models\InvoiceItem;
 
 class InvoiceController extends Controller
 {
@@ -19,6 +21,7 @@ class InvoiceController extends Controller
         $invoices = Invoice::with(['customer','project','subCategory'])->latest()->get();
         return view('admin.invoice.index', compact('invoices'));
     }
+    
     public function create(): View
     {
         $auth = auth()->user();
@@ -31,8 +34,9 @@ class InvoiceController extends Controller
         $projects = Project::orderBy('name')->get();
         $incomeCategory = Category::where('name','Income')->first();
         $incomeSubCategories = $incomeCategory ? SubCategory::where('category_id', $incomeCategory->id)->orderBy('name')->get() : collect();
-
-        return view('admin.invoice.create', compact('customers','projects','incomeSubCategories'));
+        $items = Item::orderBy('name')->get();
+        
+        return view('admin.invoice.create', compact('customers','projects','incomeSubCategories','items'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -45,18 +49,52 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'customer_id' => 'required|exists:users,id',
             'project_id' => 'required|exists:projects,id',
-            'sub_category_id' => 'required|exists:sub_categories,id',
-            'amount' => 'required|numeric|min:0.01',
             'note' => 'required|string',
             'status' => 'nullable|in:Paid,Pending',
             'invoice_date' => 'required|date|after_or_equal:today',
+            'items' => 'required|array|min:1',
+            'items.*.item_id' => 'nullable|exists:items,id',
+            'items.*.sub_category_id' => 'required|exists:sub_categories,id',
+            'items.*.qty' => 'required|numeric|min:0.01',
+            'items.*.unit_amount' => 'required|numeric|min:0',
         ]);
 
-        // ensure due_amount is initialized to the invoice amount
-        $validated['due_amount'] = $validated['amount'];
-        // default status to Pending when not provided by frontend
-        if (empty($validated['status'])) { $validated['status'] = 'Pending'; }
-        Invoice::create($validated);
+        // compute total amount from items
+        $totalAmount = 0.0;
+        foreach ($validated['items'] as $it) {
+            $totalAmount += (float)$it['qty'] * (float)$it['unit_amount'];
+        }
+
+        $invoiceData = [
+            'customer_id' => $validated['customer_id'],
+            'project_id' => $validated['project_id'],
+            'amount' => $totalAmount,
+            'due_amount' => $totalAmount,
+            'note' => $validated['note'],
+            'invoice_date' => $validated['invoice_date'],
+            'status' => $validated['status'] ?? 'Pending',
+        ];
+
+        // set sub_category_id of the invoice to first item sub_category if possible
+        $firstSub = $validated['items'][0]['sub_category_id'] ?? null;
+        if ($firstSub) { 
+            $invoiceData['sub_category_id'] = $firstSub; 
+        }
+
+        $invoice = Invoice::create($invoiceData);
+
+        // create invoice items
+        foreach ($validated['items'] as $it) {
+            InvoiceItem::create([
+                'invoice_id' => $invoice->id,
+                'item_id' => $it['item_id'] ?? null,
+                'sub_category_id' => $it['sub_category_id'],
+                'qty' => $it['qty'],
+                'unit_amount' => $it['unit_amount'],
+                'total_amount' => (float)$it['qty'] * (float)$it['unit_amount'],
+            ]);
+        }
+
         return redirect()->route('invoice.index')->with('success','Invoice created');
     }
 
@@ -67,17 +105,23 @@ class InvoiceController extends Controller
             abort(403);
         }
 
-        $invoice = Invoice::findOrFail($id);
+        // Load invoice with its items relationship
+        $invoice = Invoice::with('invoiceItems')->findOrFail($id);
+        
         if ($invoice->status === 'Paid') {
             return redirect()->route('invoice.index')->with('error', 'Paid invoices cannot be edited');
         }
+        
         $customerRoleId = \App\Models\Role::where('name','customer')->value('id');
         $customers = User::where('role_id', $customerRoleId)->orderBy('name')->get();
         $projects = Project::orderBy('name')->get();
         $incomeCategory = Category::where('name','Income')->first();
         $incomeSubCategories = $incomeCategory ? SubCategory::where('category_id', $incomeCategory->id)->orderBy('name')->get() : collect();
+        
+        // Get all items for dropdown
+        $items = Item::orderBy('name')->get();
 
-        return view('admin.invoice.edit', compact('invoice','customers','projects','incomeSubCategories'));
+        return view('admin.invoice.edit', compact('invoice', 'customers', 'projects', 'incomeSubCategories', 'items'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -91,26 +135,57 @@ class InvoiceController extends Controller
         if ($invoice->status === 'Paid') {
             return redirect()->route('invoice.index')->with('error', 'Paid invoices cannot be edited');
         }
+        
         $validated = $request->validate([
             'customer_id' => 'required|exists:users,id',
             'project_id' => 'required|exists:projects,id',
-            'sub_category_id' => 'required|exists:sub_categories,id',
-            'amount' => 'required|numeric|min:0.01',
             'note' => 'required|string',
             'status' => 'nullable|in:Paid,Pending',
             'invoice_date' => 'required|date|after_or_equal:today',
+            'items' => 'required|array|min:1',
+            'items.*.item_id' => 'nullable|exists:items,id',
+            'items.*.sub_category_id' => 'required|exists:sub_categories,id',
+            'items.*.qty' => 'required|numeric|min:0.01',
+            'items.*.unit_amount' => 'required|numeric|min:0',
         ]);
-        // only update status if provided by the form (we hide it in frontend)
-        if (!array_key_exists('status', $validated)) {
-            unset($validated['status']);
+
+        // compute total
+        $totalAmount = 0.0;
+        foreach ($validated['items'] as $it) {
+            $totalAmount += (float)$it['qty'] * (float)$it['unit_amount'];
         }
-        $invoice->update($validated);
+
+        // update invoice core fields
+        $invoice->customer_id = $validated['customer_id'];
+        $invoice->project_id = $validated['project_id'];
+        $invoice->amount = $totalAmount;
+        $invoice->note = $validated['note'];
+        $invoice->invoice_date = $validated['invoice_date'];
+        if (array_key_exists('status', $validated)) { 
+            $invoice->status = $validated['status']; 
+        }
+        $invoice->sub_category_id = $validated['items'][0]['sub_category_id'] ?? $invoice->sub_category_id;
+        $invoice->save();
+
+        // replace invoice items
+        $invoice->invoiceItems()->delete();
+        foreach ($validated['items'] as $it) {
+            InvoiceItem::create([
+                'invoice_id' => $invoice->id,
+                'item_id' => $it['item_id'] ?? null,
+                'sub_category_id' => $it['sub_category_id'],
+                'qty' => $it['qty'],
+                'unit_amount' => $it['unit_amount'],
+                'total_amount' => (float)$it['qty'] * (float)$it['unit_amount'],
+            ]);
+        }
 
         // Recalculate due_amount after amount change using recorded payments
         $paid = (float) \DB::table('payment_receive_invoices')->where('invoice_id', $invoice->id)->sum('amount');
         $invoice->due_amount = max(0, (float)$invoice->amount - $paid);
         $invoice->status = $invoice->due_amount <= 0 ? 'Paid' : 'Pending';
         $invoice->save();
+        
         return redirect()->route('invoice.index')->with('success','Invoice updated');
     }
 
@@ -132,7 +207,7 @@ class InvoiceController extends Controller
 
     public function show($id): View
     {
-        $invoice = Invoice::with(['customer','project','subCategory'])->findOrFail($id);
+        $invoice = Invoice::with(['customer','project','subCategory', 'invoiceItems'])->findOrFail($id);
         return view('admin.invoice.show', compact('invoice'));
     }
 
@@ -152,9 +227,15 @@ class InvoiceController extends Controller
 
             if (!empty($search)) {
                 $query->where(function($q) use ($search) {
-                    $q->whereHas('customer', function($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
-                      ->orWhereHas('project', function($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
-                      ->orWhereHas('subCategory', function($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
+                    $q->whereHas('customer', function($q2) use ($search) { 
+                        $q2->where('name', 'like', "%{$search}%"); 
+                    })
+                      ->orWhereHas('project', function($q2) use ($search) { 
+                        $q2->where('name', 'like', "%{$search}%"); 
+                      })
+                      ->orWhereHas('subCategory', function($q2) use ($search) { 
+                        $q2->where('name', 'like', "%{$search}%"); 
+                      })
                       ->orWhere('amount', 'like', "%{$search}%");
                 });
             }
@@ -166,6 +247,14 @@ class InvoiceController extends Controller
 
             if ($request->filled('status')) {
                 $query->where('status', $request->input('status'));
+            }
+
+            // optional date range filter
+            if ($request->filled('date_from')) {
+                $query->whereDate('invoice_date', '>=', $request->input('date_from'));
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('invoice_date', '<=', $request->input('date_to'));
             }
 
             $totalData = Invoice::count();
@@ -196,7 +285,7 @@ class InvoiceController extends Controller
 
             $data = [];
             $i = $start + 1;
-                foreach ($rows as $row) {
+            foreach ($rows as $row) {
                 $nested = [];
                 $nested['id'] = $i;
                 $nested['customer'] = $row->customer->name ?? '';
@@ -205,10 +294,7 @@ class InvoiceController extends Controller
                 $nested['amount'] = $row->amount;
                 $nested['status'] = $row->status;
                 $nested['invoice_date'] = $row->invoice_date;
-
                 $nested['project_id'] = $row->project_id;
-
-                // include actual invoice id for client-side use
                 $nested['invoice_id'] = $row->id;
 
                 // compute paid and due amounts

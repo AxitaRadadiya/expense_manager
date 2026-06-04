@@ -23,4 +23,5 @@ class Invoice extends Model
     public function customer() { return $this->belongsTo(User::class, 'customer_id'); }
     public function project() { return $this->belongsTo(Project::class, 'project_id'); }
     public function subCategory() { return $this->belongsTo(SubCategory::class, 'sub_category_id'); }
+    public function invoiceItems() { return $this->hasMany(InvoiceItem::class); }
 }

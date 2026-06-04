@@ -54,7 +54,7 @@
         <a href="{{ route('invoice.index') }}"
           class="nav-link {{ Request::routeIs('invoice.*') || Request::routeIs('payment-receive.*') ? 'active' : '' }}">
           <i class="nav-icon fas fa-dollar-sign"></i>
-          <p>Sales</p>
+          <p>Income</p>
         </a>
       </li>
       @endif

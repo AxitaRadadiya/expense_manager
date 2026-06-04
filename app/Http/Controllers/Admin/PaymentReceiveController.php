@@ -193,6 +193,14 @@ class PaymentReceiveController extends Controller
                 });
             }
 
+            // optional date range filter
+            if ($request->filled('date_from')) {
+                $query->whereDate('payment_date', '>=', $request->input('date_from'));
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('payment_date', '<=', $request->input('date_to'));
+            }
+
             $totalData = PaymentReceive::count();
             $totalFiltered = $query->count();
 

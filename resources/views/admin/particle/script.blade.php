@@ -297,7 +297,11 @@ $(document).ready(function () {
             ajax: {
                 url: '{{ route("payment.list") }}',
                 type: 'GET',
-                data: { _token: '{{ csrf_token() }}' }
+                data: function(d) {
+                    d._token = '{{ csrf_token() }}';
+                    d.date_from = $('#filter-payments-from').val();
+                    d.date_to = $('#filter-payments-to').val();
+                }
             },
             columns: [
                 { data: 'id' },
@@ -324,7 +328,11 @@ $(document).ready(function () {
             ajax: {
                 url: '{{ route("purchase.list") }}',
                 type: 'GET',
-                data: { _token: '{{ csrf_token() }}' }
+                data: function(d) {
+                    d._token = '{{ csrf_token() }}';
+                    d.date_from = $('#filter-purchases-from').val();
+                    d.date_to = $('#filter-purchases-to').val();
+                }
             },
             columns: [
                 { data: 'id' },
@@ -352,7 +360,11 @@ $(document).ready(function () {
             ajax: {
                 url: '{{ route("payment-receive.list") }}',
                 type: 'GET',
-                data: { _token: '{{ csrf_token() }}' }
+                data: function(d) {
+                    d._token = '{{ csrf_token() }}';
+                    d.date_from = $('#filter-paymentsreceive-from').val();
+                    d.date_to = $('#filter-paymentsreceive-to').val();
+                }
             },
             columns: [
                 { data: 'id' },
@@ -380,7 +392,11 @@ $(document).ready(function () {
             ajax: {
                 url: '{{ route("invoice.list") }}',
                 type: 'GET',
-                data: { _token: '{{ csrf_token() }}' }
+                data: function(d) {
+                    d._token = '{{ csrf_token() }}';
+                    d.date_from = $('#filter-invoices-from').val();
+                    d.date_to = $('#filter-invoices-to').val();
+                }
             },
             columns: [
                 { data: 'id' },
@@ -398,6 +414,12 @@ $(document).ready(function () {
         });
     }
     load_invoices();
+
+    // Reload tables when date filters change
+    $('#filter-invoices-from, #filter-invoices-to').on('change', function(){ if ($.fn.DataTable.isDataTable('#InvoicesTable')) $('#InvoicesTable').DataTable().ajax.reload(); });
+    $('#filter-purchases-from, #filter-purchases-to').on('change', function(){ if ($.fn.DataTable.isDataTable('#PurchasesTable')) $('#PurchasesTable').DataTable().ajax.reload(); });
+    $('#filter-payments-from, #filter-payments-to').on('change', function(){ if ($.fn.DataTable.isDataTable('#PaymentsTable')) $('#PaymentsTable').DataTable().ajax.reload(); });
+    $('#filter-paymentsreceive-from, #filter-paymentsreceive-to').on('change', function(){ if ($.fn.DataTable.isDataTable('#PaymentsReceiveTable')) $('#PaymentsReceiveTable').DataTable().ajax.reload(); });
 
     // Category table
    function load_category() {
@@ -794,6 +816,118 @@ $(document).ready(function () {
         });
     }
     load_report_timeline();
+
+    // Insert filter buttons into DataTable's search area and wire toggle for date panels
+    (function () {
+        // add CSS for outline teal button
+        var css = `
+            .btn-outline-teal { color: #006666; border: 1px solid #00a8a8; background: transparent; }
+            .btn-outline-teal.active { background: linear-gradient(135deg,#006666,#00a8a8); color: #fff; }
+            .dt-filter-btn { margin-left: 6px; }
+            .date-filters { transition: all .18s ease-in-out; }
+            .dt-filter-popup { background: #fff; border-radius:8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); padding:12px; }
+            .dt-filter-popup .filter-row { display:flex; gap:8px; align-items:center; }
+            .dt-filter-popup .form-control { padding:.375rem .5rem; font-size:.9rem; }
+            .dt-filter-popup .label { font-size:.78rem; color:#444; margin-bottom:4px; }
+            .dt-filter-popup .popup-caret { position:absolute; right:14px; top:-8px; width:16px; height:8px; overflow:hidden; }
+            .dt-filter-popup .popup-caret:after { content: ''; display:block; width:12px; height:12px; background:#fff; transform: rotate(45deg); box-shadow: 0 3px 6px rgba(0,0,0,0.06); margin-left:2px; }
+            .dt-filter-badge { display:inline-block; min-width:18px; height:18px; line-height:18px; text-align:center; border-radius:10px; background:#00a8a8; color:#fff; font-size:11px; padding:0 6px; margin-left:6px; }
+            @media (max-width: 576px) {
+                .dt-filter-popup { min-width: 220px; right: -6px !important; }
+                .dt-filter-popup .filter-row { flex-direction:column; align-items:stretch; }
+            }
+        `;
+        $('<style>').text(css).appendTo('head');
+
+        function addFilterButton(tableId, panelSelector) {
+            var wrapper = $('#' + tableId + '_wrapper .dataTables_filter');
+            if (!wrapper.length) return;
+            if (wrapper.find('.dt-filter-btn').length) return;
+            wrapper.css('position','relative');
+            var btn = $('<button type="button" class="btn btn-sm btn-outline-teal dt-filter-btn" title="Filters"><i class="fa fa-filter"></i></button>');
+            wrapper.append(btn);
+
+            // build popup and move date inputs into it (preserve original IDs)
+            var popup = $('<div class="dt-filter-popup" style="display:none; position:absolute; right:0; top:calc(100% + 8px); z-index:2500; min-width:300px;"></div>');
+            popup.append('<div class="popup-caret"></div>');
+            var panel = $(panelSelector);
+            var fromInput, toInput;
+            if (panel.length) {
+                // take the inputs by id if present
+                fromInput = panel.find('input[type="date"]').first();
+                toInput = panel.find('input[type="date"]').last();
+                // move inputs into popup with labels
+                var row = $('<div class="filter-row"></div>');
+                var fromWrap = $('<div style="flex:1"></div>');
+                fromWrap.append('<div class="label">From</div>').append(fromInput);
+                var toWrap = $('<div style="flex:1"></div>');
+                toWrap.append('<div class="label">To</div>').append(toInput);
+                row.append(fromWrap).append(toWrap);
+                popup.append(row);
+                panel.remove();
+            } else {
+                // fallback: create two date inputs (ids should match naming conventions)
+                fromInput = $('<input type="date" id="filter-' + tableId.toLowerCase().replace('table','') + '-from" class="form-control">');
+                toInput = $('<input type="date" id="filter-' + tableId.toLowerCase().replace('table','') + '-to" class="form-control">');
+                var row = $('<div class="filter-row"></div>');
+                var fromWrap = $('<div style="flex:1"></div>'); fromWrap.append('<div class="label">From</div>').append(fromInput);
+                var toWrap = $('<div style="flex:1"></div>'); toWrap.append('<div class="label">To</div>').append(toInput);
+                row.append(fromWrap).append(toWrap);
+                popup.append(row);
+            }
+
+            var actions = $('<div class="d-flex justify-content-end mt-2"></div>');
+            var clearBtn = $('<button type="button" class="btn btn-sm btn-outline-secondary mr-2">Clear</button>');
+            var applyBtn = $('<button type="button" class="btn btn-sm btn-outline-teal">Apply</button>');
+            actions.append(clearBtn).append(applyBtn);
+            popup.append(actions);
+            wrapper.append(popup);
+
+            // toggle popup
+            btn.on('click', function (e) {
+                e.stopPropagation();
+                $('.dt-filter-popup').not(popup).hide();
+                popup.toggle();
+                $(this).toggleClass('active', popup.is(':visible'));
+            });
+
+
+            // apply -> reload table and show badge if filters active
+            applyBtn.on('click', function (e) {
+                e.preventDefault();
+                if ($.fn.DataTable.isDataTable('#' + tableId)) $('#'+tableId).DataTable().ajax.reload();
+                popup.hide(); btn.removeClass('active');
+                // show badge if any date set
+                var any = popup.find('input[type="date"]').filter(function(){ return $(this).val(); }).length > 0;
+                btn.next('.dt-filter-badge').remove();
+                if (any) btn.after('<span class="dt-filter-badge">1</span>');
+            });
+
+            // clear -> empty inputs and reload
+            clearBtn.on('click', function (e) {
+                e.preventDefault();
+                popup.find('input[type="date"]').val('');
+                if ($.fn.DataTable.isDataTable('#' + tableId)) $('#'+tableId).DataTable().ajax.reload();
+                popup.hide(); btn.removeClass('active');
+                btn.next('.dt-filter-badge').remove();
+            });
+
+            // close when clicking outside
+            $(document).on('click.dtFilter', function (ev) {
+                if (!$(ev.target).closest(popup).length && !$(ev.target).closest(btn).length) {
+                    popup.hide(); btn.removeClass('active');
+                }
+            });
+        }
+
+        // Wait briefly for DataTables to initialize wrappers
+        setTimeout(function () {
+            addFilterButton('InvoicesTable', '#filters-invoices-panel');
+            addFilterButton('PurchasesTable', '#filters-purchases-panel');
+            addFilterButton('PaymentsTable', '#filters-payments-panel');
+            addFilterButton('PaymentsReceiveTable', '#filters-paymentsreceive-panel');
+        }, 400);
+    })();
 
     // Labour Management table loader (client-side DataTable for rendered rows)
     function load_labour_management() {
