@@ -40,7 +40,7 @@
 
               <div class="form-group col-md-6">
                 <label class="font-weight-bold">Email</label>
-                <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required readonly>
                 @error('email') <small class="text-danger">{{ $message }}</small> @enderror
               </div>
               <div class="form-group col-md-6">

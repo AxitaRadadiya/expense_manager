@@ -152,7 +152,7 @@
               <div class="form-group">
                 <label for="description" class="font-weight-bold">Description</label>
                 <textarea class="form-control @error('description') is-invalid @enderror" name="description" id="description" rows="4" placeholder="Add a short description of the expense, items purchased, or purpose.">{{ old('description') }}</textarea>
-                <small class="text-muted d-block mt-1">Optional. Use this for supporting details.</small>
+                <!-- <small class="text-muted d-block mt-1">Optional. Use this for supporting details.</small> -->
                 @error('description')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
               </div>
             </div>
@@ -161,7 +161,7 @@
               <div class="form-group">
                 <label for="note" class="font-weight-bold">Note</label>
                 <textarea class="form-control @error('note') is-invalid @enderror" name="note" id="note" rows="4" placeholder="Enter the key reason for this expense or any important internal note.">{{ old('note') }}</textarea>
-                <small class="text-muted d-block mt-1">Optional. Add any helpful internal note if needed.</small>
+                <!-- <small class="text-muted d-block mt-1">Optional. Add any helpful internal note if needed.</small> -->
                 @error('note')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
               </div>
             </div>

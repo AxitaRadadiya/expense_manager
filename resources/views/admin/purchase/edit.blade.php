@@ -57,7 +57,7 @@
               <div class="form-group">
                 <label>Purchase Date <span class="text-danger">*</span></label>
                 <input type="date" name="purchase_date" class="form-control"
-                  value="{{ $purchase->purchase_date }}" required>
+                  value="{{ $purchase->purchase_date }}" min="{{ date('Y-m-d') }}" required>
               </div>
             </div>
 

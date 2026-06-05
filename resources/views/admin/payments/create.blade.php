@@ -46,7 +46,7 @@
             <div class="col-md-4">
               <div class="form-group">
                 <label>Payment Date <span class="text-danger">*</span></label>
-                <input type="date" name="payment_date" class="form-control" min="{{ date('Y-m-d') }}" required>
+                <input type="date" name="payment_date" class="form-control" min="{{ date('Y-m-d') }}" value="{{ old('payment_date', date('Y-m-d')) }}" required>
               </div>
             </div>
           </div>

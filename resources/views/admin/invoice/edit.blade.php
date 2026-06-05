@@ -59,7 +59,7 @@
                             <div class="form-group">
                                 <label>Invoice Date <span class="text-danger">*</span></label>
                                 <input type="date" name="invoice_date" class="form-control"
-                                    value="{{ $invoice->invoice_date }}" required>
+                                    value="{{ $invoice->invoice_date }}" min="{{ date('Y-m-d') }}" required>
                             </div>
                         </div>
 
@@ -175,10 +175,10 @@
                                 <div class="row align-items-center">
                                     <div class="col-md-7">
                                         <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <!-- <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <div><strong>Total Amount</strong></div>
                                                 <div class="text-primary" id="summary-items-total">0.00</div>
-                                            </div>
+                                            </div> -->
                                         </div>
                                     </div>
                                     <div class="col-md-5">
