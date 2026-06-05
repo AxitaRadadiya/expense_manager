@@ -10,7 +10,7 @@ class Purchase extends Model
     use HasFactory;
 
     protected $fillable = [
-        'vendor_id', 'project_id', 'sub_category_id', 'amount', 'note', 'purchase_date', 'due_amount', 'status'
+        'vendor_id', 'project_id', 'sub_category_id', 'amount', 'note', 'purchase_date', 'due_amount', 'status', 'image'
     ];
 
     public function vendor()

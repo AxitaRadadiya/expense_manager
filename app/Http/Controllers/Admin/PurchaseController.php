@@ -53,15 +53,28 @@ class PurchaseController extends Controller
         $validated = $request->validate([
             'vendor_id' => 'required|exists:users,id',
             'project_id' => 'required|exists:projects,id',
-            'sub_category_id' => 'required|exists:sub_categories,id',
             'amount' => 'required|numeric|min:0.01',
             'note' => 'nullable|string',
             'purchase_date' => 'required|date|after_or_equal:today',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'items' => 'nullable|array',
+            'items.*.sub_category_id' => 'required_with:items|exists:sub_categories,id',
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('purchases', 'public');
+            $validated['image'] = $imagePath;
+        }
 
         // set due_amount and status on create
         $validated['due_amount'] = $validated['amount'];
         $validated['status'] = ($validated['amount'] <= 0) ? 'paid' : 'pending';
+
+        // set purchase sub_category_id from first item's sub_category if provided
+        if ($request->has('items') && is_array($request->items) && !empty($request->items[0]['sub_category_id'])) {
+            $validated['sub_category_id'] = $request->items[0]['sub_category_id'];
+        }
 
         $purchase = Purchase::create($validated);
 
@@ -82,6 +95,7 @@ class PurchaseController extends Controller
                 $data = [
                     'purchase_id' => $purchase->id,
                     'item_id' => $it['item_id'] ?? null,
+                    'sub_category_id' => $it['sub_category_id'] ?? null,
                     'quantity' => $quantity,
                     'date_start' => $it['date_start'] ?? null,
                     'date_end' => $it['date_end'] ?? null,
@@ -158,11 +172,23 @@ class PurchaseController extends Controller
         $validated = $request->validate([
             'vendor_id' => 'required|exists:users,id',
             'project_id' => 'required|exists:projects,id',
-            'sub_category_id' => 'required|exists:sub_categories,id',
             'amount' => 'required|numeric|min:0.01',
             'note' => 'nullable|string',
             'purchase_date' => 'required|date|after_or_equal:today',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'items' => 'nullable|array',
+            'items.*.sub_category_id' => 'required_with:items|exists:sub_categories,id',
         ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($purchase->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($purchase->image);
+            }
+            $imagePath = $request->file('image')->store('purchases', 'public');
+            $validated['image'] = $imagePath;
+        }
 
         // preserve existing payments when amount changes
         $oldAmount = $purchase->amount;
@@ -173,6 +199,12 @@ class PurchaseController extends Controller
         $validated['status'] = ($newDue <= 0) ? 'paid' : 'pending';
 
         $purchase->update($validated);
+
+        // set purchase sub_category_id to first item's sub_category if provided
+        if ($request->has('items') && is_array($request->items) && !empty($request->items[0]['sub_category_id'])) {
+            $purchase->sub_category_id = $request->items[0]['sub_category_id'];
+            $purchase->save();
+        }
 
         // Update purchase items if provided
         if ($request->has('items') && is_array($request->items)) {
@@ -193,6 +225,7 @@ class PurchaseController extends Controller
                 $data = [
                     'purchase_id' => $purchase->id,
                     'item_id' => $it['item_id'] ?? null,
+                    'sub_category_id' => $it['sub_category_id'] ?? null,
                     'quantity' => $quantity,
                     'date_start' => $it['date_start'] ?? null,
                     'date_end' => $it['date_end'] ?? null,
@@ -251,7 +284,7 @@ class PurchaseController extends Controller
 
     public function show($id): View
     {
-        $purchase = Purchase::with(['vendor', 'project', 'subCategory'])->findOrFail($id);
+        $purchase = Purchase::with(['vendor', 'project', 'purchaseItems.item', 'purchaseItems.subCategory'])->findOrFail($id);
         return view('admin.purchase.show', compact('purchase'));
     }
 
@@ -286,6 +319,14 @@ class PurchaseController extends Controller
             }
             if ($request->filled('status')) {
                 $query->where('status', $request->input('status'));
+            }
+
+            // optional date range filter
+            if ($request->filled('date_from')) {
+                $query->whereDate('purchase_date', '>=', $request->input('date_from'));
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('purchase_date', '<=', $request->input('date_to'));
             }
 
             $totalData = Purchase::count();

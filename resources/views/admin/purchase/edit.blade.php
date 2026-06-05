@@ -5,15 +5,15 @@
 <div class="content-header">
   <div class="container-fluid-85">
     <div class="row mb-2">
-        <div class="col-sm-6"><h1 class="m-0">Edit Purchase</h1></div>
-        <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('purchase.index') }}">Purchases</a></li>
-                <li class="breadcrumb-item active">Edit</li>  
-            </ol>
-        </div>
-        </div>
+      <div class="col-sm-6"><h1 class="m-0">Edit Purchase</h1></div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('purchase.index') }}">Purchases</a></li>
+          <li class="breadcrumb-item active">Edit</li>
+        </ol>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -21,10 +21,12 @@
   <div class="container-fluid-85">
     <div class="card card-outline card-primary shadow-sm">
       <div class="card-body">
-        <form action="{{ route('purchase.update', $purchase->id) }}" method="POST">
+        <form action="{{ route('purchase.update', $purchase->id) }}" method="POST" enctype="multipart/form-data">
           @csrf
           @method('PUT')
           <div class="row">
+
+            {{-- Vendor --}}
             <div class="col-md-4">
               <div class="form-group">
                 <label>Vendor <span class="text-danger">*</span></label>
@@ -37,6 +39,7 @@
               </div>
             </div>
 
+            {{-- Project --}}
             <div class="col-md-4">
               <div class="form-group">
                 <label>Project <span class="text-danger">*</span></label>
@@ -49,37 +52,17 @@
               </div>
             </div>
 
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Sub Category <span class="text-danger">*</span></label>
-                <select name="sub_category_id" class="form-control select2" required>
-                  <option value="">-- Select Sub Category --</option>
-                  @foreach($expenseSubCategories as $s)
-                    <option value="{{ $s->id }}" {{ $purchase->sub_category_id == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
-                  @endforeach
-                </select>
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <div class="form-group">
-                <label>Amount <span class="text-danger">*</span></label>
-                <input type="number" name="amount" step="0.01" min="0.01" value="{{ $purchase->amount }}" class="form-control" required>
-              </div>
-            </div>
-
-            {{-- Quantity removed from edit form --}}
-
+            {{-- Purchase Date --}}
             <div class="col-md-4">
               <div class="form-group">
                 <label>Purchase Date <span class="text-danger">*</span></label>
-                <input type="date" name="purchase_date" class="form-control" min="{{ date('Y-m-d') }}" value="{{ $purchase->purchase_date }}" required>
+                <input type="date" name="purchase_date" class="form-control"
+                  value="{{ $purchase->purchase_date }}" required>
               </div>
             </div>
 
-            <div class="col-md-12 mt-2"></div>
-
-            <div class="col-md-12">
+            {{-- Item List --}}
+            <div class="col-md-12 mt-2">
               <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                   <h5 class="mb-0">Item List</h5>
@@ -89,16 +72,16 @@
                     <table class="table table-bordered" id="items-table">
                       <thead>
                         <tr>
-                          <th style="width:40px;">#</th>
+                          <th style="width:40px;">SR No.</th>
                           <th>Select Item</th>
+                          <th>Expense Type <span class="text-danger">*</span></th>
                           <th style="width:100px;">Qty</th>
-                          <th style="width:320px;">Date Range</th>
-                          <th style="width:160px;">Amount (Per Piece/Day)</th>
+                          <th style="width:160px;">Amount (Per Piece)</th>
                           <th style="width:140px;">Total Amount</th>
                           <th style="width:60px;"></th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody id="items-body">
                         @if($purchase->purchaseItems->count())
                           @foreach($purchase->purchaseItems as $i => $pi)
                           <tr>
@@ -111,16 +94,17 @@
                                 @endforeach
                               </select>
                             </td>
-                            <td><input type="number" name="items[{{ $i }}][quantity]" min="1" class="form-control qty-input" value="{{ $pi->quantity }}"></td>
                             <td>
-                              <div class="d-flex">
-                                <input type="date" name="items[{{ $i }}][date_start]" class="form-control mr-2" value="{{ $pi->date_start }}">
-                                <div class="px-2 align-self-center">-</div>
-                                <input type="date" name="items[{{ $i }}][date_end]" class="form-control ml-2" value="{{ $pi->date_end }}">
-                              </div>
+                              <select name="items[{{ $i }}][sub_category_id]" class="form-control" required>
+                                <option value="">Select</option>
+                                @foreach($expenseSubCategories as $s)
+                                  <option value="{{ $s->id }}" {{ $pi->sub_category_id == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+                                @endforeach
+                              </select>
                             </td>
+                            <td><input type="number" name="items[{{ $i }}][quantity]" min="1" step="0.01" class="form-control qty-input" value="{{ $pi->quantity }}"></td>
                             <td><input type="number" name="items[{{ $i }}][amount]" step="0.01" class="form-control unit-price-input" value="{{ $pi->amount }}"></td>
-                            <td class="text-right"><span class="row-total">{{ number_format($pi->total_amount,2) }}</span></td>
+                            <td class="text-right"><span class="row-total">{{ number_format($pi->quantity * $pi->amount, 2) }}</span></td>
                             <td class="text-center"><button type="button" class="btn btn-link text-danger remove-row" title="Delete"><i class="fa fa-trash"></i></button></td>
                           </tr>
                           @endforeach
@@ -135,14 +119,15 @@
                                 @endforeach
                               </select>
                             </td>
-                            <td><input type="number" name="items[0][quantity]" min="1" class="form-control qty-input" value="1"></td>
                             <td>
-                              <div class="d-flex">
-                                <input type="date" name="items[0][date_start]" class="form-control mr-2">
-                                <div class="px-2 align-self-center">-</div>
-                                <input type="date" name="items[0][date_end]" class="form-control ml-2">
-                              </div>
+                              <select name="items[0][sub_category_id]" class="form-control" required>
+                                <option value="">Select</option>
+                                @foreach($expenseSubCategories as $s)
+                                  <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                @endforeach
+                              </select>
                             </td>
+                            <td><input type="number" name="items[0][quantity]" min="1" step="0.01" class="form-control qty-input" value="1"></td>
                             <td><input type="number" name="items[0][amount]" step="0.01" class="form-control unit-price-input" value="0"></td>
                             <td class="text-right"><span class="row-total">0.00</span></td>
                             <td class="text-center"><button type="button" class="btn btn-link text-danger remove-row" title="Delete"><i class="fa fa-trash"></i></button></td>
@@ -164,135 +149,51 @@
               </div>
             </div>
 
+            {{-- Items subtotal --}}
             <div class="col-md-12 mt-2">
               <div class="d-flex justify-content-end align-items-center">
-                <div class="mr-4"><strong>Total Amount (Item List):</strong></div>
+                <div class="mr-4"><strong>Total Amount </strong></div>
                 <div class="text-primary" id="items-total">0.00</div>
               </div>
             </div>
 
-            {{-- Labour List --}}
+            {{-- Grand Total and Image in same row, different boxes --}}
             <div class="col-md-12 mt-4">
-              <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0">Labour List</h5>
-                </div>
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table table-bordered" id="labours-table">
-                      <thead>
-                        <tr>
-                          <th style="width:40px;">#</th>
-                          <th>Labour (Category)</th>
-                          <th style="width:100px;">Numbers</th>
-                          <th style="width:320px;">Date Range</th>
-                          <th style="width:180px;">Amount (Per Day/Person)</th>
-                          <th style="width:140px;">Total Amount</th>
-                          <th style="width:60px;"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @if($purchase->purchaseLabours->count())
-                          @foreach($purchase->purchaseLabours as $j => $pl)
-                          <tr>
-                            <td class="row-index">{{ $loop->iteration }}</td>
-                            <td><input type="text" name="labours[{{ $j }}][labour]" class="form-control" placeholder="Category" value="{{ $pl->labour }}"></td>
-                            <td><input type="number" name="labours[{{ $j }}][numbers]" min="1" class="form-control labour-numbers" value="{{ $pl->numbers }}"></td>
-                            <td>
-                              <div class="d-flex">
-                                <input type="date" name="labours[{{ $j }}][date_start]" class="form-control mr-2" value="{{ $pl->date_start }}">
-                                <div class="px-2 align-self-center">-</div>
-                                <input type="date" name="labours[{{ $j }}][date_end]" class="form-control ml-2" value="{{ $pl->date_end }}">
-                              </div>
-                            </td>
-                            <td><input type="number" name="labours[{{ $j }}][amount]" step="0.01" class="form-control labour-amount" value="{{ $pl->amount }}"></td>
-                            <td class="text-right"><span class="labour-row-total">{{ number_format($pl->total_amount,2) }}</span></td>
-                            <td class="text-center"><button type="button" class="btn btn-link text-danger remove-labour-row" title="Delete"><i class="fa fa-trash"></i></button></td>
-                          </tr>
-                          @endforeach
-                        @else
-                          <tr>
-                            <td class="row-index">1</td>
-                            <td><input type="text" name="labours[0][labour]" class="form-control" placeholder="Category"></td>
-                            <td><input type="number" name="labours[0][numbers]" min="1" class="form-control labour-numbers" value="1"></td>
-                            <td>
-                              <div class="d-flex">
-                                <input type="date" name="labours[0][date_start]" class="form-control mr-2">
-                                <div class="px-2 align-self-center">-</div>
-                                <input type="date" name="labours[0][date_end]" class="form-control ml-2">
-                              </div>
-                            </td>
-                            <td><input type="number" name="labours[0][amount]" step="0.01" class="form-control labour-amount" value="0"></td>
-                            <td class="text-right"><span class="labour-row-total">0.00</span></td>
-                            <td class="text-center"><button type="button" class="btn btn-link text-danger remove-labour-row" title="Delete"><i class="fa fa-trash"></i></button></td>
-                          </tr>
-                        @endif
-                      </tbody>
-                      <tfoot>
-                        <tr>
-                          <td colspan="7">
-                            <div class="d-flex justify-content-end">
-                              <button type="button" id="add-labour" class="btn-submit">+ Add New Row</button>
-                            </div>
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-12 mt-2">
-              <div class="d-flex justify-content-end align-items-center">
-                <div class="mr-4"><strong>Total Amount (Labour List):</strong></div>
-                <div class="text-primary" id="labours-total">0.00</div>
-              </div>
-            </div>
-
-            <div class="col-md-12 mt-4">
-              <div class="card p-3">
-                <div class="row align-items-center">
-                  <div class="col-md-7">
-                    <div class="d-flex">
-                        <div class="pr-4 border-right mr-4"></div>
-                      <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                          <div><strong>Total Amount (Item List)</strong></div>
-                          <div class="text-primary" id="summary-items-total">0.00</div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card shadow-sm">
+                    <div class="card-body">
+                      <label class="font-weight-bold">Attach Image</label>
+                      @if($purchase->image)
+                        <div class="mb-2 text-center">
+                          <img src="{{ asset('storage/' . $purchase->image) }}" alt="Purchase Image" class="img-fluid rounded" style="max-height: 120px;">
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                          <div><strong>Total Amount (Labour List)</strong></div>
-                          <div class="text-primary" id="summary-labours-total-small">0.00</div>
-                        </div>
-                      </div>
+                      @endif
+                      <input type="file" name="image" class="form-control" accept="image/*">
                     </div>
                   </div>
-                  <div class="col-md-5">
-                    <div class="d-flex justify-content-end align-items-center">
-                      <div class="text-right">
-                        <div class="mb-1"><strong>Grand Total</strong></div>
-                        <div id="grand-total" class="text-success" style="font-size:1.8rem; font-weight:800">0.00</div>
-                      </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card shadow-sm">
+                    <div class="card-body text-right">
+                      <div class="mb-1"><strong>Grand Total</strong></div>
+                      <div id="grand-total" class="text-success" style="font-size:1.8rem; font-weight:800">₹ 0.00</div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {{-- Note --}}
             <div class="col-md-12 mt-3">
               <div class="form-group">
                 <label>Note</label>
                 <textarea name="note" class="form-control" rows="3">{{ $purchase->note }}</textarea>
               </div>
             </div>
-            <!-- <div class="col-md-12 mt-3 d-flex justify-content-end align-items-center">
-              <button type="button" id="reset-form" class="btn btn-outline-secondary mr-3"><i class="fa fa-sync-alt mr-1"></i> Reset</button>
-              <button class="btn btn-primary" type="submit"><i class="fa fa-save mr-1"></i> Update Purchase</button>
-            </div> -->
 
-            <input type="hidden" id="purchase-amount" name="amount" value="0">
+            <input type="hidden" id="purchase-amount" name="amount" value="{{ $purchase->amount }}">
 
-            
           </div>
 
           <div class="card-footer p-0">
@@ -300,144 +201,111 @@
             <a href="{{ route('purchase.index') }}" class="btn-cancel ml-2"><i class="fa fa-times mr-1"></i> Cancel</a>
           </div>
         </form>
+
+        {{-- Hidden option templates for JS row cloning --}}
+        <select id="_item_options_tpl" style="display:none">
+          <option value="">Select Item</option>
+          @foreach($items as $it)
+            <option value="{{ $it->id }}">{{ $it->name }}</option>
+          @endforeach
+        </select>
+        <select id="_subcat_options_tpl" style="display:none">
+          <option value="">Select</option>
+          @foreach($expenseSubCategories as $s)
+            <option value="{{ $s->id }}">{{ $s->name }}</option>
+          @endforeach
+        </select>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          let idx = {{ $purchase->purchaseItems->count() ?: 1 }};
+
+          const fmt = n => parseFloat(n || 0).toFixed(2);
+
+          function recalcRow(row) {
+            const qty  = parseFloat(row.querySelector('.qty-input').value)        || 0;
+            const unit = parseFloat(row.querySelector('.unit-price-input').value) || 0;
+            const total = qty * unit;
+            row.querySelector('.row-total').textContent = fmt(total);
+            return total;
+          }
+
+          function recalcTotals() {
+            const rows = [...document.querySelectorAll('#items-body tr')];
+            const itemsTotal = rows.reduce((sum, row) => sum + recalcRow(row), 0);
+
+            const itemsTotalEl = document.getElementById('items-total');
+            if (itemsTotalEl) { itemsTotalEl.textContent = fmt(itemsTotal); }
+            const summaryEl = document.getElementById('summary-items-total');
+            if (summaryEl) { summaryEl.textContent = fmt(itemsTotal); }
+            const grandEl = document.getElementById('grand-total');
+            if (grandEl) { grandEl.textContent = '₹ ' + fmt(itemsTotal); }
+            const purchaseAmount = document.getElementById('purchase-amount');
+            if (purchaseAmount) { purchaseAmount.value = fmt(itemsTotal); }
+          }
+
+          function makeItemRow(i) {
+            const itemOpts   = document.getElementById('_item_options_tpl').innerHTML;
+            const subcatOpts = document.getElementById('_subcat_options_tpl').innerHTML;
+            return `
+              <td class="row-index">${i}</td>
+              <td><select name="items[${idx}][item_id]" class="form-control">${itemOpts}</select></td>
+              <td><select name="items[${idx}][sub_category_id]" class="form-control" required>${subcatOpts}</select></td>
+              <td><input type="number" name="items[${idx}][quantity]" min="1" step="0.01" class="form-control qty-input" value="1"></td>
+              <td><input type="number" name="items[${idx}][amount]" step="0.01" class="form-control unit-price-input" value="0"></td>
+              <td class="text-right"><span class="row-total">0.00</span></td>
+              <td class="text-center">
+                <button type="button" class="btn btn-link text-danger remove-row" title="Delete"><i class="fa fa-trash"></i></button>
+              </td>`;
+          }
+
+          function reindex() {
+            document.querySelectorAll('#items-body .row-index').forEach((el, i) => el.textContent = i + 1);
+          }
+
+          // Add row
+          document.getElementById('add-item').addEventListener('click', function () {
+            const tbody = document.querySelector('#items-body');
+            const tr = document.createElement('tr');
+            tr.innerHTML = makeItemRow(tbody.children.length + 1);
+            tbody.appendChild(tr);
+            idx++;
+            recalcTotals();
+          });
+
+          // Remove row (event delegation)
+          document.addEventListener('click', function (e) {
+            if (!e.target.closest('.remove-row')) return;
+            const tbody = document.querySelector('#items-body');
+            if (tbody.children.length <= 1) {
+              // Last row: clear instead of remove
+              const row = tbody.querySelector('tr');
+              row.querySelector('.qty-input').value        = '1';
+              row.querySelector('.unit-price-input').value = '0';
+              row.querySelector('.row-total').textContent  = '0.00';
+              recalcTotals();
+              return;
+            }
+            e.target.closest('tr').remove();
+            reindex();
+            recalcTotals();
+          });
+
+          // Recalc on input — delegated to tbody
+          document.getElementById('items-body').addEventListener('input', function (e) {
+            if (e.target.classList.contains('qty-input') || e.target.classList.contains('unit-price-input')) {
+              recalcTotals();
+            }
+          });
+
+          // Run on load to populate totals from existing saved data
+          recalcTotals();
+        });
+        </script>
+
       </div>
     </div>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      let idx = {{ max($purchase->purchaseItems->count(), $purchase->purchaseLabours->count()) }};
-
-      const fmt = n => new Intl.NumberFormat(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}).format(n);
-
-      function calcDays(row) {
-        const s = row.querySelector('input[name*="[date_start]"]').value;
-        const e = row.querySelector('input[name*="[date_end]"]').value;
-        if (!s || !e) return 1;
-        const diff = Math.floor((new Date(e) - new Date(s)) / 86400000);
-        return diff >= 0 ? diff + 1 : 1;
-      }
-
-      function recalcRow(row) {
-        const total = (parseFloat(row.querySelector('.qty-input').value) || 0)
-                    * (parseFloat(row.querySelector('.unit-price-input').value) || 0)
-                    * calcDays(row);
-        row.querySelector('.row-total').textContent = fmt(total);
-        return total;
-      }
-
-      function recalcLabourRow(row) {
-        const total = (parseFloat(row.querySelector('.labour-numbers').value) || 0)
-                    * (parseFloat(row.querySelector('.labour-amount').value) || 0)
-                    * calcDays(row);
-        row.querySelector('.labour-row-total').textContent = fmt(total);
-        return total;
-      }
-
-      function recalcTotals() {
-        const sum = (sel, fn) => [...document.querySelectorAll(sel)].reduce((t, r) => t + fn(r), 0);
-        const itemsTotal   = sum('#items-table tbody tr', recalcRow);
-        const laboursTotal = sum('#labours-table tbody tr', recalcLabourRow);
-        const grand = itemsTotal + laboursTotal;
-
-        document.getElementById('items-total').textContent            = fmt(itemsTotal);
-        document.getElementById('summary-items-total').textContent    = fmt(itemsTotal);
-        document.getElementById('labours-total').textContent          = fmt(laboursTotal);
-        document.getElementById('summary-labours-total-small').textContent = fmt(laboursTotal);
-        document.getElementById('grand-total').textContent            = fmt(grand);
-        document.getElementById('purchase-amount').value              = grand.toFixed(2);
-      }
-
-      function makeItemRow(i) {
-        return `
-          <td class="row-index">${i}</td>
-          <td>
-            <select name="items[${idx}][item_id]" class="form-control">
-              <option value="">Select Item</option>
-              @foreach($items as $it)
-                <option value="{{ $it->id }}">{{ $it->name }}</option>
-              @endforeach
-            </select>
-          </td>
-          <td><input type="number" name="items[${idx}][quantity]" min="1" class="form-control qty-input" value="1"></td>
-          <td>
-            <div class="d-flex">
-              <input type="date" name="items[${idx}][date_start]" class="form-control mr-2">
-              <div class="px-2 align-self-center">-</div>
-              <input type="date" name="items[${idx}][date_end]" class="form-control ml-2">
-            </div>
-          </td>
-          <td><input type="number" name="items[${idx}][amount]" step="0.01" class="form-control unit-price-input" value="0"></td>
-          <td class="text-right"><span class="row-total">0.00</span></td>
-          <td class="text-center"><button type="button" class="btn btn-link text-danger remove-row" title="Delete"><i class="fa fa-trash"></i></button></td>`;
-      }
-
-      function makeLabourRow(i) {
-        return `
-          <td class="row-index">${i}</td>
-          <td><input type="text" name="labours[${idx}][labour]" class="form-control" placeholder="Category"></td>
-          <td><input type="number" name="labours[${idx}][numbers]" min="1" class="form-control labour-numbers" value="1"></td>
-          <td>
-            <div class="d-flex">
-              <input type="date" name="labours[${idx}][date_start]" class="form-control mr-2">
-              <div class="px-2 align-self-center">-</div>
-              <input type="date" name="labours[${idx}][date_end]" class="form-control ml-2">
-            </div>
-          </td>
-          <td><input type="number" name="labours[${idx}][amount]" step="0.01" class="form-control labour-amount" value="0"></td>
-          <td class="text-right"><span class="labour-row-total">0.00</span></td>
-          <td class="text-center"><button type="button" class="btn btn-link text-danger remove-labour-row" title="Delete"><i class="fa fa-trash"></i></button></td>`;
-      }
-
-      function addRow(tbodySel, makeFn) {
-        const tbody = document.querySelector(tbodySel);
-        const tr = document.createElement('tr');
-        tr.innerHTML = makeFn(tbody.children.length + 1);
-        tbody.appendChild(tr);
-        idx++;
-        recalcTotals();
-      }
-
-      function reindex(tbodySel) {
-        document.querySelectorAll(`${tbodySel} .row-index`).forEach((el, i) => el.textContent = i + 1);
-      }
-
-      document.getElementById('add-item').addEventListener('click',   () => addRow('#items-table tbody',   makeItemRow));
-      document.getElementById('add-labour').addEventListener('click', () => addRow('#labours-table tbody', makeLabourRow));
-
-      document.addEventListener('input', e => {
-        if (e.target.matches('.qty-input, .unit-price-input, .labour-amount, .labour-numbers')) recalcTotals();
-      });
-
-      document.addEventListener('change', e => {
-        if (e.target.matches('input[type="date"]')) recalcTotals();
-      });
-
-      document.addEventListener('click', e => {
-        if (e.target.closest('.remove-row')) {
-          e.target.closest('tr').remove();
-          reindex('#items-table tbody');
-          recalcTotals();
-        }
-        if (e.target.closest('.remove-labour-row')) {
-          e.target.closest('tr').remove();
-          reindex('#labours-table tbody');
-          recalcTotals();
-        }
-      });
-
-      document.getElementById('reset-form').addEventListener('click', function () {
-        ['vendor_id','project_id','sub_category_id'].forEach(n => document.querySelector(`[name="${n}"]`).value = '');
-        document.querySelector('[name="purchase_date"]').value = '{{ date("Y-m-d") }}';
-        idx = 1;
-        const tbody = document.querySelector('#items-table tbody');
-        tbody.innerHTML = `<tr>${makeItemRow(1)}</tr>`;
-        recalcTotals();
-      });
-
-      recalcTotals();
-    });
-  </script>
 </section>
 
 @endsection

@@ -10,7 +10,7 @@ class PurchaseItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'purchase_id', 'item_id', 'quantity', 'date_start', 'date_end', 'amount', 'total_amount', 'note'
+        'purchase_id', 'item_id', 'sub_category_id', 'quantity', 'date_start', 'date_end', 'amount', 'total_amount', 'note'
     ];
 
     public function purchase()
@@ -21,5 +21,10 @@ class PurchaseItem extends Model
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
 }

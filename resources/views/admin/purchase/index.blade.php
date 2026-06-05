@@ -22,7 +22,12 @@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">All Purchases</h5>
-        <div></div>
+          <div id="filters-purchases-panel" class="date-filters d-none d-flex align-items-center" style="gap:8px;">
+            <div class="input-group input-group-sm">
+              <input type="date" id="filter-purchases-from" class="form-control" placeholder="From">
+              <input type="date" id="filter-purchases-to" class="form-control" placeholder="To">
+            </div>
+          </div>
         @if(auth()->check() && auth()->user()->hasPermission('purchase-create'))
         <a id="purchaseAddBtn" href="{{ route('purchase.create') }}" class="btn-create">
           <i class="fas fa-plus"></i> Add Purchase

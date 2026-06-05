@@ -86,49 +86,52 @@
                         </div>
                     </div>
 
-                    <!-- Invoice Summary -->
+                    <!-- Invoice Items -->
                     <h5 class="font-weight-bold">
-                        Account Summary
+                        Invoice Items
                     </h5>
 
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>Project</th>
-                                    <th>Category</th>
-                                    <th class="text-right">Amount</th>
+                                    <th>SR</th>
+                                    <th>Item</th>
+                                    <th>Expense Type</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-right">Unit Amount</th>
+                                    <th class="text-right">Total</th>
                                 </tr>
                             </thead>
 
                             <tbody>
+                                @forelse($invoice->invoiceItems as $ii)
                                 <tr>
-                                    <td>
-                                        {{ $invoice->project->name ?? '-' }}
-                                    </td>
-
-                                    <td>
-                                        {{ $invoice->subCategory->name ?? '-' }}
-                                    </td>
-
-                                    <td class="text-right">
-                                        ₹ {{ number_format($invoice->amount ?? 0, 2) }}
-                                    </td>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $ii->item->name ?? '-' }}</td>
+                                    <td>{{ $ii->subCategory->name ?? '-' }}</td>
+                                    <td class="text-center">{{ $ii->qty }}</td>
+                                    <td class="text-right">₹ {{ number_format($ii->unit_amount, 2) }}</td>
+                                    <td class="text-right">₹ {{ number_format($ii->total_amount, 2) }}</td>
                                 </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="text-center">No items found</td>
+                                </tr>
+                                @endforelse
                             </tbody>
 
                             <tfoot>
                                 <tr>
-                                    <th colspan="2" class="text-right">
+                                    <th colspan="5" class="text-right">
                                         Total Amount
                                     </th>
-
                                     <th class="text-right text-success">
                                         ₹ {{ number_format($invoice->amount ?? 0, 2) }}
                                     </th>
                                 </tr>
                                 <tr>
-                                    <th colspan="2" class="text-right">Due Amount</th>
+                                    <th colspan="5" class="text-right">Due Amount</th>
                                     <th class="text-right text-danger">₹ {{ number_format($invoice->due_amount ?? 0, 2) }}</th>
                                 </tr>
                             </tfoot>
