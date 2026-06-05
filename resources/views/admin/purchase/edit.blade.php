@@ -72,13 +72,13 @@
                     <table class="table table-bordered" id="items-table">
                       <thead>
                         <tr>
-                          <th style="width:40px;">SR No.</th>
-                          <th>Select Item</th>
-                          <th>Expense Type <span class="text-danger">*</span></th>
-                          <th style="width:100px;">Qty</th>
-                          <th style="width:160px;">Amount (Per Piece)</th>
-                          <th style="width:140px;">Total Amount</th>
-                          <th style="width:60px;"></th>
+                          <th style="width:45px;">SR No.</th>
+                          <th style="width:160px;">Select Item</th>
+                          <th style="width:160px;">Expense Type <span class="text-danger">*</span></th>
+                          <th style="width:80px;">Qty</th>
+                          <th style="width:120px;">Amount (Per Piece)</th>
+                          <th style="width:110px;">Total Amount</th>
+                          <th style="width:50px;"></th>
                         </tr>
                       </thead>
                       <tbody id="items-body">
@@ -112,7 +112,7 @@
                           <tr>
                             <td class="row-index">1</td>
                             <td>
-                              <select name="items[0][item_id]" class="form-control">
+                              <select name="items[0][item_id]" class="form-control select2">
                                 <option value="">Select Item</option>
                                 @foreach($items as $it)
                                   <option value="{{ $it->id }}">{{ $it->name }}</option>
@@ -120,7 +120,7 @@
                               </select>
                             </td>
                             <td>
-                              <select name="items[0][sub_category_id]" class="form-control" required>
+                              <select name="items[0][sub_category_id]" class="form-control select2">
                                 <option value="">Select</option>
                                 @foreach($expenseSubCategories as $s)
                                   <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -164,9 +164,9 @@
                   <div class="card shadow-sm">
                     <div class="card-body">
                       <label class="font-weight-bold">Attach Image</label>
-                      @if($purchase->image)
+                      @if(!empty($purchase->image))
                         <div class="mb-2 text-center">
-                          <img src="{{ asset('storage/' . $purchase->image) }}" alt="Purchase Image" class="img-fluid rounded" style="max-height: 120px;">
+                          <img src="{{ asset('storage/' . $purchase->image) }}" alt="Purchase Image" class="img-fluid rounded" style="max-height:120px;">
                         </div>
                       @endif
                       <input type="file" name="image" class="form-control" accept="image/*">

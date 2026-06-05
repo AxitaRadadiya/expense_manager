@@ -74,13 +74,13 @@
                                         <table class="table table-bordered" id="items-table">
                                             <thead>
                                                 <tr>
-                                                    <th style="width:40px;">SR No.</th>
-                                                    <th>Select Item</th>
-                                                    <th>Income Type <span class="text-danger">*</span></th>
-                                                    <th style="width:100px;">Qty</th>
-                                                    <th style="width:160px;">Amount (Per Unit)</th>
-                                                    <th style="width:140px;">Total Amount</th>
-                                                    <th style="width:60px;"></th>
+                                                    <th style="width:45px;">SR No.</th>
+                                                    <th style="width:160px;">Select Item</th>
+                                                    <th style="width:160px;">Income Type <span class="text-danger">*</span></th>
+                                                    <th style="width:80px;">Qty</th>
+                                                    <th style="width:120px;">Amount (Per Unit)</th>
+                                                    <th style="width:110px;">Total Amount</th>
+                                                    <th style="width:50px;"></th>
                                                 </tr>
                                             </thead>
                                             <tbody id="items-body">
@@ -89,7 +89,7 @@
                                                     <tr class="invoice-item-row">
                                                         <td class="row-index">{{ $loop->iteration }}</td>
                                                         <td>
-                                                            <select name="items[{{ $index }}][item_id]" class="form-control item-select">
+                                                            <select name="items[{{ $index }}][item_id]" class="form-control item-select select2">
                                                                 <option value="">Select Item</option>
                                                                 @foreach($items as $it)
                                                                     <option value="{{ $it->id }}" {{ $item->item_id == $it->id ? 'selected' : '' }}>{{ $it->name }}</option>
@@ -97,7 +97,7 @@
                                                             </select>
                                                         </td>
                                                         <td>
-                                                            <select name="items[{{ $index }}][sub_category_id]" class="form-control subcategory-select" required>
+                                                            <select name="items[{{ $index }}][sub_category_id]" class="form-control subcategory-select select2" required>
                                                                 <option value="">Select</option>
                                                                 @foreach($incomeSubCategories as $s)
                                                                     <option value="{{ $s->id }}" {{ $item->sub_category_id == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
