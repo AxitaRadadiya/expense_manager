@@ -154,6 +154,7 @@ $(document).ready(function () {
 
     // Roles table
     $('#roleTable').DataTable({
+        dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
         paging: true, lengthChange: true, searching: true, ordering: true, info: true,
         autoWidth: false, responsive: true, processing: true, serverSide: true,
         order: [0, 'asc'],
@@ -175,6 +176,7 @@ $(document).ready(function () {
     // Users table loader
     function load_user() {
         $('#userTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
@@ -203,6 +205,7 @@ $(document).ready(function () {
     // Vendors table loader
     function load_vendors() {
         $('#VendorsTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [[1, 'asc']],
@@ -234,6 +237,7 @@ $(document).ready(function () {
     // Customers table loader
     function load_customers() {
         $('#CustomersTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [[1, 'asc']],
@@ -265,6 +269,7 @@ $(document).ready(function () {
     // Projects table loader
     function load_projects() {
         $('#projectsTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [0, 'desc'],
@@ -278,6 +283,7 @@ $(document).ready(function () {
     // Expense table loader
     function load_expense() {
         $('#ExpenseTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             processing: true, serverSide: true, responsive: true, autoWidth: false, order: [[0, 'desc']],
             ajax: { url: '{{ route('expense.list') }}', type: 'GET', data: { _token: '{{ csrf_token() }}' } },
             columns: [
@@ -292,6 +298,7 @@ $(document).ready(function () {
     function load_payment() {
         if (!$('#PaymentsTable').length) return;
         $('#PaymentsTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [[0, 'desc']],
@@ -319,6 +326,7 @@ $(document).ready(function () {
     function load_purchases() {
         if (!$('#PurchasesTable').length) return;
         $('#PurchasesTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [[0, 'desc']],
@@ -347,6 +355,7 @@ $(document).ready(function () {
     function load_payments() {
         if (!$('#PaymentsReceiveTable').length) return;
         $('#PaymentsReceiveTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [[0, 'desc']],
@@ -375,6 +384,7 @@ $(document).ready(function () {
     function load_invoices() {
         if (!$('#InvoicesTable').length) return;
         $('#InvoicesTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
             order: [[0, 'desc']],
@@ -403,6 +413,7 @@ $(document).ready(function () {
     // Category table
    function load_category() {
             var table = $('#CategoryTable').DataTable({
+                dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
                 paging: true, 
                 lengthChange: true, 
                 searching: true, 
@@ -447,7 +458,7 @@ $(document).ready(function () {
         $('#SubCategoryTable').DataTable().destroy();
     }
             $('#SubCategoryTable').DataTable({
-
+                dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
                 paging: true, 
                 lengthChange: true, 
                 searching: true,
@@ -550,6 +561,7 @@ $(document).ready(function () {
         // Items table loader
         function load_items() {
             var table = $('#ItemsTable').DataTable({
+                dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
                 paging: true, lengthChange: true, searching: true, ordering: true, info: true,
                 autoWidth: false, responsive: true, processing: true, serverSide: true,
                 order: [[1, 'asc']],
@@ -737,6 +749,7 @@ $(document).ready(function () {
 
     function load_transfer() {
         $('#TransferTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             processing: true,
             serverSide: true,
             responsive: true,
@@ -766,6 +779,7 @@ $(document).ready(function () {
         }
 
         $reportTable.DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             processing: true,
             serverSide: true,
             responsive: true,
