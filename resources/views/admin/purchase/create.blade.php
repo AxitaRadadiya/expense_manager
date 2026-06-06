@@ -84,7 +84,7 @@
                         <tr>
                           <td class="row-index">1</td>
                           <td>
-                            <select name="items[0][item_id]" class="form-control">
+                            <select name="items[0][item_id]" class="form-control select2">
                               <option value="">Select Item</option>
                               @foreach($items as $it)
                                 <option value="{{ $it->id }}">{{ $it->name }}</option>
@@ -92,7 +92,7 @@
                             </select>
                           </td>
                           <td>
-                            <select name="items[0][sub_category_id]" class="form-control" required>
+                            <select name="items[0][sub_category_id]" class="form-control select2" required>
                               <option value="">Select</option>
                               @foreach($expenseSubCategories as $s)
                                 <option value="{{ $s->id }}">{{ $s->name }}</option>

@@ -129,7 +129,10 @@ class PaymentReceiveController extends Controller
             ->pluck('amount', 'invoice_id')
             ->toArray();
 
-        return view('admin.payment_receive.edit', compact('payment','customers','projects','allocations'));
+        // Get the invoice IDs that are associated with this payment (for loading in edit screen)
+        $allocatedInvoiceIds = array_keys($allocations);
+
+        return view('admin.payment_receive.edit', compact('payment','customers','projects','allocations','allocatedInvoiceIds'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -148,7 +151,86 @@ class PaymentReceiveController extends Controller
             'payment_date' => 'required|date|after_or_equal:today',
         ]);
 
+        // Get old allocations before updating
+        $oldAllocations = \DB::table('payment_receive_invoices')
+            ->where('payment_receive_id', $payment->id)
+            ->pluck('amount', 'invoice_id')
+            ->toArray();
+
+        // Revert old allocations (restore invoice due_amounts)
+        foreach ($oldAllocations as $invoiceId => $oldAmount) {
+            $invoice = Invoice::find($invoiceId);
+            if ($invoice) {
+                $currentDue = floatval($invoice->due_amount ?? 0);
+                $invoice->due_amount = max(0, $currentDue + floatval($oldAmount));
+                $invoice->status = $invoice->due_amount <= 0 ? 'Paid' : 'Pending';
+                $invoice->save();
+            }
+        }
+
+        // Delete old allocations
+        \DB::table('payment_receive_invoices')->where('payment_receive_id', $payment->id)->delete();
+
+        // Update payment fields
         $payment->update($validated);
+
+        // Apply new allocations
+        $invoicePayments = $request->input('invoice_payments', []);
+        $affectedInvoiceIds = [];
+        $remainingPayment = (float) $payment->amount;
+
+        if (!empty($invoicePayments) && is_array($invoicePayments)) {
+            foreach ($invoicePayments as $invoiceId => $amt) {
+                if ($remainingPayment <= 0) { break; }
+                $amt = (float)$amt;
+                if ($amt <= 0) continue;
+
+                $invoice = Invoice::find((int)$invoiceId);
+                if ($invoice) {
+                    $alreadyPaid = (float) \DB::table('payment_receive_invoices')->where('invoice_id', $invoice->id)->sum('amount');
+                    $due = max(0, (float)$invoice->amount - $alreadyPaid);
+                    $alloc = min($amt, $due, $remainingPayment);
+                } else {
+                    $alloc = min($amt, $remainingPayment);
+                }
+
+                if ($alloc > 0) {
+                    \DB::table('payment_receive_invoices')->insert([
+                        'payment_receive_id' => $payment->id,
+                        'invoice_id' => (int)$invoiceId,
+                        'amount' => $alloc,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $affectedInvoiceIds[] = (int)$invoiceId;
+                    $remainingPayment -= $alloc;
+                }
+            }
+        }
+
+        // Update invoices' due_amount and status
+        $affectedInvoiceIds = array_unique($affectedInvoiceIds);
+        foreach ($affectedInvoiceIds as $invId) {
+            $totalPaid = (float) \DB::table('payment_receive_invoices')->where('invoice_id', $invId)->sum('amount');
+            $invoice = Invoice::find($invId);
+            if ($invoice) {
+                $due = max(0, (float)$invoice->amount - $totalPaid);
+                $invoice->due_amount = $due;
+                $invoice->status = $due <= 0 ? 'Paid' : 'Pending';
+                $invoice->save();
+            }
+        }
+
+        // Handle remaining (unallocated) amount
+        if ($remainingPayment > 0 && !empty($payment->customer_id)) {
+            $user = User::find($payment->customer_id);
+            if ($user) {
+                $current = (float) ($user->extra_amount ?? 0);
+                $user->extra_amount = $current + $remainingPayment;
+                $user->save();
+            }
+        }
+
         return redirect()->route('payment-receive.index')->with('success','Payment updated');
     }
 
@@ -167,7 +249,72 @@ class PaymentReceiveController extends Controller
     public function show($id): View
     {
         $payment = PaymentReceive::with(['customer','project'])->findOrFail($id);
-        return view('admin.payment_receive.show', compact('payment'));
+        
+        // Fetch existing invoice allocations for this payment
+        $allocations = \DB::table('payment_receive_invoices')
+            ->where('payment_receive_id', $payment->id)
+            ->get()
+            ->map(function($alloc) {
+                $invoice = Invoice::find($alloc->invoice_id);
+                return [
+                    'invoice_id' => $alloc->invoice_id,
+                    'invoice_no' => $invoice->invoice_no ?? '#'.$alloc->invoice_id,
+                    'invoice_date' => $invoice->invoice_date ?? '-',
+                    'project_name' => $invoice->project->name ?? '-',
+                    'invoice_amount' => $invoice->amount ?? 0,
+                    'allocated_amount' => $alloc->amount,
+                ];
+            });
+        
+        return view('admin.payment_receive.show', compact('payment', 'allocations'));
+    }
+
+    /**
+     * Get invoices allocated to a specific payment for editing.
+     * Returns both allocated invoices and pending invoices for the customer.
+     */
+    public function getAllocatedInvoices($paymentId)
+    {
+        $payment = PaymentReceive::with(['customer'])->findOrFail($paymentId);
+        
+        // Get existing allocations
+        $allocations = \DB::table('payment_receive_invoices')
+            ->where('payment_receive_id', $paymentId)
+            ->get();
+        
+        $allocatedInvoices = [];
+        $allocatedInvoiceIds = [];
+        
+        foreach ($allocations as $alloc) {
+            $invoice = Invoice::find($alloc->invoice_id);
+            if ($invoice) {
+                $allocatedInvoices[] = [
+                    'invoice_id' => $invoice->id,
+                    'id' => $invoice->id,
+                    'invoice_date' => $invoice->invoice_date,
+                    'invoice_no' => $invoice->invoice_no,
+                    'amount' => $invoice->amount,
+                    'due_amount' => $invoice->due_amount,
+                    'status' => $invoice->status ?? 'Pending',
+                    'project' => ($invoice->project && $invoice->project->name) ? $invoice->project->name : '-',
+                    'project_id' => $invoice->project_id,
+                    'customer' => ($invoice->customer && $invoice->customer->name) ? $invoice->customer->name : '',
+                    'allocated_amount' => $alloc->amount,
+                ];
+                $allocatedInvoiceIds[] = $invoice->id;
+            }
+        }
+        
+        return response()->json([
+            'payment' => [
+                'id' => $payment->id,
+                'customer_id' => $payment->customer_id,
+                'amount' => $payment->amount,
+                'payment_date' => $payment->payment_date,
+            ],
+            'allocated_invoices' => $allocatedInvoices,
+            'allocated_invoice_ids' => $allocatedInvoiceIds,
+        ]);
     }
 
     public function list(Request $request)

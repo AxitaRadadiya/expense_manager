@@ -102,12 +102,14 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('purchase', PurchaseController::class);
 
     Route::get('payment-list', [PaymentController::class, 'list'])->name('payment.list');
+    Route::get('payment-allocated-purchases/{paymentId}', [PaymentController::class, 'getAllocatedPurchases'])->name('payment.allocated-purchases');
     Route::resource('payment', PaymentController::class);
 
     Route::get('invoice-list', [InvoiceController::class, 'list'])->name('invoice.list');
     Route::resource('invoice', InvoiceController::class);
 
     Route::get('payment-receive-list', [PaymentReceiveController::class, 'list'])->name('payment-receive.list');
+    Route::get('payment-receive-allocated-invoices/{paymentId}', [PaymentReceiveController::class, 'getAllocatedInvoices'])->name('payment-receive.allocated-invoices');
     Route::resource('payment-receive', PaymentReceiveController::class);
 
     Route::get('customer-list', [CustomerController::class, 'list'])->name('customer.list');

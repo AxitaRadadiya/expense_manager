@@ -89,7 +89,7 @@
                                                     <tr class="invoice-item-row">
                                                         <td class="row-index">{{ $loop->iteration }}</td>
                                                         <td>
-                                                            <select name="items[{{ $index }}][item_id]" class="form-control item-select">
+                                                            <select name="items[{{ $index }}][item_id]" class="form-control item-select select2">
                                                                 <option value="">Select Item</option>
                                                                 @foreach($items as $it)
                                                                     <option value="{{ $it->id }}" {{ $item->item_id == $it->id ? 'selected' : '' }}>{{ $it->name }}</option>
@@ -97,7 +97,7 @@
                                                             </select>
                                                         </td>
                                                         <td>
-                                                            <select name="items[{{ $index }}][sub_category_id]" class="form-control subcategory-select" required>
+                                                            <select name="items[{{ $index }}][sub_category_id]" class="form-control subcategory-select select2" required>
                                                                 <option value="">Select</option>
                                                                 @foreach($incomeSubCategories as $s)
                                                                     <option value="{{ $s->id }}" {{ $item->sub_category_id == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
@@ -114,7 +114,7 @@
                                                     <tr class="invoice-item-row">
                                                         <td class="row-index">1</td>
                                                         <td>
-                                                            <select name="items[0][item_id]" class="form-control item-select">
+                                                            <select name="items[0][item_id]" class="form-control item-select select2">
                                                                 <option value="">Select Item</option>
                                                                 @foreach($items as $it)
                                                                     <option value="{{ $it->id }}">{{ $it->name }}</option>

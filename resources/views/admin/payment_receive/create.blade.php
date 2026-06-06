@@ -157,7 +157,7 @@
                 function buildRow(inv){
                     const tr = document.createElement('tr');
                     const dateTd = document.createElement('td'); dateTd.textContent = inv.invoice_date || '-';
-                    const noTd = document.createElement('td'); noTd.textContent = inv.invoice_no ?? ('#' + (inv.invoice_id || ''));
+                    const noTd = document.createElement('td'); noTd.textContent = inv.invoice_no ?? ( (inv.invoice_id || ''));
                     const projectTd = document.createElement('td'); projectTd.textContent = inv.project ?? '-';
                     const amtTd = document.createElement('td'); amtTd.className = 'text-right'; amtTd.textContent = (inv.amount? ('₹ ' + parseFloat(inv.amount).toFixed(2)):'₹ 0.00');
                     const dueTd = document.createElement('td'); dueTd.className = 'text-right'; dueTd.textContent = (typeof inv.due_amount !== 'undefined' ? ('₹ ' + parseFloat(inv.due_amount).toFixed(2)) : (inv.amount? ('₹ ' + parseFloat(inv.amount).toFixed(2)):'₹ 0.00'));

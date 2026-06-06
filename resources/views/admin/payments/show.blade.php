@@ -51,7 +51,7 @@
                         <div>
                             <p class="text-muted mb-0">
                                 Payment ID :
-                                #{{ $payment->id }}
+                                {{ $payment->id }}
                             </p>
                         </div>
 
@@ -77,11 +77,6 @@
                                     <strong>Vendor :</strong>
                                     {{ $payment->vendor->name ?? '-' }}
                                 </p>
-
-                                <p class="mb-0">
-                                    <strong>Project :</strong>
-                                    {{ $payment->project->name ?? '-' }}
-                                </p>
                             </div>
                         </div>
 
@@ -89,56 +84,59 @@
 
                     </div>
 
-                    <!-- Payment Summary Table -->
-                    <h5 class="font-weight-bold">
-                        Payment Information
-                    </h5>
+                    <!-- Purchase Allocations -->
+                    @if($payment->allocations && $payment->allocations->count() > 0)
+                        <h5 class="font-weight-bold mb-3">
+                            Purchase Invoice Allocations
+                        </h5>
 
-                    <div class="table-responsive mb-4">
-                        <table class="table table-bordered">
-
-                            <thead class="bg-light">
-                                <tr>
-                                    <th>Vendor</th>
-                                    <th>Project</th>
-                                    <th class="text-right">
-                                        Amount
-                                    </th>
-                                  
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        {{ $payment->vendor->name ?? '-' }}
-                                    </td>
-
-                                    <td>
-                                        {{ $payment->project->name ?? '-' }}
-                                    </td>
-
-                                    <td class="text-right text-success font-weight-bold">
-                                        ₹ {{ number_format($payment->amount, 2) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-
-                            <tfoot>
-                                <tr>
-                                    <th colspan="2" class="text-right">
-                                        Total Amount
-                                    </th>
-
-                                    <th colspan="2"
-                                        class="text-center text-success">
-                                        ₹ {{ number_format($payment->amount, 2) }}
-                                    </th>
-                                </tr>
-                            </tfoot>
-
-                        </table>
-                    </div>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered table-hover">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Purchase No</th>
+                                        <th>Project</th>
+                                        <th class="text-right">Purchase Amount</th>
+                                        <th class="text-right">Allocated Amount</th>
+                                        <th class="text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $totalAllocated = 0; @endphp
+                                    @foreach($payment->allocations as $allocation)
+                                        @php $totalAllocated += $allocation->amount; @endphp
+                                        <tr>
+                                            <td>{{ $allocation->purchase->purchase_date ?? '-' }}</td>
+                                            <td>{{ $allocation->purchase->id }}</td>
+                                            <td>{{ $allocation->purchase->project->name ?? '-' }}</td>
+                                            <td class="text-right">₹ {{ number_format($allocation->purchase->amount ?? 0, 2) }}</td>
+                                            <td class="text-right text-primary font-weight-bold">₹ {{ number_format($allocation->amount, 2) }}</td>
+                                            <td class="text-right">
+                                                @if($allocation->purchase->status === 'paid')
+                                                    <span class="badge badge-success">Paid</span>
+                                                @else
+                                                    <span class="badge badge-warning">Pending</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4" class="text-right">Total Allocated</th>
+                                        <th class="text-center text-primary font-weight-bold">₹ {{ number_format($totalAllocated, 2) }}</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-info mb-4" role="alert">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            No purchase invoices allocated to this payment.
+                        </div>
+                    @endif
 
                     <!-- Note -->
                     @if(!empty($payment->note))

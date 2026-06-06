@@ -105,7 +105,7 @@ class PaymentController extends Controller
             abort(403);
         }
 
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::with(['allocations.purchase'])->findOrFail($id);
         $vendorRoleId = \App\Models\Role::where('name', 'vendor')->value('id');
         $vendors = User::where('role_id', $vendorRoleId)->orderBy('name')->get();
         // project selection removed from payments edit form
@@ -190,8 +190,50 @@ class PaymentController extends Controller
 
     public function show($id): View
     {
-        $payment = Payment::with(['vendor', 'project'])->findOrFail($id);
+        $payment = Payment::with(['vendor', 'project', 'allocations.purchase', 'allocations.purchase.project'])->findOrFail($id);
         return view('admin.payments.show', compact('payment'));
+    }
+
+    /**
+     * Get purchases allocated to a specific payment for editing.
+     * Returns both allocated purchases and pending purchases for the vendor.
+     */
+    public function getAllocatedPurchases($paymentId)
+    {
+        $payment = Payment::with(['allocations.purchase'])->findOrFail($paymentId);
+        
+        $allocatedPurchases = [];
+        $allocatedPurchaseIds = [];
+        
+        foreach ($payment->allocations as $alloc) {
+            $purchase = $alloc->purchase;
+            if ($purchase) {
+                $allocatedPurchases[] = [
+                    'id' => $purchase->id,
+                    'purchase_id' => $purchase->id,
+                    'purchase_date' => $purchase->purchase_date,
+                    'amount' => $purchase->amount,
+                    'due_amount' => $purchase->due_amount,
+                    'status' => ucfirst($purchase->status ?? ''),
+                    'project' => $purchase->project->name ?? '-',
+                    'project_id' => $purchase->project_id,
+                    'vendor' => $purchase->vendor->name ?? '',
+                    'allocated_amount' => $alloc->amount,
+                ];
+                $allocatedPurchaseIds[] = $purchase->id;
+            }
+        }
+        
+        return response()->json([
+            'payment' => [
+                'id' => $payment->id,
+                'vendor_id' => $payment->vendor_id,
+                'amount' => $payment->amount,
+                'payment_date' => $payment->payment_date,
+            ],
+            'allocated_purchases' => $allocatedPurchases,
+            'allocated_purchase_ids' => $allocatedPurchaseIds,
+        ]);
     }
 
     public function list(Request $request)

@@ -249,6 +249,14 @@ class InvoiceController extends Controller
                 $query->where('status', $request->input('status'));
             }
 
+            // Filter by specific invoice IDs (used when editing payments to load allocated invoices)
+            if ($request->filled('invoice_ids')) {
+                $invoiceIds = json_decode($request->input('invoice_ids'), true);
+                if (is_array($invoiceIds) && !empty($invoiceIds)) {
+                    $query->whereIn('id', $invoiceIds);
+                }
+            }
+
             // optional date range filter
             if ($request->filled('date_from')) {
                 $query->whereDate('invoice_date', '>=', $request->input('date_from'));
