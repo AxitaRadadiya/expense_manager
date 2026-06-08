@@ -71,7 +71,7 @@
 
               <div class="form-group">
                 <label class="font-weight-bold">Opening Balance</label>
-                <input type="number" step="0.01" min="0" name="amount" class="form-control" value="{{ old('amount', $user->amount) }}">
+                <input type="number" step="0.01" min="0" name="amount" class="form-control" value="{{ old('amount', $user->amount) }}"readonly>
                 @error('amount') <small class="text-danger">{{ $message }}</small> @enderror
               </div>
 

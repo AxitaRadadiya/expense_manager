@@ -33,7 +33,7 @@
 <script src="{{ asset('admin/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
 <!-- Toastr -->
 <script src="{{ asset('admin/plugins/toastr/toastr.min.js') }}"></script>
-<!-- DataTables  & Plugins -->
+<!-- DataTables & Plugins -->
 <script src="{{ asset('admin/plugins/datatables/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('admin/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 <script src="{{ asset('admin/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
@@ -54,7 +54,7 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{{ asset('admin/dist/js/pages/dashboard.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.25/webcam.min.js"></script>
-<script src="{!!asset('admin/dist/js/numeric.js')!!}"></script>
+<script src="{{ asset('admin/dist/js/numeric.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
 <script>
@@ -78,11 +78,6 @@ $(function () {
     // Initialize on page load
     toggleLabourFields();
 });
-</script>
-
-<script>
-    $(function () {
-    })
 </script>
 
 <script>
@@ -123,13 +118,13 @@ $(document).ready(function () {
     var Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
 
     @if (session('success'))
-        Toast.fire({ icon: 'success', title: '{{ session('success') }}' })
+        Toast.fire({ icon: 'success', title: '{{ session("success") }}' })
     @endif
     @if (session('error'))
-        Toast.fire({ icon: 'error', title: '{{ session('error') }}' })
+        Toast.fire({ icon: 'error', title: '{{ session("error") }}' })
     @endif
     @if (session('warning'))
-        Toast.fire({ icon: 'warning', title: '{{ session('warning') }}' })
+        Toast.fire({ icon: 'warning', title: '{{ session("warning") }}' })
     @endif
     @if ($errors->any())
         const validationErrors = @json($errors->all());
@@ -155,11 +150,27 @@ $(document).ready(function () {
     // Roles table
     $('#roleTable').DataTable({
         dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
-        paging: true, lengthChange: true, searching: true, ordering: true, info: true,
-        autoWidth: false, responsive: true, processing: true, serverSide: true,
-        order: [0, 'asc'],
-        ajax: { url: '{{ route('roles.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'roles.list' } },
-        columns: [{ data: 'id' }, { data: 'name' }, { data: 'action' }],
+        paging: true,
+        lengthChange: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        autoWidth: false,
+        responsive: true,
+        processing: true,
+        serverSide: true,
+        order: [[0, 'asc']], // FIX: wrapped in nested array
+        ajax: {
+            url: '{{ route("roles.list") }}',
+            dataType: 'json',
+            type: 'GET',
+            data: { _token: '{{ csrf_token() }}', route: 'roles.list' }
+        },
+        columns: [
+            { data: 'id',     orderable: false },
+            { data: 'name',   orderable: false },
+            { data: 'action', orderable: false }
+        ],
         aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
     });
 
@@ -167,9 +178,18 @@ $(document).ready(function () {
     $('#permissionsTable').DataTable({
         paging: true, lengthChange: false, searching: true, ordering: true, info: true,
         autoWidth: false, responsive: true, processing: true, serverSide: true,
-        order: [0, 'desc'],
-        ajax: { url: '{{ route('permissions.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'permissions.list' } },
-        columns: [{ data: 'id' }, { data: 'name' }, { data: 'action' }],
+        order: [[0, 'desc']], // FIX: wrapped in nested array
+        ajax: {
+            url: '{{ route("permissions.list") }}',
+            dataType: 'json',
+            type: 'GET',
+            data: { _token: '{{ csrf_token() }}', route: 'permissions.list' }
+        },
+        columns: [
+            { data: 'id',     orderable: false },
+            { data: 'name',   orderable: false },
+            { data: 'action', orderable: false }
+        ],
         aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
     });
 
@@ -179,25 +199,25 @@ $(document).ready(function () {
             dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
-            order: [0, 'desc'],
+            order: [[0, 'desc']], // FIX: wrapped in nested array
             ajax: {
-                url: '{{ route('users.list') }}',
+                url: '{{ route("users.list") }}',
                 dataType: 'json',
                 type: 'GET',
-                data: { _token: '{{csrf_token()}}' }
+                data: { _token: '{{ csrf_token() }}' }
             },
             columns: [
-            { data: 'id' },
-            { data: 'name' },
-            { data: 'email' },
-            { data: 'mobile' },
-            { data: 'project' },
-            { data: 'amount' },
-            { data: 'role' },
-            { data: 'status' },
-            { data: 'action' }
-        ]
-            , aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
+                { data: 'id',      orderable: false },
+                { data: 'name',    orderable: false },
+                { data: 'email',   orderable: false },
+                { data: 'mobile',  orderable: false },
+                { data: 'project', orderable: false },
+                { data: 'amount',  orderable: false },
+                { data: 'role',    orderable: false },
+                { data: 'status',  orderable: false },
+                { data: 'action',  orderable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
         });
     }
     load_user();
@@ -213,23 +233,26 @@ $(document).ready(function () {
                 url: '{{ route("vendor.list") }}',
                 dataType: 'json',
                 type: 'GET',
-                data: { _token: '{{csrf_token()}}' },
-                error: function(xhr) {
+                data: { _token: '{{ csrf_token() }}' },
+                error: function (xhr) {
                     console.log('Vendors DataTable Ajax Error - Status: ' + xhr.status);
                     console.log('Response: ' + xhr.responseText);
                 }
             },
             columns: [
-                { data: 'id' },
-                { data: 'name' },
-                { data: 'company_name', defaultContent: '-' },
-                { data: 'mobile' },
-                { data: 'email' },
-                { data: 'action', orderable: false, searchable: false }
+                { data: 'id',           orderable: false },
+                { data: 'name',         orderable: false },
+                { data: 'company_name', defaultContent: '-', orderable: false },
+                { data: 'mobile',       orderable: false },
+                { data: 'email',        orderable: false },
+                { data: 'action',       orderable: false, searchable: false }
             ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
-            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
     }
     load_vendors();
@@ -245,23 +268,26 @@ $(document).ready(function () {
                 url: '{{ route("customer.list") }}',
                 dataType: 'json',
                 type: 'GET',
-                data: { _token: '{{csrf_token()}}' },
-                error: function(xhr) {
+                data: { _token: '{{ csrf_token() }}' },
+                error: function (xhr) {
                     console.log('Customers DataTable Ajax Error - Status: ' + xhr.status);
                     console.log('Response: ' + xhr.responseText);
                 }
             },
             columns: [
-                { data: 'id' },
-                { data: 'name' },
-                { data: 'company_name'},
-                { data: 'mobile' },
-                { data: 'email' },
-                { data: 'action', orderable: false, searchable: false }
+                { data: 'id',           orderable: false },
+                { data: 'name',         orderable: false },
+                { data: 'company_name', orderable: false },
+                { data: 'mobile',       orderable: false },
+                { data: 'email',        orderable: false },
+                { data: 'action',       orderable: false, searchable: false }
             ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
-            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
     }
     load_customers();
@@ -272,9 +298,22 @@ $(document).ready(function () {
             dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
             paging: true, lengthChange: true, searching: true, ordering: true, info: true,
             autoWidth: false, responsive: true, processing: true, serverSide: true,
-            order: [0, 'desc'],
-            ajax: { url: '{{ route('projects.list') }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}', route: 'projects.list' } },
-            columns: [ { data: 'id' }, { data: 'name' }, { data: 'start_date' }, { data: 'end_date' }, { data: 'customers_count' }, { data: 'users_count' }, { data: 'action' } ],
+            order: [[0, 'desc']], // FIX: wrapped in nested array
+            ajax: {
+                url: '{{ route("projects.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}', route: 'projects.list' }
+            },
+            columns: [
+                { data: 'id',              orderable: false },
+                { data: 'name',            orderable: false },
+                { data: 'start_date',      orderable: false },
+                { data: 'end_date',        orderable: false },
+                { data: 'customers_count', orderable: false },
+                { data: 'users_count',     orderable: false },
+                { data: 'action',          orderable: false }
+            ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }]
         });
     }
@@ -284,11 +323,21 @@ $(document).ready(function () {
     function load_expense() {
         $('#ExpenseTable').DataTable({
             dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
-            processing: true, serverSide: true, responsive: true, autoWidth: false, order: [[0, 'desc']],
-            ajax: { url: '{{ route('expense.list') }}', type: 'GET', data: { _token: '{{ csrf_token() }}' } },
+            processing: true, serverSide: true, responsive: true, autoWidth: false,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("expense.list") }}',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
             columns: [
-                { data: 'id', name: 'id' }, { data: 'project', name: 'project', orderable: false }, { data: 'expense_date', name: 'expense_date' },
-                { data: 'amount', name: 'amount' }, { data: 'payment_mode', name: 'payment_mode', orderable: false }, { data: 'action', name: 'action', orderable: false, searchable: false }
+                // FIX: removed double commas (,,) from all columns below
+                { data: 'id',           name: 'id',           orderable: false },
+                { data: 'project',      name: 'project',      orderable: false },
+                { data: 'expense_date', name: 'expense_date', orderable: false },
+                { data: 'amount',       name: 'amount',       orderable: false },
+                { data: 'payment_mode', name: 'payment_mode', orderable: false },
+                { data: 'action',       name: 'action',       orderable: false, searchable: false }
             ]
         });
     }
@@ -305,23 +354,26 @@ $(document).ready(function () {
             ajax: {
                 url: '{{ route("payment.list") }}',
                 type: 'GET',
-                data: function(d) {
-                    d._token = '{{ csrf_token() }}';
+                data: function (d) {
+                    d._token    = '{{ csrf_token() }}';
                     d.date_from = $('#filter-payments-from').val();
-                    d.date_to = $('#filter-payments-to').val();
+                    d.date_to   = $('#filter-payments-to').val();
                 }
             },
             columns: [
-                { data: 'id' },
-                { data: 'vendor' },
-                { data: 'project' },
-                { data: 'amount' },
-                { data: 'payment_date' },
-                { data: 'action', orderable: false, searchable: false }
+                { data: 'id',           orderable: false },
+                { data: 'vendor',       orderable: false },
+                { data: 'project',      orderable: false },
+                { data: 'amount',       orderable: false },
+                { data: 'payment_date', orderable: false },
+                { data: 'action',       orderable: false, searchable: false }
             ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
-            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
     }
     load_payment();
@@ -337,24 +389,27 @@ $(document).ready(function () {
             ajax: {
                 url: '{{ route("purchase.list") }}',
                 type: 'GET',
-                data: function(d) {
-                    d._token = '{{ csrf_token() }}';
+                data: function (d) {
+                    d._token    = '{{ csrf_token() }}';
                     d.date_from = $('#filter-purchases-from').val();
-                    d.date_to = $('#filter-purchases-to').val();
+                    d.date_to   = $('#filter-purchases-to').val();
                 }
             },
             columns: [
-                { data: 'id' },
-                { data: 'vendor' },
-                { data: 'project' },
-                { data: 'sub_category' },
-                { data: 'amount' },
-                { data: 'purchase_date' },
-                { data: 'action', orderable: false, searchable: false }
+                { data: 'id',            orderable: false },
+                { data: 'vendor',        orderable: false },
+                { data: 'project',       orderable: false },
+                { data: 'sub_category',  orderable: false },
+                { data: 'amount',        orderable: false },
+                { data: 'purchase_date', orderable: false },
+                { data: 'action',        orderable: false, searchable: false }
             ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
-            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
     }
     load_purchases();
@@ -370,24 +425,27 @@ $(document).ready(function () {
             ajax: {
                 url: '{{ route("payment-receive.list") }}',
                 type: 'GET',
-                data: function(d) {
-                    d._token = '{{ csrf_token() }}';
+                data: function (d) {
+                    d._token    = '{{ csrf_token() }}';
                     d.date_from = $('#filter-paymentsreceive-from').val();
-                    d.date_to = $('#filter-paymentsreceive-to').val();
+                    d.date_to   = $('#filter-paymentsreceive-to').val();
                 }
             },
             columns: [
-                { data: 'id' },
-                { data: 'payment_type' },
-                { data: 'customer' },
-                { data: 'project' },
-                { data: 'amount' },
-                { data: 'payment_date' },
-                { data: 'action', orderable: false, searchable: false }
+                { data: 'id',           orderable: false },
+                { data: 'payment_type', orderable: false },
+                { data: 'customer',     orderable: false },
+                { data: 'project',      orderable: false },
+                { data: 'amount',       orderable: false },
+                { data: 'payment_date', orderable: false },
+                { data: 'action',       orderable: false, searchable: false }
             ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
-            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
     }
     load_payments();
@@ -403,379 +461,349 @@ $(document).ready(function () {
             ajax: {
                 url: '{{ route("invoice.list") }}',
                 type: 'GET',
-                data: function(d) {
-                    d._token = '{{ csrf_token() }}';
+                data: function (d) {
+                    d._token    = '{{ csrf_token() }}';
                     d.date_from = $('#filter-invoices-from').val();
-                    d.date_to = $('#filter-invoices-to').val();
+                    d.date_to   = $('#filter-invoices-to').val();
                 }
             },
             columns: [
-                { data: 'id' },
-                { data: 'customer' },
-                { data: 'project' },
-                { data: 'category' },
-                /* { data: 'status' }, */
-                { data: 'amount' },
-                { data: 'invoice_date' },
-                { data: 'action', orderable: false, searchable: false }
+                { data: 'id',           orderable: false },
+                { data: 'customer',     orderable: false },
+                { data: 'project',      orderable: false },
+                { data: 'category',     orderable: false },
+                { data: 'amount',       orderable: false },
+                { data: 'invoice_date', orderable: false },
+                { data: 'action',       orderable: false, searchable: false }
             ],
             aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
-            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
     }
     load_invoices();
 
     // Reload tables when date filters change
-    $('#filter-invoices-from, #filter-invoices-to').on('change', function(){ if ($.fn.DataTable.isDataTable('#InvoicesTable')) $('#InvoicesTable').DataTable().ajax.reload(); });
-    $('#filter-purchases-from, #filter-purchases-to').on('change', function(){ if ($.fn.DataTable.isDataTable('#PurchasesTable')) $('#PurchasesTable').DataTable().ajax.reload(); });
-    $('#filter-payments-from, #filter-payments-to').on('change', function(){ if ($.fn.DataTable.isDataTable('#PaymentsTable')) $('#PaymentsTable').DataTable().ajax.reload(); });
-    $('#filter-paymentsreceive-from, #filter-paymentsreceive-to').on('change', function(){ if ($.fn.DataTable.isDataTable('#PaymentsReceiveTable')) $('#PaymentsReceiveTable').DataTable().ajax.reload(); });
+    $('#filter-invoices-from, #filter-invoices-to').on('change', function () {
+        if ($.fn.DataTable.isDataTable('#InvoicesTable')) $('#InvoicesTable').DataTable().ajax.reload();
+    });
+    $('#filter-purchases-from, #filter-purchases-to').on('change', function () {
+        if ($.fn.DataTable.isDataTable('#PurchasesTable')) $('#PurchasesTable').DataTable().ajax.reload();
+    });
+    $('#filter-payments-from, #filter-payments-to').on('change', function () {
+        if ($.fn.DataTable.isDataTable('#PaymentsTable')) $('#PaymentsTable').DataTable().ajax.reload();
+    });
+    $('#filter-paymentsreceive-from, #filter-paymentsreceive-to').on('change', function () {
+        if ($.fn.DataTable.isDataTable('#PaymentsReceiveTable')) $('#PaymentsReceiveTable').DataTable().ajax.reload();
+    });
 
-    // Category table
-   function load_category() {
-            var table = $('#CategoryTable').DataTable({
-                dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
-                paging: true, 
-                lengthChange: true, 
-                searching: true, 
-                ordering: true, 
-                info: true,
-                autoWidth: false, 
-                responsive: true, 
-                processing: true, 
-                serverSide: true, 
-                order: [[2, 'asc']],
-                rowReorder: { dataSrc: 'position', selector: '.drag-handle' },
-                ajax: { 
-                    url: '{{ route("category.list") }}', 
-                    dataType: 'json', 
-                    type: 'GET', 
-                    data: { _token: '{{ csrf_token() }}' },
-                    error: function(xhr) {
-                        console.log('DataTable Ajax Error - Status: ' + xhr.status);
-                        console.log('Response: ' + xhr.responseText);
-                    }
-                },
-                columns: [
-                    { data: 'position', orderable: false, className: 'drag-handle'},
-                    { data: 'id', orderable: false },
-                    { data: 'name' },
-                ],
-                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+    // Category table loader
+    function load_category() {
+        var table = $('#CategoryTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[2, 'asc']],
+            rowReorder: { dataSrc: 'position', selector: '.drag-handle' },
+            ajax: {
+                url: '{{ route("category.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' },
+                error: function (xhr) {
+                    console.log('CategoryTable Ajax Error - Status: ' + xhr.status);
+                    console.log('Response: ' + xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'position', orderable: false, className: 'drag-handle' },
+                { data: 'id',       orderable: false },
+                { data: 'name',     orderable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
             language: { paginate: { previous: "Previous", next: "Next" } },
-            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
-            });
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+        });
 
-            table.on('row-reorder', function (e, diff) {
-                var order = [];
-            diff.forEach(function (item) { var rowData = table.row(item.node).data(); order.push({ id: rowData.id, position: item.newPosition + 1 }); });
-            });
-        }
-        load_category();
-
-        // SubCategory table loader
-        function load_subcategory() {
- if ($.fn.DataTable.isDataTable('#SubCategoryTable')) {
-        $('#SubCategoryTable').DataTable().destroy();
     }
-            $('#SubCategoryTable').DataTable({
-                dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
-                paging: true, 
-                lengthChange: true, 
-                searching: true,
-                 ordering: true,
-                order: [[0, 'desc']],
- 
-                 info: true,
-                autoWidth: false, 
-                responsive: true,      
-                processing: true, 
-                serverSide: true,
+    load_category();
 
-                ajax: { url: '{{ route("sub-category.list") }}', dataType: 'json', type: 'GET', data: { _token: '{{csrf_token()}}' } },
-                columns: [ { data: 'id' }, { data: 'name' }, { data: 'category' }, { data: 'action', orderable: false, searchable: false } ],
-                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
-                language: { paginate: { previous: "Previous", next: "Next" } },
-                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
-            });
+    // SubCategory table loader
+    function load_subcategory() {
+        if ($.fn.DataTable.isDataTable('#SubCategoryTable')) {
+            $('#SubCategoryTable').DataTable().destroy();
         }
-        load_subcategory();
-
-        // SubCategory edit modal handler
-        $(document).on('click', '.edit-subcategory-modal', function (e) {
-            e.preventDefault();
-            var id = $(this).data('id');
-            var name = $(this).data('name');
-            var categoryId = $(this).data('category');
-
-            var form = $('#subCategoryForm');
-            form.attr('action', '{{ route("sub-category.update", ":id") }}'.replace(':id', id));
-            if (!form.find('input[name="_method"]').length) {
-                form.append('<input type="hidden" name="_method" value="PATCH">');
+        $('#SubCategoryTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[0, 'desc']],
+            ajax: {
+                url: '{{ route("sub-category.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' }
+            },
+            columns: [
+                { data: 'id',       orderable: false },
+                { data: 'name',     orderable: false },
+                { data: 'category', orderable: false },
+                { data: 'action',   orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
             }
-            $('#subcategory_id').val(id);
-            $('#sub_category_name').val(name);
-            $('#sub_category_category_id').val(categoryId).trigger('change');
-            $('#addSubCategoryModal').modal('show');
         });
+    }
+    load_subcategory();
 
-        // Reset subcategory form when modal is hidden
-        $('#addSubCategoryModal').on('hidden.bs.modal', function () {
-            var form = $('#subCategoryForm');
-            form.attr('action', '{{ route("sub-category.store") }}');
-            form.find('input[name="_method"]').remove();
-            form[0].reset();
-            $('#subcategory_id').val('');
-        });
-
-        // Proper submit button handler for subCategoryForm
-        $('#subCategoryForm').on('submit', function (e) {
-            var btn = $(this).find('button[type="submit"]');
-            // Prevent double submit
-            if (btn.prop('disabled')) {
-                e.preventDefault();
-                return false;
-            }
-            btn.prop('disabled', true).data('original-text', btn.text()).text('Saving...');
-         
-        });
-
-        // Modal handlers
-        // $(document).on('click', '.category-date-modal', function () {
-        //     $('#categoryForm')[0].reset();
-        //     $('#categoryForm').attr('action', '{{ route("category.store") }}');
-        //     $('#categoryForm').find('input[name="_method"]').remove();
-        //     $('#category_id').val('');
-        //     $('.error').text('');
-        //     $('input').removeClass('is-invalid');
-        //     $('#CategoryModal').modal('show');
-        // });
-
-        // $(document).on('click', '.edit-category-date-modal', function () {
-        //     let categoryId = $(this).data('id');
-        //     let categoryName = $(this).data('name');
-        //     $('#categoryForm')[0].reset();
-        //     $('#category_id').val(categoryId);
-        //     $('#category_name').val(categoryName);
-        //     $('.error').text('');
-        //     $('input').removeClass('is-invalid');
-        //     let updateUrl = '{{ route("category.update", ":id") }}'.replace(':id', categoryId);
-        //     $('#categoryForm').attr('action', updateUrl);
-        //     $('#categoryForm').find('input[name="_method"]').remove();
-        //     $('#categoryForm').append('<input type="hidden" name="_method" value="PUT">');
-        //     $('#CategoryModal').modal('show');
-        // });
-
-    $('#CategoryModal').on('hidden.bs.modal', function () { $('#categoryForm')[0].reset(); $('#categoryForm').find('input[name="_method"]').remove(); $('#category_id').val(''); $('.error').text(''); $('input').removeClass('is-invalid'); });
-
-        // Save the Category (client validation)
-        $(document).on('click', '#saveCategory', function (e) {
-            e.preventDefault();
-            let categoryName = $('#category_name').val();
-        $('.error').text(''); $('input').removeClass('is-invalid');
-            let errors = {};
-            if (!categoryName) errors.categoryName = 'Category Name is required.';
-        if (Object.keys(errors).length > 0) { if (errors.categoryName) { $('#category_name').addClass('is-invalid'); $('.category-name-error').text(errors.categoryName); } return; }
-            $('#categoryForm').submit();
-        });
-
-        // Items table loader
-        function load_items() {
-            var table = $('#ItemsTable').DataTable({
-                dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
-                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
-                autoWidth: false, responsive: true, processing: true, serverSide: true,
-                order: [[1, 'asc']],
-                ajax: {
-                    url: '{{ route("item.list") }}',
-                    dataType: 'json',
-                    type: 'GET',
-                    data: { _token: '{{ csrf_token() }}' },
-                    error: function(xhr) {
-                        console.log('Items DataTable Ajax Error - Status: ' + xhr.status);
-                        console.log('Response: ' + xhr.responseText);
-                    }
-                },
-                columns: [
-                    { data: null, orderable: false, searchable: false },
-                    { data: 'id', name: 'id' },
-                    { data: 'name', name: 'name' },
-                    { data: 'action', orderable: false, searchable: false }
-                ],
-                columnDefs: [
-                    { targets: 0, visible: false, searchable: false, orderable: false }
-                ],
-                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
-                language: { paginate: { previous: "Previous", next: "Next" } },
-                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
-            });
-
-            // expose table if needed
-            return table;
-        }
-        load_items();
-        
-        // Items modal handlers (create / edit / save)
-        $(document).on('click', '.item-modal', function () {
-            $('#itemForm')[0].reset();
-            $('#itemForm').attr('action', '{{ route("item.store") }}');
-            $('#itemForm').find('input[name="_method"]').remove();
-            $('#item_id').val('');
-            $('.item-error').text('');
-            $('input').removeClass('is-invalid');
-            $('#ItemModal').modal('show');
-        });
-
-        $(document).on('click', '.edit-item-modal', function () {
-            let itemId = $(this).data('id');
-            let itemName = $(this).data('name');
-            $('#itemForm')[0].reset();
-            $('#item_id').val(itemId);
-            $('#item_name').val(itemName);
-            $('.item-error').text('');
-            $('input').removeClass('is-invalid');
-            let updateUrl = '{{ route("item.update", ":id") }}'.replace(':id', itemId);
-            $('#itemForm').attr('action', updateUrl);
-            $('#itemForm').find('input[name="_method"]').remove();
-            $('#itemForm').append('<input type="hidden" name="_method" value="PUT">');
-            $('#ItemModal').modal('show');
-        });
-
-        $('#ItemModal').on('hidden.bs.modal', function () { $('#itemForm')[0].reset(); $('#itemForm').find('input[name="_method"]').remove(); $('#item_id').val(''); $('.item-error').text(''); $('input').removeClass('is-invalid'); });
-
-        // Save the Item (client validation)
-        $(document).on(
-    'click',
-    '#saveItem',
-    function (e) {
-
+    // SubCategory edit modal handler
+    $(document).on('click', '.edit-subcategory-modal', function (e) {
         e.preventDefault();
+        var id         = $(this).data('id');
+        var name       = $(this).data('name');
+        var categoryId = $(this).data('category');
 
-        let btn = $(this);
+        var form = $('#subCategoryForm');
+        form.attr('action', '{{ route("sub-category.update", ":id") }}'.replace(':id', id));
+        if (!form.find('input[name="_method"]').length) {
+            form.append('<input type="hidden" name="_method" value="PATCH">');
+        }
+        $('#subcategory_id').val(id);
+        $('#sub_category_name').val(name);
+        $('#sub_category_category_id').val(categoryId).trigger('change');
+        $('#addSubCategoryModal').modal('show');
+    });
 
-        let itemName =
-            $('#item_name')
-                .val()
-                .trim();
+    // Reset subcategory form when modal is hidden
+    $('#addSubCategoryModal').on('hidden.bs.modal', function () {
+        var form = $('#subCategoryForm');
+        form.attr('action', '{{ route("sub-category.store") }}');
+        form.find('input[name="_method"]').remove();
+        form[0].reset();
+        $('#subcategory_id').val('');
+    });
 
-        // reset errors
-        $('.item-error')
-            .text('');
+    // Proper submit button handler for subCategoryForm
+    $('#subCategoryForm').on('submit', function (e) {
+        var btn = $(this).find('button[type="submit"]');
+        // Prevent double submit
+        if (btn.prop('disabled')) {
+            e.preventDefault();
+            return false;
+        }
+        btn.prop('disabled', true).data('original-text', btn.text()).text('Saving...');
+    });
 
-        $('#item_name')
-            .removeClass(
-                'is-invalid'
-            );
+    $('#CategoryModal').on('hidden.bs.modal', function () {
+        $('#categoryForm')[0].reset();
+        $('#categoryForm').find('input[name="_method"]').remove();
+        $('#category_id').val('');
+        $('.error').text('');
+        $('input').removeClass('is-invalid');
+    });
 
-        // validation
-        if (!itemName) {
-
-            $('#item_name')
-                .addClass(
-                    'is-invalid'
-                );
-
-            $('.item-name-error')
-                .text(
-                    'Item Name is required.'
-                );
-
+    // Save the Category (client validation)
+    $(document).on('click', '#saveCategory', function (e) {
+        e.preventDefault();
+        var categoryName = $('#category_name').val();
+        $('.error').text('');
+        $('input').removeClass('is-invalid');
+        var errors = {};
+        if (!categoryName) errors.categoryName = 'Category Name is required.';
+        if (Object.keys(errors).length > 0) {
+            if (errors.categoryName) {
+                $('#category_name').addClass('is-invalid');
+                $('.category-name-error').text(errors.categoryName);
+            }
             return;
         }
+        $('#categoryForm').submit();
+    });
 
-        // stop multiple click
-        if (
-            btn.prop('disabled')
-        ) {
-            return;
-        }
-
-        // disable button
-        btn.prop(
-            'disabled',
-            true
-        );
-
-        btn.html(
-            '<i class="fas fa-spinner fa-spin mr-1"></i>Saving...'
-        );
-
-        // submit form
-        $('#itemForm')
-            .submit();
+    // Items table loader
+    function load_items() {
+        // FIX: removed the hidden `data: null` column that caused mismatch;
+        //      columns now match server response directly.
+        var table = $('#ItemsTable').DataTable({
+            dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[0, 'asc']],
+            ajax: {
+                url: '{{ route("item.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' },
+                error: function (xhr) {
+                    console.log('Items DataTable Ajax Error - Status: ' + xhr.status);
+                    console.log('Response: ' + xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'id',     name: 'id',     orderable: false },
+                { data: 'name',   name: 'name',   orderable: false },
+                { data: 'action',                 orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+        });
+        return table;
     }
-);
+    load_items();
 
-        // Item Expense table loader
-        function load_item_expense() {
-            if (!$('#ItemExpenseTable').length) return;
-            $('#ItemExpenseTable').DataTable({
-                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
-                autoWidth: false, responsive: true, processing: true, serverSide: true,
-                order: [[1, 'asc']],
-                ajax: {
-                    url: '{{ route("item-expense.list") }}',
-                    dataType: 'json',
-                    type: 'GET',
-                    data: { _token: '{{ csrf_token() }}' },
-                    error: function(xhr) { console.log('ItemExpense DataTable Ajax Error - Status: ' + xhr.status); console.log('Response: ' + xhr.responseText); }
-                },
-                columns: [
-                    { data: 'id' },
-                    { data: 'item' },
-                    { data: 'vendor' },
-                    { data: 'project' },
-                    { data: 'start_date' },
-                    { data: 'end_date' },
-                    { data: 'user' },
-                    { data: 'total_number' },
-                    { data: 'total_amount' },
-                    { data: 'action', orderable: false, searchable: false }
-                ],
-                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
-                language: { paginate: { previous: "Previous", next: "Next" } },
-                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
-            });
+    // Items modal handlers (create / edit / save)
+    $(document).on('click', '.item-modal', function () {
+        $('#itemForm')[0].reset();
+        $('#itemForm').attr('action', '{{ route("item.store") }}');
+        $('#itemForm').find('input[name="_method"]').remove();
+        $('#item_id').val('');
+        $('.item-error').text('');
+        $('input').removeClass('is-invalid');
+        $('#ItemModal').modal('show');
+    });
+
+    $(document).on('click', '.edit-item-modal', function () {
+        var itemId   = $(this).data('id');
+        var itemName = $(this).data('name');
+        $('#itemForm')[0].reset();
+        $('#item_id').val(itemId);
+        $('#item_name').val(itemName);
+        $('.item-error').text('');
+        $('input').removeClass('is-invalid');
+        var updateUrl = '{{ route("item.update", ":id") }}'.replace(':id', itemId);
+        $('#itemForm').attr('action', updateUrl);
+        $('#itemForm').find('input[name="_method"]').remove();
+        $('#itemForm').append('<input type="hidden" name="_method" value="PUT">');
+        $('#ItemModal').modal('show');
+    });
+
+    $('#ItemModal').on('hidden.bs.modal', function () {
+        $('#itemForm')[0].reset();
+        $('#itemForm').find('input[name="_method"]').remove();
+        $('#item_id').val('');
+        $('.item-error').text('');
+        $('input').removeClass('is-invalid');
+    });
+
+    // Save the Item (client validation)
+    $(document).on('click', '#saveItem', function (e) {
+        e.preventDefault();
+        var btn      = $(this);
+        var itemName = $('#item_name').val().trim();
+
+        // Reset errors
+        $('.item-error').text('');
+        $('#item_name').removeClass('is-invalid');
+
+        // Validation
+        if (!itemName) {
+            $('#item_name').addClass('is-invalid');
+            $('.item-name-error').text('Item Name is required.');
+            return;
         }
-        load_item_expense();
 
-        // Item Return table loader
-        function load_item_return() {
-            if (!$('#ItemReturnTable').length) return;
-            $('#ItemReturnTable').DataTable({
-                paging: true, lengthChange: true, searching: true, ordering: true, info: true,
-                autoWidth: false, responsive: true, processing: true, serverSide: true,
-                order: [[1, 'asc']],
-                ajax: {
-                    url: '{{ route("item-return.list") }}',
-                    dataType: 'json',
-                    type: 'GET',
-                    data: { _token: '{{ csrf_token() }}' },
-                    error: function(xhr) { console.log('ItemReturn DataTable Ajax Error - Status: ' + xhr.status); console.log('Response: ' + xhr.responseText); }
-                },
-                columns: [
-                    { data: 'id' },
-                    { data: 'project' },
-                    { data: 'item' },
-                    { data: 'date' },
-                    { data: 'total_number' },
-                    { data: 'action', orderable: false, searchable: false }
-                ],
-                aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
-                language: { paginate: { previous: "Previous", next: "Next" } },
-                drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
-            });
-        }
-        load_item_return();
+        // Stop multiple clicks
+        if (btn.prop('disabled')) return;
 
+        btn.prop('disabled', true);
+        btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Saving...');
+        $('#itemForm').submit();
+    });
+
+    // Item Expense table loader
+    function load_item_expense() {
+        if (!$('#ItemExpenseTable').length) return;
+        $('#ItemExpenseTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[1, 'asc']],
+            ajax: {
+                url: '{{ route("item-expense.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' },
+                error: function (xhr) {
+                    console.log('ItemExpense DataTable Ajax Error - Status: ' + xhr.status);
+                    console.log('Response: ' + xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'item' },
+                { data: 'vendor' },
+                { data: 'project' },
+                { data: 'start_date' },
+                { data: 'end_date' },
+                { data: 'user' },
+                { data: 'total_number' },
+                { data: 'total_amount' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+        });
+    }
+    load_item_expense();
+
+    // Item Return table loader
+    function load_item_return() {
+        if (!$('#ItemReturnTable').length) return;
+        $('#ItemReturnTable').DataTable({
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: true, serverSide: true,
+            order: [[1, 'asc']],
+            ajax: {
+                url: '{{ route("item-return.list") }}',
+                dataType: 'json',
+                type: 'GET',
+                data: { _token: '{{ csrf_token() }}' },
+                error: function (xhr) {
+                    console.log('ItemReturn DataTable Ajax Error - Status: ' + xhr.status);
+                    console.log('Response: ' + xhr.responseText);
+                }
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'project' },
+                { data: 'item' },
+                { data: 'date' },
+                { data: 'total_number' },
+                { data: 'action', orderable: false, searchable: false }
+            ],
+            aoColumnDefs: [{ bSortable: false, aTargets: [-1] }],
+            language: { paginate: { previous: "Previous", next: "Next" } },
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+        });
+    }
+    load_item_return();
+
+    // Transfer table loader
     function load_transfer() {
+        if (!$('#TransferTable').length) return;
         $('#TransferTable').DataTable({
             dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            autoWidth: false,
+            processing: true, serverSide: true, responsive: true, autoWidth: false,
             order: [[0, 'desc']],
             ajax: {
                 url: '{{ route("transfer.list") }}',
@@ -783,50 +811,47 @@ $(document).ready(function () {
                 data: { _token: '{{ csrf_token() }}' }
             },
             columns: [
-                { data: 'id',         name: 'id' },
+                { data: 'id',         name: 'id',         orderable: false },
                 { data: 'user',       name: 'user',       orderable: false },
-                { data: 'start_date', name: 'start_date' },
+                { data: 'start_date', name: 'start_date', orderable: false },
                 { data: 'note',       name: 'note',       orderable: false },
-                { data: 'amount',     name: 'amount' },
+                { data: 'amount',     name: 'amount',     orderable: false },
+                // FIX: added missing action column
+                { data: 'action',     name: 'action',     orderable: false, searchable: false }
             ]
         });
     }
     load_transfer();
 
+    // Report Timeline table loader
     function load_report_timeline() {
         var $reportTable = $('#ReportTimelineTable');
-
-        if (! $reportTable.length) {
-            return;
-        }
+        if (!$reportTable.length) return;
 
         $reportTable.DataTable({
             dom: '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"lip>',
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            autoWidth: false,
+            processing: true, serverSide: true, responsive: true, autoWidth: false,
             order: [[2, 'desc']],
             ajax: {
                 url: $reportTable.data('url'),
                 type: 'GET',
                 data: {
-                    _token: '{{ csrf_token() }}',
+                    _token:      '{{ csrf_token() }}',
                     projects_id: $reportTable.data('projects-id'),
-                    users_id: $reportTable.data('users-id'),
-                    from_date: $reportTable.data('from-date'),
-                    to_date: $reportTable.data('to-date'),
-                    entry_type: $reportTable.data('entry-type')
+                    users_id:    $reportTable.data('users-id'),
+                    from_date:   $reportTable.data('from-date'),
+                    to_date:     $reportTable.data('to-date'),
+                    entry_type:  $reportTable.data('entry-type')
                 }
             },
             columns: [
-                { data: 'id', name: 'id' },
-                { data: 'type', name: 'type', orderable: false, searchable: false },
-                { data: 'date', name: 'date' },
-                { data: 'time', name: 'time' },
+                { data: 'id',      name: 'id',      orderable: false },
+                { data: 'type',    name: 'type',    orderable: false, searchable: false },
+                { data: 'date',    name: 'date',    orderable: false },
+                { data: 'time',    name: 'time',    orderable: false },
                 { data: 'project', name: 'project', orderable: false },
-                { data: 'user', name: 'user', orderable: false },
-                { data: 'amount', name: 'amount', orderable: false, searchable: false }
+                { data: 'user',    name: 'user',    orderable: false },
+                { data: 'amount',  name: 'amount',  orderable: false, searchable: false }
             ]
         });
     }
@@ -834,7 +859,6 @@ $(document).ready(function () {
 
     // Insert filter buttons into DataTable's search area and wire toggle for date panels
     (function () {
-        // add CSS for outline teal button
         var css = `
             .btn-outline-teal { color: #006666; border: 1px solid #00a8a8; background: transparent; }
             .btn-outline-teal.active { background: linear-gradient(135deg,#006666,#00a8a8); color: #fff; }
@@ -858,21 +882,19 @@ $(document).ready(function () {
             var wrapper = $('#' + tableId + '_wrapper .dataTables_filter');
             if (!wrapper.length) return;
             if (wrapper.find('.dt-filter-btn').length) return;
-            wrapper.css('position','relative');
+            wrapper.css('position', 'relative');
             var btn = $('<button type="button" class="btn btn-sm btn-outline-teal dt-filter-btn" title="Filters"><i class="fa fa-filter"></i></button>');
             wrapper.append(btn);
 
-            // build popup and move date inputs into it (preserve original IDs)
             var popup = $('<div class="dt-filter-popup" style="display:none; position:absolute; right:0; top:calc(100% + 8px); z-index:2500; min-width:300px;"></div>');
             popup.append('<div class="popup-caret"></div>');
             var panel = $(panelSelector);
             var fromInput, toInput;
+
             if (panel.length) {
-                // take the inputs by id if present
                 fromInput = panel.find('input[type="date"]').first();
-                toInput = panel.find('input[type="date"]').last();
-                // move inputs into popup with labels
-                var row = $('<div class="filter-row"></div>');
+                toInput   = panel.find('input[type="date"]').last();
+                var row      = $('<div class="filter-row"></div>');
                 var fromWrap = $('<div style="flex:1"></div>');
                 fromWrap.append('<div class="label">From</div>').append(fromInput);
                 var toWrap = $('<div style="flex:1"></div>');
@@ -881,24 +903,25 @@ $(document).ready(function () {
                 popup.append(row);
                 panel.remove();
             } else {
-                // fallback: create two date inputs (ids should match naming conventions)
-                fromInput = $('<input type="date" id="filter-' + tableId.toLowerCase().replace('table','') + '-from" class="form-control">');
-                toInput = $('<input type="date" id="filter-' + tableId.toLowerCase().replace('table','') + '-to" class="form-control">');
-                var row = $('<div class="filter-row"></div>');
-                var fromWrap = $('<div style="flex:1"></div>'); fromWrap.append('<div class="label">From</div>').append(fromInput);
-                var toWrap = $('<div style="flex:1"></div>'); toWrap.append('<div class="label">To</div>').append(toInput);
+                fromInput = $('<input type="date" id="filter-' + tableId.toLowerCase().replace('table', '') + '-from" class="form-control">');
+                toInput   = $('<input type="date" id="filter-' + tableId.toLowerCase().replace('table', '') + '-to" class="form-control">');
+                var row      = $('<div class="filter-row"></div>');
+                var fromWrap = $('<div style="flex:1"></div>');
+                fromWrap.append('<div class="label">From</div>').append(fromInput);
+                var toWrap = $('<div style="flex:1"></div>');
+                toWrap.append('<div class="label">To</div>').append(toInput);
                 row.append(fromWrap).append(toWrap);
                 popup.append(row);
             }
 
-            var actions = $('<div class="d-flex justify-content-end mt-2"></div>');
+            var actions  = $('<div class="d-flex justify-content-end mt-2"></div>');
             var clearBtn = $('<button type="button" class="btn btn-sm btn-outline-secondary mr-2">Clear</button>');
             var applyBtn = $('<button type="button" class="btn btn-sm btn-outline-teal">Apply</button>');
             actions.append(clearBtn).append(applyBtn);
             popup.append(actions);
             wrapper.append(popup);
 
-            // toggle popup
+            // Toggle popup
             btn.on('click', function (e) {
                 e.stopPropagation();
                 $('.dt-filter-popup').not(popup).hide();
@@ -906,40 +929,41 @@ $(document).ready(function () {
                 $(this).toggleClass('active', popup.is(':visible'));
             });
 
-
-            // apply -> reload table and show badge if filters active
+            // Apply -> reload table and show badge if filters active
             applyBtn.on('click', function (e) {
                 e.preventDefault();
-                if ($.fn.DataTable.isDataTable('#' + tableId)) $('#'+tableId).DataTable().ajax.reload();
-                popup.hide(); btn.removeClass('active');
-                // show badge if any date set
-                var any = popup.find('input[type="date"]').filter(function(){ return $(this).val(); }).length > 0;
+                if ($.fn.DataTable.isDataTable('#' + tableId)) $('#' + tableId).DataTable().ajax.reload();
+                popup.hide();
+                btn.removeClass('active');
+                var any = popup.find('input[type="date"]').filter(function () { return $(this).val(); }).length > 0;
                 btn.next('.dt-filter-badge').remove();
                 if (any) btn.after('<span class="dt-filter-badge">1</span>');
             });
 
-            // clear -> empty inputs and reload
+            // Clear -> empty inputs and reload
             clearBtn.on('click', function (e) {
                 e.preventDefault();
                 popup.find('input[type="date"]').val('');
-                if ($.fn.DataTable.isDataTable('#' + tableId)) $('#'+tableId).DataTable().ajax.reload();
-                popup.hide(); btn.removeClass('active');
+                if ($.fn.DataTable.isDataTable('#' + tableId)) $('#' + tableId).DataTable().ajax.reload();
+                popup.hide();
+                btn.removeClass('active');
                 btn.next('.dt-filter-badge').remove();
             });
 
-            // close when clicking outside
+            // Close when clicking outside
             $(document).on('click.dtFilter', function (ev) {
                 if (!$(ev.target).closest(popup).length && !$(ev.target).closest(btn).length) {
-                    popup.hide(); btn.removeClass('active');
+                    popup.hide();
+                    btn.removeClass('active');
                 }
             });
         }
 
         // Wait briefly for DataTables to initialize wrappers
         setTimeout(function () {
-            addFilterButton('InvoicesTable', '#filters-invoices-panel');
-            addFilterButton('PurchasesTable', '#filters-purchases-panel');
-            addFilterButton('PaymentsTable', '#filters-payments-panel');
+            addFilterButton('InvoicesTable',        '#filters-invoices-panel');
+            addFilterButton('PurchasesTable',       '#filters-purchases-panel');
+            addFilterButton('PaymentsTable',        '#filters-payments-panel');
             addFilterButton('PaymentsReceiveTable', '#filters-paymentsreceive-panel');
         }, 400);
     })();
@@ -947,21 +971,16 @@ $(document).ready(function () {
     // Labour Management table loader (client-side DataTable for rendered rows)
     function load_labour_management() {
         var $labour = $('#LabourTable');
-        if (! $labour.length) return;
-
+        if (!$labour.length) return;
         $labour.DataTable({
-            paging: true,
-            lengthChange: true,
-            searching: true,
-            ordering: true,
-            info: true,
-            autoWidth: false,
-            responsive: true,
-            processing: false,
-            serverSide: false,
-            order: [[3, 'desc']], // sort by Start Date (4th column)
+            paging: true, lengthChange: true, searching: true, ordering: true, info: true,
+            autoWidth: false, responsive: true, processing: false, serverSide: false,
+            order: [[3, 'desc']],
             language: { paginate: { previous: "Previous", next: "Next" } },
-            drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); $('[data-toggle="tooltip"]').tooltip(); }
+            drawCallback: function () {
+                $('.dataTables_paginate > .pagination').addClass('pagination-rounded');
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         });
     }
     load_labour_management();
@@ -971,34 +990,21 @@ $(document).ready(function () {
         var $lab = $('#VendorLabourTable');
         if ($lab.length) {
             $lab.DataTable({
-                paging: true,
-                pageLength: 5,
-                lengthChange: false,
-                searching: false,
-                ordering: true,
-                info: true,
-                autoWidth: false,
-                responsive: true,
-                order: [[3, 'desc']], // start_date column
-                columnDefs: [ { orderable: false, targets: 0 } ],
+                paging: true, pageLength: 5, lengthChange: false, searching: false,
+                ordering: true, info: true, autoWidth: false, responsive: true,
+                order: [[3, 'desc']],
+                columnDefs: [{ orderable: false, targets: 0 }],
                 language: { paginate: { previous: "Previous", next: "Next" } },
                 drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); }
             });
         }
-
         var $it = $('#VendorItemTable');
         if ($it.length) {
             $it.DataTable({
-                paging: true,
-                pageLength: 5,
-                lengthChange: false,
-                searching: false,
-                ordering: true,
-                info: true,
-                autoWidth: false,
-                responsive: true,
-                order: [[4, 'desc']], // start_date column
-                columnDefs: [ { orderable: false, targets: 0 } ],
+                paging: true, pageLength: 5, lengthChange: false, searching: false,
+                ordering: true, info: true, autoWidth: false, responsive: true,
+                order: [[4, 'desc']],
+                columnDefs: [{ orderable: false, targets: 0 }],
                 language: { paginate: { previous: "Previous", next: "Next" } },
                 drawCallback: function () { $('.dataTables_paginate > .pagination').addClass('pagination-rounded'); }
             });
@@ -1006,12 +1012,11 @@ $(document).ready(function () {
     }
     init_vendor_tables();
 
+    // Credit table loader
     function load_credit() {
+        if (!$('#CreditTable').length) return;
         $('#CreditTable').DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            autoWidth: false,
+            processing: true, serverSide: true, responsive: true, autoWidth: false,
             order: [[0, 'desc']],
             ajax: {
                 url: '{{ route("credit.list") }}',
@@ -1019,40 +1024,34 @@ $(document).ready(function () {
                 data: { _token: '{{ csrf_token() }}' }
             },
             columns: [
-                { data: 'id', name: 'id' },
-                { data: 'project', name: 'project', orderable: false },
-                { data: 'credit_date', name: 'credit_date' },
-                { data: 'amount', name: 'amount' },
+                { data: 'id',         name: 'id',         orderable: false },
+                { data: 'project',    name: 'project',    orderable: false },
+                { data: 'credit_date',name: 'credit_date',orderable: false },
+                { data: 'amount',     name: 'amount',     orderable: false },
                 { data: 'created_by', name: 'created_by', orderable: false },
-                { data: 'action', name: 'action', orderable: false, searchable: false }
+                { data: 'action',     name: 'action',     orderable: false, searchable: false }
             ]
         });
     }
     load_credit();
 
-
 });
+
 $(document).ready(function () {
 
     // Prevent multiple submit for all forms
     $('.prevent-multiple-submit').on('submit', function () {
-
         var form = $(this);
-        var btn = form.find('.saveBtn');
+        var btn  = form.find('.saveBtn');
 
         // Stop if already disabled
         if (btn.prop('disabled')) {
             return false;
         }
 
-        // Disable button
+        // Disable button and show spinner
         btn.prop('disabled', true);
-
-        // Change button text
-        btn.html(
-            '<i class="fas fa-spinner fa-spin mr-1"></i>Saving...'
-        );
-
+        btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Saving...');
     });
 
 });

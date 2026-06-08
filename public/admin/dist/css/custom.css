@@ -296,3 +296,8 @@ table.dataTable thead th {
 .nav-sidebar .menu-is-opening>.nav-link i.right {
     transform: rotate(-180deg) !important;
 }
+stable thead th::before,
+table thead th::after {
+    display: none !important;
+    content: none !important;
+}
