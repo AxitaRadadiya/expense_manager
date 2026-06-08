@@ -208,14 +208,23 @@
 function togglePw(inputId, iconId) {
   var inp = document.getElementById(inputId);
   var ico = document.getElementById(iconId);
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    ico.classList.replace('fa-eye', 'fa-eye-slash');
-  } else {
-    inp.type = 'password';
-    ico.classList.replace('fa-eye-slash', 'fa-eye');
+  if (!inp) return;
+
+  var isPassword = inp.type === 'password';
+  inp.type = isPassword ? 'text' : 'password';
+
+  // If icon exists, toggle classes safely
+  if (ico) {
+    if (isPassword) {
+      ico.classList.remove('fa-eye');
+      ico.classList.add('fa-eye-slash');
+    } else {
+      ico.classList.remove('fa-eye-slash');
+      ico.classList.add('fa-eye');
+    }
   }
 }
+
 function togglePwSection() {
   var sec = document.getElementById('pw-section');
   var caret = document.getElementById('pw-caret');
@@ -485,6 +494,6 @@ function togglePwSection() {
     }
   });
 })();
-@error('password') togglePwSection(); @enderror
+
 </script>
 @endsection
