@@ -32,7 +32,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Customer <span class="text-danger">*</span></label>
-                                <select name="customer_id" class="form-control select2" required>
+                                <select name="customer_id" id="customer_id" class="form-control select2" required>
                                     <option value="">-- Select Customer --</option>
                                     @foreach($customers as $c)
                                         <option value="{{ $c->id }}" {{ $invoice->customer_id == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
@@ -45,11 +45,9 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Project <span class="text-danger">*</span></label>
-                                <select name="project_id" class="form-control select2" required>
+                                <select name="project_id" id="project_id" class="form-control select2" required>
                                     <option value="">-- Select Project --</option>
-                                    @foreach($projects as $p)
-                                        <option value="{{ $p->id }}" {{ $invoice->project_id == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
-                                    @endforeach
+                                    {{-- Options will be populated via AJAX on page load --}}
                                 </select>
                             </div>
                         </div>
@@ -252,7 +250,7 @@
                         const summaryItemsTotalElem = document.getElementById('summary-items-total');
                         const grandTotalElem = document.getElementById('grand-total');
                         const invoiceAmountElem = document.getElementById('invoice-amount');
-                        
+
                         if (itemsTotalElem) itemsTotalElem.textContent = fmt(itemsTotal);
                         if (summaryItemsTotalElem) summaryItemsTotalElem.textContent = fmt(itemsTotal);
                         if (grandTotalElem) grandTotalElem.textContent = fmt(itemsTotal);
@@ -264,7 +262,7 @@
                         const subcatOpts = document.getElementById('_subcat_options_tpl').innerHTML;
                         const newIndex = currentMaxIndex;
                         currentMaxIndex++;
-                        
+
                         return `
                             <tr class="invoice-item-row">
                                 <td class="row-index">${newIndex + 1}</td>
@@ -284,11 +282,11 @@
                             if (indexCell) {
                                 indexCell.textContent = idx + 1;
                             }
-                            
+
                             // Update name attributes with new indices
                             const selects = row.querySelectorAll('select');
                             const inputs = row.querySelectorAll('input');
-                            
+
                             selects.forEach(select => {
                                 const name = select.getAttribute('name');
                                 if (name) {
@@ -296,7 +294,7 @@
                                     select.setAttribute('name', newName);
                                 }
                             });
-                            
+
                             inputs.forEach(input => {
                                 const name = input.getAttribute('name');
                                 if (name && !name.includes('_paid') && !name.includes('amount')) {
@@ -331,7 +329,7 @@
                                 if (qtyInput) qtyInput.value = '1';
                                 if (unitInput) unitInput.value = '0';
                                 if (totalSpan) totalSpan.textContent = '0.00';
-                                
+
                                 // Reset selects
                                 const itemSelect = row.querySelector('.item-select');
                                 const subcatSelect = row.querySelector('.subcategory-select');
@@ -366,4 +364,50 @@
     </div>
 </section>
 
+@endsection
+
+@section('pageScript')
+<script>
+$(document).ready(function () {
+
+    // Store the currently selected project id from the invoice
+    const selectedProjectId = "{{ $invoice->project_id }}";
+    
+    function loadProjectsForCustomer(userId, preselectId) {
+        $('#project_id').html('<option value="">Select Project</option>');
+
+        if (!userId) return;
+
+        $.ajax({
+            url: '/projects-by-user/' + userId,
+            type: 'GET',
+            success: function (res) {
+                let options = '<option value="">Select Project</option>';
+                $.each(res, function (i, project) {
+                    const selected = (preselectId && project.id == preselectId) ? 'selected' : '';
+                    options += `<option value="${project.id}" ${selected}>${project.name}</option>`;
+                });
+                $('#project_id').html(options);
+
+                // Re-initialize select2 if it is being used
+                if ($.fn.select2) {
+                    $('#project_id').trigger('change.select2');
+                }
+            }
+        });
+    }
+
+   
+    const initialCustomerId = $('#customer_id').val();
+    if (initialCustomerId) {
+        loadProjectsForCustomer(initialCustomerId, selectedProjectId);
+    }
+
+    // On customer change: reload projects without preselection
+    $(document).on('change', '#customer_id', function () {
+        loadProjectsForCustomer($(this).val(), null);
+    });
+
+});
+</script>
 @endsection

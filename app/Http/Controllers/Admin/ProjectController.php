@@ -284,4 +284,15 @@ class ProjectController extends Controller
                 }
             });
     }
+
+    public function getProjects($userId)
+    {
+        $projects = Project::whereHas('users', function ($query) use ($userId) {
+            $query->where('users.id', $userId);
+        })
+        ->select('id', 'name')
+        ->get();
+
+        return response()->json($projects);
+    }
 }

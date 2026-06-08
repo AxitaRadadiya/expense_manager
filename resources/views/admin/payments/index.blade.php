@@ -22,11 +22,9 @@
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">All Payments Made</h5>
-        <div id="filters-payments-panel" class="date-filters d-none d-flex align-items-center" style="gap:8px;">
-          <div class="input-group input-group-sm">
-            <input type="date" id="filter-payments-from" class="form-control" placeholder="From">
-            <input type="date" id="filter-payments-to" class="form-control" placeholder="To">
-          </div>
+        <div id="filters-payments-panel" style="display:none;">
+            <input type="date" id="filter-payments-from" class="form-control">
+             <input type="date" id="filter-payments-to" class="form-control">
         </div>
         @if(auth()->check() && auth()->user()->hasPermission('purchase-create'))
         <a href="{{ route('payment.create') }}" class="btn-create">

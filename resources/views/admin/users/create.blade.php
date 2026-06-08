@@ -180,6 +180,25 @@
 </section>
 
 <script>
+function togglePw(inputId, iconId) {
+  var inp = document.getElementById(inputId);
+  var ico = document.getElementById(iconId);
+  if (!inp) return;
+
+  var isPassword = inp.type === 'password';
+  inp.type = isPassword ? 'text' : 'password';
+
+  if (ico) {
+    if (isPassword) {
+      ico.classList.remove('fa-eye');
+      ico.classList.add('fa-eye-slash');
+    } else {
+      ico.classList.remove('fa-eye-slash');
+      ico.classList.add('fa-eye');
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 
     const form = document.getElementById('user-create-form');

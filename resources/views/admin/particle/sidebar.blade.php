@@ -53,7 +53,7 @@
       <li class="nav-item">
         <a href="{{ route('invoice.index') }}"
           class="nav-link {{ Request::routeIs('invoice.*') || Request::routeIs('payment-receive.*') ? 'active' : '' }}">
-          <i class="nav-icon fas fa-dollar-sign"></i>
+          <i class="nav-icon fas fa-rupee-sign"></i>
           <p>Income</p>
         </a>
       </li>

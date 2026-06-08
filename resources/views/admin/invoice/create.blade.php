@@ -31,7 +31,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Customer <span class="text-danger">*</span></label>
-                                <select name="customer_id" class="form-control select2" required>
+                                <select name="customer_id" id="customer_id" class="form-control select2" required>
                                     <option value="">Select Customer</option>
                                     @foreach($customers as $c)
                                         <option value="{{ $c->id }}">{{ $c->name }}</option>
@@ -44,7 +44,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Project <span class="text-danger">*</span></label>
-                                <select name="project_id" class="form-control select2" required>
+                                <select name="project_id" id="project_id" class="form-control select2" required>
                                     <option value="">Select Project</option>
                                     @foreach($projects as $p)
                                         <option value="{{ $p->id }}">{{ $p->name }}</option>
@@ -281,4 +281,40 @@
         </div>
     </div>
 </section>
+@endsection
+
+@section('pageScript')
+<script>
+$(document).ready(function () {
+
+    console.log("JS LOADED");
+
+    $(document).on('change', '#customer_id', function () {
+
+        console.log("Customer changed");
+
+        let userId = $(this).val();
+
+        $('#project_id').html('<option value="">Select Project</option>');
+
+        if(userId){
+            $.ajax({
+                url: '/projects-by-user/' + userId,
+                type: 'GET',
+                success: function(res){
+
+                    let options = '<option value="">Select Project</option>';
+
+                    $.each(res, function(i, project){
+                        options += `<option value="${project.id}">${project.name}</option>`;
+                    });
+
+                    $('#project_id').html(options);
+                }
+            });
+        }
+    });
+
+});
+</script>
 @endsection
