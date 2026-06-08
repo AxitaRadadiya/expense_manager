@@ -88,7 +88,7 @@
                           if (str_ends_with($name, '-edit') || str_contains($name, 'edit')) $map['edit'] = $p->id;
                           if (str_ends_with($name, '-delete') || str_contains($name, 'delete')) $map['delete'] = $p->id;
                       }
-                      $rowId = 'perm_row_' . \'\'' . md5($module);
+                      $rowId = 'perm_row_' . md5($module);
                     @endphp
                     <tr>
                       <td class="align-middle">{{ $module }}</td>

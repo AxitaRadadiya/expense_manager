@@ -46,13 +46,13 @@
             <div class="col-md-3">
               <div class="form-group">
                 <label class="font-weight-bold">Start Date</label>
-                <input type="date" name="start_date" value="{{ old('start_date', optional($project->start_date)->format('Y-m-d')) }}" min="{{ date('Y-m-d') }}" class="form-control">
+                <input type="date" name="start_date" value="{{ old('start_date', optional($project->start_date)->format('Y-m-d')) }}" class="form-control">
               </div>
             </div>
             <div class="col-md-3">
               <div class="form-group">
                 <label class="font-weight-bold">End Date</label>
-                <input type="date" name="end_date" value="{{ old('end_date', optional($project->end_date)->format('Y-m-d')) }}" min="{{ date('Y-m-d') }}"  class="form-control">
+                <input type="date" name="end_date" value="{{ old('end_date', optional($project->end_date)->format('Y-m-d')) }}"  class="form-control">
               </div>
             </div>
           </div>

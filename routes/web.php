@@ -61,6 +61,7 @@ Route::group(['middleware' => ['auth']], function () {
     // Projects
     Route::get('projects-list', [ProjectController::class, 'list'])->name('projects.list');
     Route::resource('projects', ProjectController::class);
+    Route::get('/projects-by-user/{userId}', [ProjectController::class, 'getProjects']);
     // Expenses
     Route::get('expense-list', [ExpenseController::class, 'list'])->name('expense.list');
     Route::patch('expense/{expense}/approve', [ExpenseController::class, 'approve'])->name('expense.approve');

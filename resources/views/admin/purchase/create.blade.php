@@ -137,7 +137,23 @@
                   <div class="card shadow-sm">
                     <div class="card-body">
                       <label class="font-weight-bold">Attach Image</label>
-                      <input type="file" name="image" class="form-control" accept="image/*">
+
+                      <div id="imagePreviewWrapper" class="mb-2 text-center"
+                        style="position:relative; display:none;">
+                        <img id="imagePreview"
+                          src=""
+                          alt="Preview"
+                          class="img-fluid rounded"
+                          style="max-height:120px;">
+                        <button type="button"
+                          onclick="removeImage()"
+                          title="Remove Image"
+                          style="position:absolute; top:-8px; right:-8px; background:red; color:white; border:none; border-radius:50%; width:22px; height:22px; font-size:15px; line-height:1; cursor:pointer;">
+                          &times;
+                        </button>
+                      </div>
+
+                      <input type="file" name="image" id="imageInput" class="form-control mt-2" accept="image/*" onchange="previewNewImage(this)">
                     </div>
                   </div>
                 </div>
@@ -184,6 +200,27 @@
           @endforeach
         </select>
 
+    
+        <script>
+          function removeImage() {
+            document.getElementById('imagePreviewWrapper').style.display = 'none';
+            document.getElementById('imageInput').value = '';
+            document.getElementById('imagePreview').src = '';
+          }
+
+          function previewNewImage(input) {
+            if (input.files && input.files[0]) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('imagePreviewWrapper').style.display = 'inline-block';
+              };
+              reader.readAsDataURL(input.files[0]);
+            }
+          }
+        </script>
+
+        {{-- Existing JS inside DOMContentLoaded --}}
         <script>
         document.addEventListener('DOMContentLoaded', function () {
           let idx = 1;
@@ -206,7 +243,7 @@
             const summaryEl = document.getElementById('summary-items-total');
             if (summaryEl) { summaryEl.textContent = fmt(itemsTotal); }
             const grandEl = document.getElementById('grand-total');
-            if (grandEl) { grandEl.textContent = fmt(itemsTotal); }
+            if (grandEl) { grandEl.textContent = '₹ ' + fmt(itemsTotal); }
             const purchaseAmount = document.getElementById('purchase-amount');
             if (purchaseAmount) { purchaseAmount.value = fmt(itemsTotal); }
           }
@@ -245,7 +282,6 @@
             if (!e.target.closest('.remove-row')) return;
             const tbody = document.querySelector('#items-body');
             if (tbody.children.length <= 1) {
-              // Last row: clear instead of remove
               const row = tbody.querySelector('tr');
               row.querySelector('.qty-input').value        = '1';
               row.querySelector('.unit-price-input').value = '0';
@@ -258,14 +294,14 @@
             recalcTotals();
           });
 
-          // Recalc on input — delegated to tbody
+          // Recalc on input
           document.getElementById('items-body').addEventListener('input', function (e) {
             if (e.target.classList.contains('qty-input') || e.target.classList.contains('unit-price-input')) {
               recalcTotals();
             }
           });
 
-          // Reset
+          // Reset button
           document.getElementById('reset-form').addEventListener('click', function () {
             ['vendor_id', 'project_id'].forEach(n => {
               const el = document.querySelector(`[name="${n}"]`);
@@ -276,6 +312,9 @@
             const tbody = document.querySelector('#items-body');
             tbody.innerHTML = `<tr>${makeItemRow(1)}</tr>`;
             recalcTotals();
+
+        
+            removeImage();
           });
 
           recalcTotals();

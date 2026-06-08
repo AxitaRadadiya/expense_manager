@@ -21,8 +21,8 @@ class PurchaseController extends Controller
     public function index(): View
     {
         $purchases = Purchase::with(['vendor', 'project', 'subCategory'])->latest()->get();
-        $payments = \App\Models\Payment::with(['vendor','project'])->latest()->get();
-        return view('admin.purchase.index', compact('purchases','payments'));
+        $payments = \App\Models\Payment::with(['vendor', 'project'])->latest()->get();
+        return view('admin.purchase.index', compact('purchases', 'payments'));
     }
 
     public function create(): View
@@ -154,7 +154,7 @@ class PurchaseController extends Controller
         $expenseSubCategories = $expenseCategory ? SubCategory::where('category_id', $expenseCategory->id)->orderBy('name')->get() : collect();
 
         $items = Item::orderBy('name')->get();
-        return view('admin.purchase.edit', compact('purchase','vendors','projects','expenseSubCategories','items'));
+        return view('admin.purchase.edit', compact('purchase', 'vendors', 'projects', 'expenseSubCategories', 'items'));
     }
 
     public function update(Request $request, $id): RedirectResponse
@@ -178,11 +178,19 @@ class PurchaseController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'items' => 'nullable|array',
             'items.*.sub_category_id' => 'required_with:items|exists:sub_categories,id',
+            'remove_image' => 'nullable|in:0,1',
         ]);
 
-        // Handle image upload
+        // Handle image removal
+        if ($request->input('remove_image') == '1') {
+            if ($purchase->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($purchase->image);
+            }
+            $validated['image'] = null;
+        }
+
+        // Handle new image upload
         if ($request->hasFile('image')) {
-            // Delete old image if exists
             if ($purchase->image) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($purchase->image);
             }
@@ -307,9 +315,9 @@ class PurchaseController extends Controller
                     $q->whereHas('vendor', function ($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
                       ->orWhereHas('project', function ($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
                       ->orWhereHas('subCategory', function ($q2) use ($search) { $q2->where('name', 'like', "%{$search}%"); })
-                      ->orWhere('amount', 'like', "%{$search}%")
-                      ->orWhere('due_amount', 'like', "%{$search}%")
-                      ->orWhere('status', 'like', "%{$search}%");
+                        ->orWhere('amount', 'like', "%{$search}%")
+                        ->orWhere('due_amount', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%");
                 });
             }
 
