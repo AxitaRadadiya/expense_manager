@@ -46,9 +46,9 @@
                                 <label>Project <span class="text-danger">*</span></label>
                                 <select name="project_id" id="project_id" class="form-control select2" required>
                                     <option value="">Select Project</option>
-                                    @foreach($projects as $p)
+                                    <!-- @foreach($projects as $p)
                                         <option value="{{ $p->id }}">{{ $p->name }}</option>
-                                    @endforeach
+                                    @endforeach -->
                                 </select>
                             </div>
                         </div>
@@ -287,14 +287,11 @@
 <script>
 $(document).ready(function () {
 
-    console.log("JS LOADED");
-
     $(document).on('change', '#customer_id', function () {
-
-        console.log("Customer changed");
 
         let userId = $(this).val();
 
+        $('#project_id').prop('disabled', true);
         $('#project_id').html('<option value="">Select Project</option>');
 
         if(userId){
@@ -309,7 +306,7 @@ $(document).ready(function () {
                         options += `<option value="${project.id}">${project.name}</option>`;
                     });
 
-                    $('#project_id').html(options);
+                    $('#project_id').html(options).prop('disabled', false);
                 }
             });
         }
